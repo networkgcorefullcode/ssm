@@ -133,10 +133,16 @@ func (s *SSM) Start() error {
 		factory.SsmConfig.Configuration.Pin)
 
 	SsmServer.mgr = PkcsManager
-	PkcsManager.OpenSession()
 
 	if err != nil {
 		logger.AppLog.Errorf("Failed to initialize PKCS11 manager: %v", err)
+		return err
+	}
+
+	err = PkcsManager.OpenSession()
+
+	if err != nil {
+		logger.AppLog.Errorf("Failed to OpenSession PKCS11 manager: %v", err)
 		return err
 	}
 

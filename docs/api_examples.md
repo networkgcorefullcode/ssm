@@ -15,9 +15,8 @@ El servidor escucha en un socket Unix según la configuración en `ssmConfig.yml
 
 ### Generar clave AES de 256 bits
 ```bash
-curl -X POST \
-  --unix-socket /tmp/ssm.sock \
-  http://localhost/generate-aes-key \
+curl -X POST http://dummy/generate-aes-key \
+  --unix-socket /var/run/socket.so \
   -H "Content-Type: application/json" \
   -d '{
     "label": "MySecretKey",
@@ -28,9 +27,8 @@ curl -X POST \
 
 ### Generar clave AES de 128 bits
 ```bash
-curl -X POST \
-  --unix-socket /tmp/ssm.sock \
-  http://localhost/generate-aes-key \
+curl -X POST http://dummy/generate-aes-key \
+  --unix-socket /var/run/socket.so \
   -H "Content-Type: application/json" \
   -d '{
     "label": "TestKey128",
@@ -41,9 +39,8 @@ curl -X POST \
 
 ### Generar clave AES de 192 bits
 ```bash
-curl -X POST \
-  --unix-socket /tmp/ssm.sock \
-  http://localhost/generate-aes-key \
+curl -X POST http://dummy/generate-aes-key \
+  --unix-socket /var/run/socket.so \
   -H "Content-Type: application/json" \
   -d '{
     "label": "ProductionKey",
@@ -75,9 +72,8 @@ curl -X POST \
 
 ### Cifrar texto plano
 ```bash
-curl -X POST \
-  --unix-socket /tmp/ssm.sock \
-  http://localhost/encrypt \
+curl -X POST http://dummy/encrypt \
+  --unix-socket /var/run/socket.so \
   -H "Content-Type: application/json" \
   -d '{
     "keyLabel": "MySecretKey",
@@ -87,9 +83,8 @@ curl -X POST \
 
 ### Cifrar datos sensibles
 ```bash
-curl -X POST \
-  --unix-socket /tmp/ssm.sock \
-  http://localhost/encrypt \
+curl -X POST http://dummy/encrypt \
+  --unix-socket /var/run/socket.so \
   -H "Content-Type: application/json" \
   -d '{
     "keyLabel": "ProductionKey",
@@ -102,9 +97,8 @@ curl -X POST \
 
 ### Descifrar texto
 ```bash
-curl -X POST \
-  --unix-socket /tmp/ssm.sock \
-  http://localhost/decrypt \
+curl -X POST http://dummy/decrypt \
+  --unix-socket /var/run/socket.so \
   -H "Content-Type: application/json" \
   -d '{
     "keyLabel": "MySecretKey",
@@ -117,9 +111,8 @@ curl -X POST \
 
 ### Error: Método HTTP incorrecto
 ```bash
-curl -X GET \
-  --unix-socket /tmp/ssm.sock \
-  http://localhost/generate-aes-key
+curl -X GET http://dummy/generate-aes-key \
+  --unix-socket /var/run/socket.so
 ```
 
 **Respuesta:**
@@ -133,18 +126,16 @@ curl -X GET \
 
 ### Error: JSON inválido
 ```bash
-curl -X POST \
-  --unix-socket /tmp/ssm.sock \
-  http://localhost/generate-aes-key \
+curl -X POST http://dummy/generate-aes-key \
+  --unix-socket /var/run/socket.so \
   -H "Content-Type: application/json" \
   -d '{"label": "test", "invalid_json"}'
 ```
 
 ### Error: Bits inválidos
 ```bash
-curl -X POST \
-  --unix-socket /tmp/ssm.sock \
-  http://localhost/generate-aes-key \
+curl -X POST http://dummy/generate-aes-key \
+  --unix-socket /var/run/socket.so \
   -H "Content-Type: application/json" \
   -d '{
     "label": "TestKey",
@@ -164,9 +155,8 @@ curl -X POST \
 
 ### Error: Campo requerido faltante
 ```bash
-curl -X POST \
-  --unix-socket /tmp/ssm.sock \
-  http://localhost/generate-aes-key \
+curl -X POST http://dummy/generate-aes-key \
+  --unix-socket /var/run/socket.so \
   -H "Content-Type: application/json" \
   -d '{
     "id": "test001",
@@ -180,8 +170,8 @@ curl -X POST \
 ```bash
 #!/bin/bash
 
-SOCKET_PATH="/tmp/ssm.sock"
-BASE_URL="http://localhost"
+SOCKET_PATH="/var/run/socket.so"
+BASE_URL="http://dummy"
 
 echo "=== Testing SSM API ==="
 
@@ -231,7 +221,7 @@ curl -s -X POST \
 
 ### Verificar que el socket existe
 ```bash
-ls -la /tmp/ssm.sock
+ls -la /var/run/socket.so
 ```
 
 ### Verificar que el servidor está ejecutándose
@@ -241,7 +231,7 @@ ps aux | grep ssm
 
 ### Probar conectividad básica
 ```bash
-curl --unix-socket /tmp/ssm.sock http://localhost/
+curl --unix-socket /var/run/socket.so http://dummy/
 ```
 
 ## 7. Datos de Prueba en Base64

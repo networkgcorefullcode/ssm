@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/miekg/pkcs11"
+	"github.com/networkgcorefullcode/ssm/logger"
 )
 
 type Manager struct {
@@ -22,6 +23,7 @@ func New(modulePath string, slot uint, pin string) (*Manager, error) {
 		return nil, err
 	}
 	mgr := &Manager{ctx: ctx, slot: slot, pin: pin}
+	logger.AppLog.Infoln("PKCS#11 module initialized")
 	return mgr, nil
 }
 
