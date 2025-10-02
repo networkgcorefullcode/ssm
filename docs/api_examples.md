@@ -5,6 +5,7 @@ Este documento contiene ejemplos de curl para testear la API del SSM (Secure Sto
 ## Configuración Previa
 
 Asegúrate de que el servidor SSM esté ejecutándose:
+
 ```bash
 ./ssm --cfg factory/ssmConfig.yml
 ```
@@ -14,6 +15,7 @@ El servidor escucha en un socket Unix según la configuración en `ssmConfig.yml
 ## 1. Generar Clave AES
 
 ### Generar clave AES de 256 bits
+
 ```bash
 curl -X POST http://dummy/generate-aes-key \
   --unix-socket /var/run/socket.so \
@@ -26,6 +28,7 @@ curl -X POST http://dummy/generate-aes-key \
 ```
 
 ### Generar clave AES de 128 bits
+
 ```bash
 curl -X POST http://dummy/generate-aes-key \
   --unix-socket /var/run/socket.so \

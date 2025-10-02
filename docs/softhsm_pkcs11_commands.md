@@ -7,12 +7,14 @@ Guía completa para administrar SoftHSM y realizar operaciones PKCS#11 desde lí
 ### Instalar SoftHSM
 
 **Ubuntu/Debian:**
+
 ```bash
 sudo apt update
 sudo apt install softhsm2 opensc-pkcs11
 ```
 
 **CentOS/RHEL:**
+
 ```bash
 sudo yum install softhsm opensc
 # o con dnf
@@ -20,6 +22,7 @@ sudo dnf install softhsm opensc
 ```
 
 **Windows:**
+
 ```powershell
 # Descargar desde https://github.com/disig/SoftHSM2-for-Windows
 # O usar chocolatey
@@ -29,11 +32,13 @@ choco install softhsm
 ### Configurar SoftHSM
 
 **Ver configuración actual:**
+
 ```bash
 softhsm2-util --show-slots
 ```
 
 **Verificar ruta de configuración:**
+
 ```bash
 # Linux
 cat /etc/softhsm/softhsm2.conf
@@ -42,6 +47,7 @@ export SOFTHSM2_CONF="$HOME/.softhsm2.conf"
 ```
 
 **Archivo de configuración ejemplo (`~/.softhsm2.conf`):**
+
 ```ini
 # SoftHSM v2 configuration file
 
@@ -57,6 +63,7 @@ slots.mechanisms = ALL
 ### Inicializar Token
 
 **Crear nuevo token:**
+
 ```bash
 # Slot 0 con PIN de usuario y SO-PIN
 softhsm2-util --init-token --slot 0 --label "MyToken" --pin 1234 --so-pin 5678
@@ -66,6 +73,7 @@ softhsm2-util --init-token --slot 0 --label "SSM-Token" --pin 1234 --so-pin 5678
 ```
 
 **Inicializar múltiples tokens:**
+
 ```bash
 # Token de desarrollo
 softhsm2-util --init-token --slot 0 --label "DEV-Token" --pin 1234 --so-pin 5678
@@ -77,11 +85,13 @@ softhsm2-util --init-token --slot 1 --label "PROD-Token" --pin 9876 --so-pin 543
 ### Listar y Verificar Tokens
 
 **Ver todos los slots:**
+
 ```bash
 softhsm2-util --show-slots
 ```
 
 **Ver slots con detalles:**
+
 ```bash
 # Información detallada de slots
 pkcs11-tool --list-slots --verbose
@@ -91,6 +101,7 @@ pkcs11-tool --list-token-slots
 ```
 
 **Ver información específica de un token:**
+
 ```bash
 # Token en slot específico
 pkcs11-tool --slot 0 --list-token-slots
@@ -99,6 +110,7 @@ pkcs11-tool --slot 0 --list-token-slots
 ### Eliminar Token
 
 **Eliminar token completo:**
+
 ```bash
 softhsm2-util --delete-token --token "MyToken"
 
@@ -111,6 +123,7 @@ softhsm2-util --delete-token --slot 0
 ### Generar Claves
 
 **Generar clave AES:**
+
 ```bash
 # AES-256
 pkcs11-tool --slot 0 --login --pin 1234 \
@@ -129,6 +142,7 @@ pkcs11-tool --slot 0 --login --pin 1234 \
 ```
 
 **Generar par de claves RSA:**
+
 ```bash
 # RSA 2048 bits
 pkcs11-tool --slot 0 --login --pin 1234 \
@@ -142,6 +156,7 @@ pkcs11-tool --slot 0 --login --pin 1234 \
 ```
 
 **Generar par de claves ECDSA:**
+
 ```bash
 # ECDSA P-256
 pkcs11-tool --slot 0 --login --pin 1234 \
@@ -157,6 +172,7 @@ pkcs11-tool --slot 0 --login --pin 1234 \
 ### Listar y Ver Claves
 
 **Listar todas las claves:**
+
 ```bash
 # Listar objetos públicos
 pkcs11-tool --slot 0 --list-objects
@@ -166,23 +182,27 @@ pkcs11-tool --slot 0 --login --pin 1234 --list-objects
 ```
 
 **Listar solo claves secretas:**
+
 ```bash
 pkcs11-tool --slot 0 --login --pin 1234 \
   --list-objects --type secrkey
 ```
 
 **Listar solo claves públicas:**
+
 ```bash
 pkcs11-tool --slot 0 --list-objects --type pubkey
 ```
 
 **Listar solo claves privadas:**
+
 ```bash
 pkcs11-tool --slot 0 --login --pin 1234 \
   --list-objects --type privkey
 ```
 
 **Ver detalles de una clave específica:**
+
 ```bash
 # Por ID
 pkcs11-tool --slot 0 --login --pin 1234 \
@@ -196,18 +216,21 @@ pkcs11-tool --slot 0 --login --pin 1234 \
 ### Eliminar Claves
 
 **Eliminar clave por ID:**
+
 ```bash
 pkcs11-tool --slot 0 --login --pin 1234 \
   --delete-object --id 01 --type secrkey
 ```
 
 **Eliminar clave por label:**
+
 ```bash
 pkcs11-tool --slot 0 --login --pin 1234 \
   --delete-object --label "MyAESKey" --type secrkey
 ```
 
 **Eliminar todas las claves de un tipo:**
+
 ```bash
 # ⚠️ CUIDADO: Elimina TODAS las claves secretas
 pkcs11-tool --slot 0 --login --pin 1234 \
@@ -219,6 +242,7 @@ pkcs11-tool --slot 0 --login --pin 1234 \
 ### Cifrado/Descifrado
 
 **Cifrar archivo con AES:**
+
 ```bash
 # Crear archivo de prueba
 echo "Mensaje secreto" > test.txt
@@ -235,6 +259,7 @@ pkcs11-tool --slot 0 --login --pin 1234 \
 ```
 
 **Cifrar con RSA:**
+
 ```bash
 # Cifrar con clave pública RSA
 pkcs11-tool --slot 0 --encrypt \
@@ -250,6 +275,7 @@ pkcs11-tool --slot 0 --login --pin 1234 \
 ### Firma Digital
 
 **Firmar con RSA:**
+
 ```bash
 # Crear hash del archivo
 openssl dgst -sha256 -binary test.txt > test.hash
@@ -266,6 +292,7 @@ pkcs11-tool --slot 0 --verify \
 ```
 
 **Firmar con ECDSA:**
+
 ```bash
 # Firmar con ECDSA
 pkcs11-tool --slot 0 --login --pin 1234 \
@@ -283,6 +310,7 @@ pkcs11-tool --slot 0 --verify \
 ### Capacidades del HSM
 
 **Ver mecanismos soportados:**
+
 ```bash
 # Todos los mecanismos
 pkcs11-tool --slot 0 --list-mechanisms
@@ -292,11 +320,13 @@ pkcs11-tool --slot 0 --list-mechanisms --verbose
 ```
 
 **Información del módulo:**
+
 ```bash
 pkcs11-tool --module /usr/lib/x86_64-linux-gnu/softhsm/libsofthsm2.so --show-info
 ```
 
 **Información detallada del token:**
+
 ```bash
 pkcs11-tool --slot 0 --token-info
 ```
@@ -304,11 +334,13 @@ pkcs11-tool --slot 0 --token-info
 ### Estadísticas y Estado
 
 **Ver espacio usado/libre:**
+
 ```bash
 pkcs11-tool --slot 0 --login --pin 1234 --list-objects | wc -l
 ```
 
 **Ver sesiones activas:**
+
 ```bash
 # Información de sesión
 pkcs11-tool --slot 0 --login --pin 1234 --test
@@ -319,12 +351,14 @@ pkcs11-tool --slot 0 --login --pin 1234 --test
 ### Exportar/Importar Objetos
 
 **Exportar clave pública:**
+
 ```bash
 pkcs11-tool --slot 0 --read-object \
   --type pubkey --id 10 --output-file rsa-pub.der
 ```
 
 **Importar certificado:**
+
 ```bash
 # Crear certificado auto-firmado primero
 openssl req -new -x509 -key rsa-key.pem -out cert.pem -days 365
@@ -338,6 +372,7 @@ pkcs11-tool --slot 0 --login --pin 1234 \
 ### Backup del Token Completo
 
 **Backup de directorio de tokens (SoftHSM):**
+
 ```bash
 # Ubicación típica en Linux
 sudo tar -czf softhsm-backup.tar.gz /var/lib/softhsm/tokens/
@@ -347,6 +382,7 @@ tar -czf softhsm-backup.tar.gz ~/.softhsm/tokens/
 ```
 
 **Restaurar backup:**
+
 ```bash
 # Restaurar tokens
 sudo tar -xzf softhsm-backup.tar.gz -C /
@@ -360,6 +396,7 @@ softhsm2-util --show-slots
 ### Verificar Instalación
 
 **Comprobar librerías:**
+
 ```bash
 # Verificar SoftHSM
 ls -la /usr/lib/*/softhsm/libsofthsm2.so
@@ -371,6 +408,7 @@ pkcs11-tool --version
 ```
 
 **Test básico de conectividad:**
+
 ```bash
 # Test simple
 pkcs11-tool --list-slots
@@ -382,6 +420,7 @@ pkcs11-tool --module /usr/lib/x86_64-linux-gnu/softhsm/libsofthsm2.so --list-slo
 ### Logs y Debugging
 
 **Habilitar logging detallado:**
+
 ```bash
 # Modificar softhsm2.conf
 echo "log.level = DEBUG" >> ~/.softhsm2.conf
@@ -395,6 +434,7 @@ softhsm2-util --show-slots 2>&1 | tee debug.log
 ```
 
 **Debugging de aplicaciones:**
+
 ```bash
 # Variables de debug para PKCS#11
 export PKCS11_DEBUG=1
@@ -407,6 +447,7 @@ strace -e trace=file ./ssm --cfg config.yml
 ### Problemas Comunes
 
 **Error: "CKR_TOKEN_NOT_PRESENT"**
+
 ```bash
 # Verificar que el token esté inicializado
 softhsm2-util --show-slots
@@ -416,12 +457,14 @@ softhsm2-util --init-token --slot 0 --label "NewToken" --pin 1234 --so-pin 5678
 ```
 
 **Error: "CKR_USER_PIN_NOT_INITIALIZED"**
+
 ```bash
 # Inicializar PIN de usuario
 pkcs11-tool --slot 0 --login --so-pin 5678 --init-pin --pin 1234
 ```
 
 **Error: "Module not found"**
+
 ```bash
 # Verificar rutas de módulos
 find /usr -name "*softhsm*" -type f 2>/dev/null
