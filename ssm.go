@@ -16,7 +16,7 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-var SSM = &server.SSM{}
+var SSM = server.SsmServer
 
 func main() {
 	logger.AppLog.Infoln("SSM is starting wait some seconds while the configs are loading")
