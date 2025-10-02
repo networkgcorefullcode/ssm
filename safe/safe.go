@@ -24,21 +24,6 @@ func Mlock(b []byte) error {
 		return nil
 	}
 
-	// Para Windows, usar VirtualLock
-	if runtime.GOOS == "windows" {
-		kernel32 := syscall.NewLazyDLL("kernel32.dll")
-		virtualLock := kernel32.NewProc("VirtualLock")
-
-		addr := uintptr(unsafe.Pointer(&b[0]))
-		size := uintptr(len(b))
-
-		ret, _, err := virtualLock.Call(addr, size)
-		if ret == 0 {
-			return err
-		}
-		return nil
-	}
-
 	// Para Linux/Unix
 	addr := uintptr(unsafe.Pointer(&b[0]))
 	size := uintptr(len(b))
@@ -52,18 +37,6 @@ func Mlock(b []byte) error {
 
 func Munlock(b []byte) {
 	if len(b) == 0 {
-		return
-	}
-
-	// Para Windows, usar VirtualUnlock
-	if runtime.GOOS == "windows" {
-		kernel32 := syscall.NewLazyDLL("kernel32.dll")
-		virtualUnlock := kernel32.NewProc("VirtualUnlock")
-
-		addr := uintptr(unsafe.Pointer(&b[0]))
-		size := uintptr(len(b))
-
-		virtualUnlock.Call(addr, size)
 		return
 	}
 
