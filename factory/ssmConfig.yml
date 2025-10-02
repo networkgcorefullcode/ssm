@@ -4,9 +4,12 @@ info:
   description: "Secure Storage Manager Service"
 
 configuration:
-  ssmName: "SSM-Instance-01"
-  ssmId: "ssm-001"
-  socketPath: "/usr/lib/softhsm/libsofthsm2.so"
+  ssmName: "SSM"
+  ssmId: "coffe001"
+  socketPath: "var/run/socket.so"
+  pkcsPath: "/usr/lib/softhsm/libsofthsm2.so"
+  pin: "1234"
+  lots_number: 0
 
 logger:
   SSM:
