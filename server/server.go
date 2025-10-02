@@ -2,7 +2,6 @@ package server
 
 import (
 	"fmt"
-	"log"
 	"net"
 	"net/http"
 	"os"
@@ -117,20 +116,28 @@ func (s *SSM) Start() error {
 	// remove old socket
 	socketPath := factory.SsmConfig.Configuration.SocketPath
 
+	logger.AppLog.Infof("Removing old socket at %s if exists", socketPath)
 	_ = os.Remove(socketPath)
+
+	logger.AppLog.Infof("Starting to listen on unix socket %s", socketPath)
 	l, err := net.Listen("unix", socketPath)
 	if err != nil {
+		logger.AppLog.Errorf("Failed to listen on socket %s: %v", socketPath, err)
 		return err
 	}
+
 	http.HandleFunc("/encrypt", k4opt.HandleEncryptK4)
 	http.HandleFunc("/decrypt", func(w http.ResponseWriter, r *http.Request) {
+		logger.AppLog.Debugf("Received /decrypt request")
 		k4opt.HandleDecryptK4(s.mgr, w, r)
 	})
 
-	log.Printf("SSM listening on unix socket %s", socketPath)
+	logger.AppLog.Infof("SSM listening on unix socket %s", socketPath)
 	if err := http.Serve(l, nil); err != nil {
-		logger.AppLog.Errorf("server error: %v", err)
+		logger.AppLog.Errorf("Server error: %v", err)
+		return err
 	}
 
+	logger.AppLog.Info("SSM server stopped gracefully")
 	return nil
 }
