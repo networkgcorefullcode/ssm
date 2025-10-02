@@ -129,7 +129,7 @@ func (s *SSM) Start() error {
 
 	log.Printf("SSM listening on unix socket %s", socketPath)
 	if err := http.Serve(l, nil); err != nil {
-		log.Fatalf("server error: %v", err)
+		logger.AppLog.Errorf("server error: %v", err)
 	}
 
 	return nil
