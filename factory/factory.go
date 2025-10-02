@@ -54,27 +54,15 @@ func InitConfigFactory(f string) error {
 	}
 	err = validateSsmId(SsmConfig.Configuration.SsmId)
 
-	// Checking manual configuration
-
-	if SsmConfig.Configuration.ManualConfigs != nil {
-		logger.CfgLog.Infof("Manual Configuration provided for network functions")
-		for nfType, nfs := range SsmConfig.Configuration.ManualConfigs.NFs {
-			for _, nf := range nfs {
-				logger.CfgLog.Debugf("Manual Configuration - NF Type: %s, Name: %s, URL: %s, Port: %d", nfType, nf.NfInstanceName, nf.NfServices)
-			}
-		}
-	} else {
-		logger.CfgLog.Infof("No manual configuration provided for network functions")
-	}
 	return err
 }
 
 func CheckConfigVersion() error {
 	currentVersion := SsmConfig.GetVersion()
 
-	if currentVersion != AMF_EXPECTED_CONFIG_VERSION {
+	if currentVersion != SSM_EXPECTED_CONFIG_VERSION {
 		return fmt.Errorf("config version is [%s], but expected is [%s]",
-			currentVersion, AMF_EXPECTED_CONFIG_VERSION)
+			currentVersion, SSM_EXPECTED_CONFIG_VERSION)
 	}
 
 	logger.CfgLog.Infof("config version [%s]", currentVersion)

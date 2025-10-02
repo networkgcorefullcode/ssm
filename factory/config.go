@@ -53,96 +53,24 @@ type KafkaInfo struct {
 // }
 
 type Configuration struct {
-	AmfName                         string                    `yaml:"amfName,omitempty"`
-	AmfId                           string                    `yaml:"amfId,omitempty"`
-	AmfDBName                       string                    `yaml:"amfDBName,omitempty"`
-	Mongodb                         *Mongodb                  `yaml:"mongodb,omitempty"`
-	NgapIpList                      []string                  `yaml:"ngapIpList,omitempty"`
-	NgapPort                        int                       `yaml:"ngappPort,omitempty"`
-	SctpGrpcPort                    int                       `yaml:"sctpGrpcPort,omitempty"`
-	Sbi                             *Sbi                      `yaml:"sbi,omitempty"`
-	NetworkFeatureSupport5GS        *NetworkFeatureSupport5GS `yaml:"networkFeatureSupport5GS,omitempty"`
-	ServiceNameList                 []string                  `yaml:"serviceNameList,omitempty"`
-	SupportDnnList                  []string                  `yaml:"supportDnnList,omitempty"`
-	NrfUri                          string                    `yaml:"nrfUri,omitempty"`
-	WebuiUri                        string                    `yaml:"webuiUri"`
-	Security                        *Security                 `yaml:"security,omitempty"`
-	NetworkName                     NetworkName               `yaml:"networkName,omitempty"`
-	T3502Value                      int                       `yaml:"t3502Value,omitempty"`
-	T3512Value                      int                       `yaml:"t3512Value,omitempty"`
-	Non3gppDeregistrationTimerValue int                       `yaml:"non3gppDeregistrationTimerValue,omitempty"`
-	T3513                           TimerValue                `yaml:"t3513"`
-	T3522                           TimerValue                `yaml:"t3522"`
-	T3550                           TimerValue                `yaml:"t3550"`
-	T3560                           TimerValue                `yaml:"t3560"`
-	T3565                           TimerValue                `yaml:"t3565"`
-	// Telemetry                       *TelemetryConfig          `yaml:"telemetry,omitempty"`
+	SsmName         string      `yaml:"ssmName,omitempty"`
+	SsmId           string      `yaml:"ssmId,omitempty"`
+	SocketPath      string      `yaml:"socketPath,omitempty"`
+	SsmDBName       string      `yaml:"ssmDBName,omitempty"`
+	Mongodb         *Mongodb    `yaml:"mongodb,omitempty"`
+	Sbi             *Sbi        `yaml:"sbi,omitempty"`
+	ServiceNameList []string    `yaml:"serviceNameList,omitempty"`
+	SupportDnnList  []string    `yaml:"supportDnnList,omitempty"`
+	NrfUri          string      `yaml:"nrfUri,omitempty"`
+	WebuiUri        string      `yaml:"webuiUri"`
+	Security        *Security   `yaml:"security,omitempty"`
+	NetworkName     NetworkName `yaml:"networkName,omitempty"`
 
-	EnableSctpLb             bool      `yaml:"enableSctpLb"`
 	EnableDbStore            bool      `yaml:"enableDBStore"`
 	EnableNrfCaching         bool      `yaml:"enableNrfCaching"`
 	NrfCacheEvictionInterval int       `yaml:"nrfCacheEvictionInterval,omitempty"`
 	KafkaInfo                KafkaInfo `yaml:"kafkaInfo,omitempty"`
 	DebugProfilePort         int       `yaml:"debugProfilePort,omitempty"`
-
-	// Manual Configuration to connect with network functions
-	ManualConfigs *ManualConfig `yaml:"manualConfigs,omitempty"`
-}
-
-func (c *Configuration) Get5gsNwFeatSuppEnable() bool {
-	if c.NetworkFeatureSupport5GS != nil {
-		return c.NetworkFeatureSupport5GS.Enable
-	}
-	return true
-}
-
-func (c *Configuration) Get5gsNwFeatSuppImsVoPS() uint8 {
-	if c.NetworkFeatureSupport5GS != nil {
-		return c.NetworkFeatureSupport5GS.ImsVoPS
-	}
-	return 0
-}
-
-func (c *Configuration) Get5gsNwFeatSuppEmc() uint8 {
-	if c.NetworkFeatureSupport5GS != nil {
-		return c.NetworkFeatureSupport5GS.Emc
-	}
-	return 0
-}
-
-func (c *Configuration) Get5gsNwFeatSuppEmf() uint8 {
-	if c.NetworkFeatureSupport5GS != nil {
-		return c.NetworkFeatureSupport5GS.Emf
-	}
-	return 0
-}
-
-func (c *Configuration) Get5gsNwFeatSuppIwkN26() uint8 {
-	if c.NetworkFeatureSupport5GS != nil {
-		return c.NetworkFeatureSupport5GS.IwkN26
-	}
-	return 0
-}
-
-func (c *Configuration) Get5gsNwFeatSuppMpsi() uint8 {
-	if c.NetworkFeatureSupport5GS != nil {
-		return c.NetworkFeatureSupport5GS.Mpsi
-	}
-	return 0
-}
-
-func (c *Configuration) Get5gsNwFeatSuppEmcN3() uint8 {
-	if c.NetworkFeatureSupport5GS != nil {
-		return c.NetworkFeatureSupport5GS.EmcN3
-	}
-	return 0
-}
-
-func (c *Configuration) Get5gsNwFeatSuppMcsi() uint8 {
-	if c.NetworkFeatureSupport5GS != nil {
-		return c.NetworkFeatureSupport5GS.Mcsi
-	}
-	return 0
 }
 
 type NetworkFeatureSupport5GS struct {

@@ -53,3 +53,5 @@ require (
 	golang.org/x/tools v0.36.0 // indirect
 	google.golang.org/protobuf v1.36.9 // indirect
 )
+
+replace github.com/omec-project/util => github.com/networkgcorefullcode/util v1.5.5

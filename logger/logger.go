@@ -6,31 +6,18 @@ import (
 )
 
 var (
-	log                *zap.Logger
-	AppLog             *zap.SugaredLogger
-	InitLog            *zap.SugaredLogger
-	CfgLog             *zap.SugaredLogger
-	ContextLog         *zap.SugaredLogger
-	DataRepoLog        *zap.SugaredLogger
-	NgapLog            *zap.SugaredLogger
-	HandlerLog         *zap.SugaredLogger
-	HttpLog            *zap.SugaredLogger
-	GmmLog             *zap.SugaredLogger
-	MtLog              *zap.SugaredLogger
-	ProducerLog        *zap.SugaredLogger
-	LocationLog        *zap.SugaredLogger
-	CommLog            *zap.SugaredLogger
-	CallbackLog        *zap.SugaredLogger
-	UtilLog            *zap.SugaredLogger
-	NasLog             *zap.SugaredLogger
-	ConsumerLog        *zap.SugaredLogger
-	EeLog              *zap.SugaredLogger
-	GinLog             *zap.SugaredLogger
-	GrpcLog            *zap.SugaredLogger
-	KafkaLog           *zap.SugaredLogger
-	NrfRegistrationLog *zap.SugaredLogger
-	PollConfigLog      *zap.SugaredLogger
-	atomicLevel        zap.AtomicLevel
+	log         *zap.Logger
+	AppLog      *zap.SugaredLogger
+	InitLog     *zap.SugaredLogger
+	CfgLog      *zap.SugaredLogger
+	HttpLog     *zap.SugaredLogger
+	ProducerLog *zap.SugaredLogger
+	CommLog     *zap.SugaredLogger
+	CallbackLog *zap.SugaredLogger
+	UtilLog     *zap.SugaredLogger
+	ConsumerLog *zap.SugaredLogger
+	GinLog      *zap.SugaredLogger
+	atomicLevel zap.AtomicLevel
 )
 
 const (
@@ -67,29 +54,16 @@ func init() {
 		panic(err)
 	}
 
-	AppLog = log.Sugar().With("component", "AMF", "category", "App")
-	InitLog = log.Sugar().With("component", "AMF", "category", "Init")
-	CfgLog = log.Sugar().With("component", "AMF", "category", "CFG")
-	ContextLog = log.Sugar().With("component", "AMF", "category", "Context")
-	DataRepoLog = log.Sugar().With("component", "AMF", "category", "DBRepo")
-	NgapLog = log.Sugar().With("component", "AMF", "category", "NGAP")
-	HandlerLog = log.Sugar().With("component", "AMF", "category", "Handler")
-	HttpLog = log.Sugar().With("component", "AMF", "category", "HTTP")
-	GmmLog = log.Sugar().With("component", "AMF", "category", "GMM")
-	MtLog = log.Sugar().With("component", "AMF", "category", "MT")
-	ProducerLog = log.Sugar().With("component", "AMF", "category", "Producer")
-	LocationLog = log.Sugar().With("component", "AMF", "category", "LocInfo")
-	CommLog = log.Sugar().With("component", "AMF", "category", "Comm")
-	CallbackLog = log.Sugar().With("component", "AMF", "category", "Callback")
-	UtilLog = log.Sugar().With("component", "AMF", "category", "Util")
-	NasLog = log.Sugar().With("component", "AMF", "category", "NAS")
-	ConsumerLog = log.Sugar().With("component", "AMF", "category", "Consumer")
-	EeLog = log.Sugar().With("component", "AMF", "category", "EventExposure")
-	GinLog = log.Sugar().With("component", "AMF", "category", "GIN")
-	GrpcLog = log.Sugar().With("component", "AMF", "category", "GRPC")
-	KafkaLog = log.Sugar().With("component", "AMF", "category", "Kafka")
-	NrfRegistrationLog = log.Sugar().With("component", "AMF", "category", "NrfRegistration")
-	PollConfigLog = log.Sugar().With("component", "AMF", "category", "PollConfig")
+	AppLog = log.Sugar().With("component", "SSM", "category", "App")
+	InitLog = log.Sugar().With("component", "SSM", "category", "Init")
+	CfgLog = log.Sugar().With("component", "SSM", "category", "CFG")
+	HttpLog = log.Sugar().With("component", "SSM", "category", "HTTP")
+	ProducerLog = log.Sugar().With("component", "SSM", "category", "Producer")
+	CommLog = log.Sugar().With("component", "SSM", "category", "Comm")
+	CallbackLog = log.Sugar().With("component", "SSM", "category", "Callback")
+	UtilLog = log.Sugar().With("component", "SSM", "category", "Util")
+	ConsumerLog = log.Sugar().With("component", "SSM", "category", "Consumer")
+	GinLog = log.Sugar().With("component", "SSM", "category", "GIN")
 }
 
 func GetLogger() *zap.Logger {
