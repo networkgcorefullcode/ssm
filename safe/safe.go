@@ -28,7 +28,7 @@ func Mlock(b []byte) error {
 	addr := uintptr(unsafe.Pointer(&b[0]))
 	size := uintptr(len(b))
 	const SYS_MLOCK = 149 // Linux/amd64
-	_, _, err := syscall.Syscall(uintptr(SYS_MLOCK), addr, size, 0, 0)
+	_, _, err := syscall.Syscall(uintptr(SYS_MLOCK), addr, size, 0)
 	if err != 0 {
 		return err
 	}
@@ -44,5 +44,5 @@ func Munlock(b []byte) {
 	addr := uintptr(unsafe.Pointer(&b[0]))
 	size := uintptr(len(b))
 	const SYS_MUNLOCK = 150 // Linux/amd64
-	syscall.Syscall(uintptr(SYS_MUNLOCK), addr, size, 0, 0)
+	syscall.Syscall(uintptr(SYS_MUNLOCK), addr, size, 0)
 }
