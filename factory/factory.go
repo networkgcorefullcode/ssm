@@ -31,27 +31,6 @@ func InitConfigFactory(f string) error {
 		SsmConfig.Configuration.SsmId = "cafe00"
 		logger.CfgLog.Infof("amfId not set in configuration file. Using %s", SsmConfig.Configuration.SsmId)
 	}
-	if SsmConfig.Configuration.WebuiUri == "" {
-		SsmConfig.Configuration.WebuiUri = "http://webui:5001"
-		logger.CfgLog.Infof("webuiUri not set in configuration file. Using %s", SsmConfig.Configuration.WebuiUri)
-	}
-	if SsmConfig.Configuration.KafkaInfo.EnableKafka == nil {
-		enableKafka := true
-		SsmConfig.Configuration.KafkaInfo.EnableKafka = &enableKafka
-	}
-	// if SsmConfig.Configuration.Telemetry != nil && SsmConfig.Configuration.Telemetry.Enabled {
-	// 	if SsmConfig.Configuration.Telemetry.Ratio == nil {
-	// 		defaultRatio := 1.0
-	// 		SsmConfig.Configuration.Telemetry.Ratio = &defaultRatio
-	// 	}
-
-	// 	if SsmConfig.Configuration.Telemetry.OtlpEndpoint == "" {
-	// 		return fmt.Errorf("OTLP endpoint is not set in the configuration")
-	// 	}
-	// }
-	if err = validateWebuiUri(SsmConfig.Configuration.WebuiUri); err != nil {
-		return err
-	}
 	err = validateSsmId(SsmConfig.Configuration.SsmId)
 
 	return err

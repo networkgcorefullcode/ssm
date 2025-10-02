@@ -1,0 +1,13 @@
+# SSM Configuration File
+info:
+  version: "1.0.0"
+  description: "Secure Storage Manager Service"
+
+configuration:
+  ssmName: "SSM-Instance-01"
+  ssmId: "ssm-001"
+  socketPath: "/usr/lib/softhsm/libsofthsm2.so"
+
+logger:
+  SSM:
+    debugLevel: info         # debug, info, warn, error
