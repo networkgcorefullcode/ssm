@@ -127,11 +127,10 @@ func (s *SSM) Start() error {
 		k4opt.HandleDecryptK4(s.mgr, w, r)
 	})
 
-	go func() {
-		log.Printf("SSM listening on unix socket %s", socketPath)
-		if err := http.Serve(l, nil); err != nil {
-			log.Fatalf("server error: %v", err)
-		}
-	}()
+	log.Printf("SSM listening on unix socket %s", socketPath)
+	if err := http.Serve(l, nil); err != nil {
+		log.Fatalf("server error: %v", err)
+	}
+
 	return nil
 }

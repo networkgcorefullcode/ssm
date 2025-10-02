@@ -6,7 +6,6 @@ package factory
 
 import (
 	"fmt"
-	"net/url"
 	"os"
 	"regexp"
 
@@ -29,7 +28,7 @@ func InitConfigFactory(f string) error {
 	}
 	if SsmConfig.Configuration.SsmId == "" {
 		SsmConfig.Configuration.SsmId = "cafe00"
-		logger.CfgLog.Infof("amfId not set in configuration file. Using %s", SsmConfig.Configuration.SsmId)
+		logger.CfgLog.Infof("ssmId not set in configuration file. Using %s", SsmConfig.Configuration.SsmId)
 	}
 	err = validateSsmId(SsmConfig.Configuration.SsmId)
 
@@ -49,27 +48,13 @@ func CheckConfigVersion() error {
 	return nil
 }
 
-func validateWebuiUri(uri string) error {
-	parsedUrl, err := url.ParseRequestURI(uri)
+func validateSsmId(ssmId string) error {
+	ssmIdMatch, err := regexp.MatchString(SsmFID_PATTERN, ssmId)
 	if err != nil {
-		return err
+		return fmt.Errorf("invalid ssmId: %s. It should match the following pattern: `%s`", ssmId, SsmFID_PATTERN)
 	}
-	if parsedUrl.Scheme != "http" && parsedUrl.Scheme != "https" {
-		return fmt.Errorf("unsupported scheme for webuiUri: %s", parsedUrl.Scheme)
-	}
-	if parsedUrl.Hostname() == "" {
-		return fmt.Errorf("missing host in webuiUri")
-	}
-	return nil
-}
-
-func validateSsmId(amfId string) error {
-	amfIdMatch, err := regexp.MatchString(SsmFID_PATTERN, amfId)
-	if err != nil {
-		return fmt.Errorf("invalid amfId: %s. It should match the following pattern: `%s`", amfId, SsmFID_PATTERN)
-	}
-	if !amfIdMatch {
-		return fmt.Errorf("invalid amfId: %s. It should match the following pattern: `%s`", amfId, SsmFID_PATTERN)
+	if !ssmIdMatch {
+		return fmt.Errorf("invalid ssmId: %s. It should match the following pattern: `%s`", ssmId, SsmFID_PATTERN)
 	}
 	return nil
 }
