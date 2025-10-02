@@ -113,7 +113,15 @@ func (m *Manager) FindKeyByLabel(label string) pkcs11.ObjectHandle {
 	template := []*pkcs11.Attribute{
 		pkcs11.NewAttribute(pkcs11.CKA_LABEL, label),
 	}
-	handles, _, err := m.ctx.FindObjects(m.session, template)
+
+	// Inicializar búsqueda
+	if err := m.ctx.FindObjectsInit(m.session, template); err != nil {
+		return 0
+	}
+	defer m.ctx.FindObjectsFinal(m.session)
+
+	// Buscar objetos (máximo 1)
+	handles, _, err := m.ctx.FindObjects(m.session, 1)
 	if err != nil {
 		return 0
 	}
@@ -130,7 +138,15 @@ func (m *Manager) GetAESKeyHandleByLabel(label string) (pkcs11.ObjectHandle, err
 		pkcs11.NewAttribute(pkcs11.CKA_CLASS, pkcs11.CKO_SECRET_KEY),
 		pkcs11.NewAttribute(pkcs11.CKA_KEY_TYPE, pkcs11.CKK_AES),
 	}
-	handles, _, err := m.ctx.FindObjects(m.session, template)
+
+	// Inicializar búsqueda
+	if err := m.ctx.FindObjectsInit(m.session, template); err != nil {
+		return 0, err
+	}
+	defer m.ctx.FindObjectsFinal(m.session)
+
+	// Buscar objetos (máximo 1)
+	handles, _, err := m.ctx.FindObjects(m.session, 1)
 	if err != nil {
 		return 0, err
 	}
