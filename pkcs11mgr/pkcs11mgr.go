@@ -25,6 +25,7 @@ func New(modulePath string, slot uint, pin string) (*Manager, error) {
 	return mgr, nil
 }
 
+// Open a Session to operate with the SSM
 func (m *Manager) OpenSession() error {
 	session, err := m.ctx.OpenSession(m.slot, pkcs11.CKF_SERIAL_SESSION|pkcs11.CKF_RW_SESSION)
 	if err != nil {
@@ -37,6 +38,7 @@ func (m *Manager) OpenSession() error {
 	return nil
 }
 
+// CloseSession logs out and closes the session
 func (m *Manager) CloseSession() {
 	if m.session != 0 {
 		_ = m.ctx.Logout(m.session)
@@ -45,6 +47,7 @@ func (m *Manager) CloseSession() {
 	}
 }
 
+// Finalize cleans up the PKCS#11 context
 func (m *Manager) Finalize() {
 	m.CloseSession()
 	if m.ctx != nil {
@@ -103,4 +106,36 @@ func (m *Manager) DecryptWithAESKey(keyHandle pkcs11.ObjectHandle, iv, ciphertex
 		return nil, err
 	}
 	return out, nil
+}
+
+// FindKeyByLabel returns the object handle for a given label, or 0 if not found
+func (m *Manager) FindKeyByLabel(label string) pkcs11.ObjectHandle {
+	template := []*pkcs11.Attribute{
+		pkcs11.NewAttribute(pkcs11.CKA_LABEL, label),
+	}
+	handles, err := m.ctx.FindObjects(m.session, template)
+	if err != nil {
+		return 0
+	}
+	if len(handles) == 0 {
+		return 0
+	}
+	return handles[0]
+}
+
+// GetAESKeyHandleByLabel returns the AES key handle for a given label, or an error if not found
+func (m *Manager) GetAESKeyHandleByLabel(label string) (pkcs11.ObjectHandle, error) {
+	template := []*pkcs11.Attribute{
+		pkcs11.NewAttribute(pkcs11.CKA_LABEL, label),
+		pkcs11.NewAttribute(pkcs11.CKA_CLASS, pkcs11.CKO_SECRET_KEY),
+		pkcs11.NewAttribute(pkcs11.CKA_KEY_TYPE, pkcs11.CKK_AES),
+	}
+	handles, err := m.ctx.FindObjects(m.session, template)
+	if err != nil {
+		return 0, err
+	}
+	if len(handles) == 0 {
+		return 0, errors.New("AES key not found")
+	}
+	return handles[0], nil
 }

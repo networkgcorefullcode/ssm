@@ -46,3 +46,28 @@ func Munlock(b []byte) {
 	const SYS_MUNLOCK = 150 // Linux/amd64
 	syscall.Syscall(uintptr(SYS_MUNLOCK), addr, size, 0)
 }
+
+// RandRead llena el slice con bytes aleatorios usando el sistema operativo.
+func RandRead(b []byte) error {
+	if len(b) == 0 {
+		return nil
+	}
+	_, err := syscall.Read(syscall.Stdin, b)
+	if err == nil {
+		return nil
+	}
+	// Si falla, intenta usar /dev/urandom
+	f, err := syscall.Open("/dev/urandom", syscall.O_RDONLY, 0)
+	if err != nil {
+		return err
+	}
+	defer syscall.Close(f)
+	n, err := syscall.Read(f, b)
+	if err != nil {
+		return err
+	}
+	if n != len(b) {
+		return syscall.EIO
+	}
+	return nil
+}

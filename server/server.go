@@ -133,16 +133,24 @@ func (s *SSM) Start() error {
 		factory.SsmConfig.Configuration.Pin)
 
 	SsmServer.mgr = PkcsManager
+	PkcsManager.OpenSession()
 
 	if err != nil {
 		logger.AppLog.Errorf("Failed to initialize PKCS11 manager: %v", err)
 		return err
 	}
 
-	http.HandleFunc("/encrypt", k4opt.HandleEncryptK4)
+	http.HandleFunc("/encrypt", func(w http.ResponseWriter, r *http.Request) {
+		logger.AppLog.Debugf("Received /encrypt request")
+		k4opt.HandleEncryptK4(s.mgr, w, r)
+	})
 	http.HandleFunc("/decrypt", func(w http.ResponseWriter, r *http.Request) {
 		logger.AppLog.Debugf("Received /decrypt request")
 		k4opt.HandleDecryptK4(s.mgr, w, r)
+	})
+	http.HandleFunc("/generate-aes-key", func(w http.ResponseWriter, r *http.Request) {
+		logger.AppLog.Debugf("Received /generate-aes-key request")
+		k4opt.HandleGenerateAESKey(s.mgr, w, r)
 	})
 
 	logger.AppLog.Infof("SSM listening on unix socket %s", socketPath)
@@ -150,6 +158,9 @@ func (s *SSM) Start() error {
 		logger.AppLog.Errorf("Server error: %v", err)
 		return err
 	}
+
+	PkcsManager.CloseSession()
+	PkcsManager.Finalize()
 
 	logger.AppLog.Info("SSM server stopped gracefully")
 	return nil
