@@ -21,6 +21,7 @@ type SSM struct {
 }
 
 var SsmServer = &SSM{}
+var PkcsManager = &pkcs11mgr.Manager{}
 
 type (
 	// Config information.
@@ -123,6 +124,18 @@ func (s *SSM) Start() error {
 	l, err := net.Listen("unix", socketPath)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to listen on socket %s: %v", socketPath, err)
+		return err
+	}
+
+	// init the pkcs manager
+	PkcsManager, err = pkcs11mgr.New(factory.SsmConfig.Configuration.PkcsPath,
+		uint(factory.SsmConfig.Configuration.LotsNumber),
+		factory.SsmConfig.Configuration.Pin)
+
+	SsmServer.mgr = PkcsManager
+
+	if err != nil {
+		logger.AppLog.Errorf("Failed to initialize PKCS11 manager: %v", err)
 		return err
 	}
 
