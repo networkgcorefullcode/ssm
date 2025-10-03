@@ -33,7 +33,7 @@ func postEncrypt(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	keyHandle, err := mgr.GetAESKeyHandleByLabel(req.KeyLabel)
+	keyHandle, err := mgr.FindKeyByLabel(req.KeyLabel)
 	if err != nil {
 		http.Error(w, "key not found", http.StatusNotFound)
 		return

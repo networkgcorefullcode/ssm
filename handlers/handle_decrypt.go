@@ -45,11 +45,13 @@ func postDecrypt(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	// At this point, the plaintext is in memory: use mlock before using it and zero afterwards
-	// Send result (but ideally return only results, not the key)
-	resp := map[string]string{
-		"plain_b64": base64.StdEncoding.EncodeToString(plaintext),
+	// Return the plaintext as base64
+	w.Header().Set("Content-Type", "application/json")
+	// Prepare response using the DecryptResponse struct
+	resp := models.DecryptResponse{
+		PlainB64: base64.StdEncoding.EncodeToString(plaintext),
 	}
+
 	// scrubbear
 	safe.Zero(plaintext)
 	_ = json.NewEncoder(w).Encode(resp)

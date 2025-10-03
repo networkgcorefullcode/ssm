@@ -6,3 +6,7 @@ type DecryptRequest struct {
 	IVB64     string `json:"iv_b64"`
 	ID        int    `json:"id,omitempty"`
 }
+
+type DecryptResponse struct {
+	PlainB64 string `json:"plain_b64"`
+}

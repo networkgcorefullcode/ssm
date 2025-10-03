@@ -1,9 +1,12 @@
 package handlers
 
 import (
+	"crypto/cipher"
+	"encoding/base64"
 	"encoding/json"
 	"net/http"
 
+	constants "github.com/networkgcorefullcode/ssm/const"
 	"github.com/networkgcorefullcode/ssm/models"
 	"github.com/networkgcorefullcode/ssm/pkcs11mgr"
 )
@@ -27,17 +30,35 @@ func postStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request
 
 	label := req.KeyLabel
 	id := req.ID
-	key_value := req.KeyValue
+	key_value, err := base64.StdEncoding.DecodeString(req.KeyValue)
+	if err != nil {
+		http.Error(w, "bad base64", http.StatusBadRequest)
+		return
+	}
 
-	if handle, err := mgr.StoreKey(label, []byte(key_value), []byte(id)); err != nil {
+	if handle, err := mgr.StoreKey(label, key_value, []byte(id)); err != nil {
 		http.Error(w, "failed to store key: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"handle":  handle,
-		"message": "key stored successfully",
-	})
+	resp := models.StoreKeyResponse{
+		Handle:    handle,
+		CipherKey: "", // Puedes asignar el valor adecuado si tienes el cipher key
+	}
+
+	findHandle, err := mgr.FindKeyByLabel(constants.LABEL_ENCRYPTION_KEY)
+	if err != nil || findHandle == 0 {
+		json.NewEncoder(w).Encode(resp)
+		return
+	}
+
+	cipher, err := mgr.EncryptKey(handle, make([]byte, 16), key_value, uint(cipher.BlockMode(cipher.NewCBCEncrypter).BlockSize()))
+	if err != nil {
+		cipher = []byte{}
+	}
+	resp.CipherKey = base64.StdEncoding.EncodeToString(cipher)
+
+	json.NewEncoder(w).Encode(resp)
 }
