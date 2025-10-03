@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/networkgcorefullcode/ssm/models"
 	"github.com/networkgcorefullcode/ssm/pkcs11mgr"
@@ -64,11 +65,12 @@ func HandleEncryptK4(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Requ
 		return
 	}
 
+	now := time.Now().UTC().Format(time.RFC3339)
 	resp := models.EncryptResponse{
 		CipherB64:   base64.StdEncoding.EncodeToString(ciphertext),
 		IVB64:       base64.StdEncoding.EncodeToString(iv),
-		TimeCreated: req.KeyLabel,
-		TimeUpdated: req.KeyLabel,
+		TimeCreated: now,
+		TimeUpdated: now,
 		Ok:          true,
 	}
 
