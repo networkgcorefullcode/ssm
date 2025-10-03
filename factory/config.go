@@ -32,13 +32,14 @@ const (
 )
 
 type Configuration struct {
-	SsmName    string `yaml:"ssmName,omitempty"`
-	SsmId      string `yaml:"ssmId,omitempty"`
-	SocketPath string `yaml:"socketPath,omitempty"`
-	PkcsPath   string `yaml:"pkcsPath,omitempty"`
-	Pin        string `yaml:"pin,omitempty"`
-	LotsNumber int    `yaml:"lots_number,omitempty"`
-	BindAddr   string `yaml:"bindAddr,omitempty"`
+	SsmName         string `yaml:"ssmName,omitempty"`
+	SsmId           string `yaml:"ssmId,omitempty"`
+	SocketPath      string `yaml:"socketPath,omitempty"`
+	PkcsPath        string `yaml:"pkcsPath,omitempty"`
+	Pin             string `yaml:"pin,omitempty"`
+	LotsNumber      int    `yaml:"lots_number,omitempty"`
+	BindAddr        string `yaml:"bindAddr,omitempty"`
+	ExposeSwaggerUi bool   `yaml:"exposeSwaggerUi,omitempty"`
 }
 
 func (c *Config) GetVersion() string {

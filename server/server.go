@@ -181,6 +181,13 @@ func (s *SSM) Start() error {
 		return nil
 	}()
 
+	if factory.SsmConfig.Configuration.ExposeSwaggerUi {
+		go func() {
+			logger.AppLog.Infof("Swagger UI available at http://localhost:8080/swagger/index.html")
+			ServerSwagger()
+		}()
+	}
+
 	// Use ListenAndServe to handle HTTP connections
 	if err := http.ListenAndServe(factory.SsmConfig.Configuration.BindAddr, nil); err != nil {
 		logger.AppLog.Errorf("Server error: %v", err)
