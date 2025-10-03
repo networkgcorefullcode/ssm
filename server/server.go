@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/networkgcorefullcode/ssm/factory"
-	"github.com/networkgcorefullcode/ssm/k4opt"
+	"github.com/networkgcorefullcode/ssm/handlers"
 	"github.com/networkgcorefullcode/ssm/logger"
 	"github.com/networkgcorefullcode/ssm/pkcs11mgr"
 	"github.com/urfave/cli/v3"
@@ -149,25 +149,25 @@ func (s *SSM) Start() error {
 	// Encrypt endpoints POST
 	http.HandleFunc("/encrypt", func(w http.ResponseWriter, r *http.Request) {
 		logger.AppLog.Debugf("Received /encrypt request")
-		k4opt.HandleEncryptK4(s.mgr, w, r)
+		handlers.HandleEncrypt(s.mgr, w, r)
 	})
 
 	// Decrypt endpoints POST
 	http.HandleFunc("/decrypt", func(w http.ResponseWriter, r *http.Request) {
 		logger.AppLog.Debugf("Received /decrypt request")
-		k4opt.HandleDecryptK4(s.mgr, w, r)
-	})
-
-	// Generate Key endpoints POST
-	http.HandleFunc("/generate-aes-key", func(w http.ResponseWriter, r *http.Request) {
-		logger.AppLog.Debugf("Received /generate-aes-key request")
-		k4opt.HandleGenerateAESKey(s.mgr, w, r)
+		handlers.HandleDecrypt(s.mgr, w, r)
 	})
 
 	// Store Key endpoints POST
 	http.HandleFunc("/store-key", func(w http.ResponseWriter, r *http.Request) {
 		logger.AppLog.Debugf("Received /store-key request")
-		k4opt.HandleStoreKey(s.mgr, w, r) // TODO implement this handler
+		handlers.HandleStoreKey(s.mgr, w, r) // TODO implement this handler
+	})
+
+	// Generate Key endpoints POST
+	http.HandleFunc("/generate-aes-key", func(w http.ResponseWriter, r *http.Request) {
+		logger.AppLog.Debugf("Received /generate-aes-key request")
+		handlers.HandleGenerateAESKey(s.mgr, w, r)
 	})
 
 	logger.AppLog.Infof("SSM listening on unix socket %s", socketPath)

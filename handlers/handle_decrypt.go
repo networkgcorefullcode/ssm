@@ -1,16 +1,28 @@
-package k4opt
+package handlers
 
 import (
 	"encoding/base64"
 	"encoding/json"
 	"net/http"
 
+	"github.com/miekg/pkcs11"
 	"github.com/networkgcorefullcode/ssm/models"
 	"github.com/networkgcorefullcode/ssm/pkcs11mgr"
 	"github.com/networkgcorefullcode/ssm/safe"
 )
 
-func HandleDecryptK4(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request) {
+func HandleDecrypt(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request) {
+
+	switch r.Method {
+	case http.MethodPost:
+		postDecrypt(mgr, w, r)
+	default:
+		http.Error(w, "method is not allowed", http.StatusMethodNotAllowed)
+	}
+
+}
+
+func postDecrypt(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request) {
 	var req models.DecryptRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "bad request", http.StatusBadRequest)
@@ -20,13 +32,14 @@ func HandleDecryptK4(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Requ
 	iv, _ := base64.StdEncoding.DecodeString(req.IVB64)
 
 	// Get handle using the label
-	keyHandle, err := mgr.GetAESKeyHandleByLabel(req.KeyLabel)
+	keyHandle, err := mgr.FindKeyByLabel(req.KeyLabel)
 	if err != nil {
 		http.Error(w, "key not found", http.StatusNotFound)
 		return
 	}
 
-	plaintext, err := mgr.DecryptWithAESKey(keyHandle, iv, cipher)
+	// Get the plaintext using aes decrypt algoritm
+	plaintext, err := mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_AES_CBC_PAD)
 	if err != nil {
 		http.Error(w, "decrypt error", 500)
 		return
