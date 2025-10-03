@@ -1,11 +1,11 @@
 package handlers
 
 import (
-	"crypto/cipher"
 	"encoding/base64"
 	"encoding/json"
 	"net/http"
 
+	"github.com/miekg/pkcs11"
 	constants "github.com/networkgcorefullcode/ssm/const"
 	"github.com/networkgcorefullcode/ssm/models"
 	"github.com/networkgcorefullcode/ssm/pkcs11mgr"
@@ -54,7 +54,7 @@ func postStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	cipher, err := mgr.EncryptKey(handle, make([]byte, 16), key_value, uint(cipher.BlockMode(cipher.NewCBCEncrypter).BlockSize()))
+	cipher, err := mgr.EncryptKey(findHandle, nil, key_value, pkcs11.CKM_AES_CBC_PAD)
 	if err != nil {
 		cipher = []byte{}
 	}
