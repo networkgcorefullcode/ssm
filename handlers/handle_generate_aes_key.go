@@ -28,7 +28,7 @@ func postGenerateAESKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.R
 		http.Error(w, "label is required", http.StatusBadRequest)
 		return
 	}
-	if req.ID == "" {
+	if req.Id == "" {
 		http.Error(w, "id is required", http.StatusBadRequest)
 		return
 	}
@@ -37,7 +37,7 @@ func postGenerateAESKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.R
 		return
 	}
 
-	handle, err := mgr.GenerateAESKey(req.Label, []byte(req.ID), req.Bits)
+	handle, err := mgr.GenerateAESKey(req.Label, []byte(req.Id), req.Bits)
 	if err != nil {
 		http.Error(w, "key generation failed", http.StatusInternalServerError)
 		return
@@ -45,9 +45,9 @@ func postGenerateAESKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.R
 
 	resp := models.GenAESKeyResponse{
 		Handle: uint(handle),
-		Label:  req.Label,
-		ID:     req.ID,
-		Bits:   req.Bits,
+		Label:  &req.Label,
+		Id:     &req.Id,
+		Bits:   &req.Bits,
 	}
 	w.WriteHeader(http.StatusCreated)
 	_ = json.NewEncoder(w).Encode(resp)

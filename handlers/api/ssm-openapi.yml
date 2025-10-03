@@ -215,34 +215,6 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
-  /health:
-    get:
-      tags:
-        - Health
-      summary: Estado de salud del servicio
-      description: Verifica el estado del servicio SSM y conexión con HSM
-      operationId: healthCheck
-      responses:
-        '200':
-          description: Servicio funcionando correctamente
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HealthResponse'
-              examples:
-                healthy:
-                  summary: Servicio saludable
-                  value:
-                    status: "healthy"
-                    hsm_connected: true
-                    timestamp: "2024-10-03T10:15:30Z"
-        '503':
-          description: Servicio no disponible
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/responses/ServiceUnavailable'
-
 components:
   schemas:
     GenAESKeyRequest:
@@ -418,28 +390,6 @@ components:
           type: string
           description: Clave cifrada almacenada
           example: "encrypted_key_value"
-
-    HealthResponse:
-      type: object
-      properties:
-        status:
-          type: string
-          enum: [healthy, degraded, unhealthy]
-          description: Estado general del servicio
-          example: "healthy"
-        hsm_connected:
-          type: boolean
-          description: Estado de conexión con HSM
-          example: true
-        timestamp:
-          type: string
-          format: date-time
-          description: Timestamp del check
-          example: "2024-10-03T10:15:30Z"
-        version:
-          type: string
-          description: Versión del servicio
-          example: "1.0.0"
 
     ProblemDetails:
       type: object

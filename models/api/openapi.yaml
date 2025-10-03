@@ -1,0 +1,708 @@
+openapi: 3.0.3
+info:
+  contact:
+    email: support@yourorganization.com
+    name: SSM API Support
+  description: |
+    API para gestión segura de claves criptográficas usando PKCS#11 y HSM.
+
+    El SSM proporciona operaciones seguras de:
+    - Generación de claves AES
+    - Cifrado y descifrado de datos
+    - Almacenamiento de claves
+    - Gestión mediante HSM/SoftHSM
+
+    ## Autenticación
+    La API funciona a través de Unix Domain Sockets para mayor seguridad.
+    Tambien da soporte a HTTPS con certificados TLS. No implementado aun.
+
+    ## Formatos de datos
+    - Todos los datos binarios (plaintext, ciphertext, IV) deben estar en Base64
+    - Las respuestas incluyen timestamps en formato RFC3339
+    - Los errores siguen el estándar RFC 7807 (Problem Details)
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  title: SSM (Secure Storage Manager) API
+  version: 1.0.0
+externalDocs:
+  description: Documentación adicional de SSM
+  url: https://github.com/networkgcorefullcode/ssm/blob/main/README.md
+servers:
+- description: Local Unix Socket Server
+  url: http://localhost
+tags:
+- description: Operaciones de gestión de claves criptográficas
+  name: Key Management
+- description: Operaciones de cifrado y descifrado
+  name: Encryption
+- description: Endpoints de monitoreo y salud
+  name: Health
+paths:
+  /generate-aes-key:
+    post:
+      description: |
+        Genera una nueva clave AES simétrica en el HSM con el tamaño especificado.
+        La clave se almacena de forma persistente y se referencia por su label.
+      operationId: generateAESKey
+      requestBody:
+        content:
+          application/json:
+            examples:
+              aes256:
+                summary: Clave AES-256
+                value:
+                  label: MySecretKey
+                  id: key001
+                  bits: 256
+              aes128:
+                summary: Clave AES-128
+                value:
+                  label: TestKey128
+                  id: test128
+                  bits: 128
+            schema:
+              $ref: '#/components/schemas/GenAESKeyRequest'
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              examples:
+                success:
+                  summary: Respuesta exitosa
+                  value:
+                    handle: 123456789
+                    label: MySecretKey
+                    id: key001
+                    bits: 256
+              schema:
+                $ref: '#/components/schemas/GenAESKeyResponse'
+          description: Clave generada exitosamente
+        "400":
+          content:
+            application/json:
+              examples:
+                validation:
+                  summary: Error de validación
+                  value:
+                    title: Validation Error
+                    detail: Label is required
+                    status: 400
+                    error: validation_failed
+                badJson:
+                  summary: JSON inválido
+                  value:
+                    title: Invalid JSON
+                    detail: Failed to parse request body
+                    status: 400
+                    error: bad_json
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+          description: Solicitud inválida
+        "405":
+          content:
+            application/json:
+              example:
+                title: Method Not Allowed
+                detail: Only POST method is allowed
+                status: 405
+                error: method_not_allowed
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+          description: Método HTTP no permitido
+        "500":
+          content:
+            application/json:
+              examples:
+                hsm_error:
+                  summary: Error de HSM
+                  value:
+                    title: Key Generation Failed
+                    detail: "Failed to generate AES key: pkcs11 session invalid"
+                    status: 500
+                    error: hsm_error
+                general:
+                  summary: Error general
+                  value:
+                    title: Internal Server Error
+                    detail: An unexpected error occurred
+                    status: 500
+                    error: internal_error
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+          description: Error interno del servidor
+      summary: Generar nueva clave AES
+      tags:
+      - Key Management
+  /encrypt:
+    post:
+      description: |
+        Cifra datos usando una clave AES almacenada en el HSM.
+        Genera un IV aleatorio único para cada operación de cifrado.
+      operationId: encryptData
+      requestBody:
+        content:
+          application/json:
+            examples:
+              simple:
+                summary: Cifrado simple
+                value:
+                  key_label: MySecretKey
+                  plain_b64: SGVsbG8gV29ybGQh
+            schema:
+              $ref: '#/components/schemas/EncryptRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                success:
+                  summary: Cifrado exitoso
+                  value:
+                    cipher_b64: YWJjZGVmZ2hpams...
+                    iv_b64: MTIzNDU2Nzg5MEFCQ0RFRg==
+                    ok: true
+                    time_created: 2024-10-03T10:15:30Z
+                    time_updated: 2024-10-03T10:15:30Z
+              schema:
+                $ref: '#/components/schemas/EncryptResponse'
+          description: Datos cifrados exitosamente
+        "400":
+          content:
+            application/json:
+              examples:
+                validation:
+                  summary: Error de validación
+                  value:
+                    title: Validation Error
+                    detail: Label is required
+                    status: 400
+                    error: validation_failed
+                badJson:
+                  summary: JSON inválido
+                  value:
+                    title: Invalid JSON
+                    detail: Failed to parse request body
+                    status: 400
+                    error: bad_json
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+          description: Solicitud inválida
+        "404":
+          content:
+            application/json:
+              example:
+                title: Key Not Found
+                detail: Key with label 'NonExistentKey' not found
+                status: 404
+                error: key_not_found
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+          description: Clave no encontrada
+        "500":
+          content:
+            application/json:
+              examples:
+                hsm_error:
+                  summary: Error de HSM
+                  value:
+                    title: Key Generation Failed
+                    detail: "Failed to generate AES key: pkcs11 session invalid"
+                    status: 500
+                    error: hsm_error
+                general:
+                  summary: Error general
+                  value:
+                    title: Internal Server Error
+                    detail: An unexpected error occurred
+                    status: 500
+                    error: internal_error
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+          description: Error interno del servidor
+      summary: Cifrar datos
+      tags:
+      - Encryption
+  /decrypt:
+    post:
+      description: |
+        Descifra datos usando una clave AES almacenada en el HSM.
+        Requiere el mismo IV usado durante el cifrado.
+      operationId: decryptData
+      requestBody:
+        content:
+          application/json:
+            examples:
+              simple:
+                summary: Descifrado simple
+                value:
+                  key_label: MySecretKey
+                  cipher_b64: YWJjZGVmZ2hpams...
+                  iv_b64: MTIzNDU2Nzg5MEFCQ0RFRg==
+            schema:
+              $ref: '#/components/schemas/DecryptRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                success:
+                  summary: Descifrado exitoso
+                  value:
+                    plain_b64: SGVsbG8gV29ybGQh
+              schema:
+                $ref: '#/components/schemas/DecryptResponse'
+          description: Datos descifrados exitosamente
+        "400":
+          content:
+            application/json:
+              examples:
+                validation:
+                  summary: Error de validación
+                  value:
+                    title: Validation Error
+                    detail: Label is required
+                    status: 400
+                    error: validation_failed
+                badJson:
+                  summary: JSON inválido
+                  value:
+                    title: Invalid JSON
+                    detail: Failed to parse request body
+                    status: 400
+                    error: bad_json
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+          description: Solicitud inválida
+        "404":
+          content:
+            application/json:
+              example:
+                title: Key Not Found
+                detail: Key with label 'NonExistentKey' not found
+                status: 404
+                error: key_not_found
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+          description: Clave no encontrada
+        "500":
+          content:
+            application/json:
+              examples:
+                hsm_error:
+                  summary: Error de HSM
+                  value:
+                    title: Key Generation Failed
+                    detail: "Failed to generate AES key: pkcs11 session invalid"
+                    status: 500
+                    error: hsm_error
+                general:
+                  summary: Error general
+                  value:
+                    title: Internal Server Error
+                    detail: An unexpected error occurred
+                    status: 500
+                    error: internal_error
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+          description: Error interno del servidor
+      summary: Descifrar datos
+      tags:
+      - Encryption
+  /store-key:
+    post:
+      description: |
+        Almacena una clave criptográfica existente en el HSM.
+        La clave debe proporcionarse en formato adecuado.
+      operationId: storeKey
+      requestBody:
+        content:
+          application/json:
+            examples:
+              simple:
+                summary: Almacenar clave
+                value:
+                  key_label: ImportedKey
+                  id: imported001
+                  key_value: YmFzZTY0X2VuY29kZWRfa2V5
+            schema:
+              $ref: '#/components/schemas/StoreKeyRequest'
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              examples:
+                success:
+                  summary: Clave almacenada
+                  value:
+                    handle: 987654321
+                    cipher_key: encrypted_key_value
+              schema:
+                $ref: '#/components/schemas/StoreKeyResponse'
+          description: Clave almacenada exitosamente
+        "400":
+          content:
+            application/json:
+              examples:
+                validation:
+                  summary: Error de validación
+                  value:
+                    title: Validation Error
+                    detail: Label is required
+                    status: 400
+                    error: validation_failed
+                badJson:
+                  summary: JSON inválido
+                  value:
+                    title: Invalid JSON
+                    detail: Failed to parse request body
+                    status: 400
+                    error: bad_json
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+          description: Solicitud inválida
+        "500":
+          content:
+            application/json:
+              examples:
+                hsm_error:
+                  summary: Error de HSM
+                  value:
+                    title: Key Generation Failed
+                    detail: "Failed to generate AES key: pkcs11 session invalid"
+                    status: 500
+                    error: hsm_error
+                general:
+                  summary: Error general
+                  value:
+                    title: Internal Server Error
+                    detail: An unexpected error occurred
+                    status: 500
+                    error: internal_error
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+          description: Error interno del servidor
+      summary: Almacenar clave existente
+      tags:
+      - Key Management
+components:
+  examples:
+    Base64Examples:
+      description: |
+        Ejemplos de datos comunes codificados en Base64:
+        - "Hello World!" → "SGVsbG8gV29ybGQh"
+        - "Secret Message" → "U2VjcmV0IE1lc3NhZ2U="
+        - "Test data 123" → "VGVzdCBkYXRhIDEyMw=="
+      summary: Ejemplos de datos en Base64
+  responses:
+    BadRequest:
+      content:
+        application/json:
+          examples:
+            validation:
+              summary: Error de validación
+              value:
+                title: Validation Error
+                detail: Label is required
+                status: 400
+                error: validation_failed
+            badJson:
+              summary: JSON inválido
+              value:
+                title: Invalid JSON
+                detail: Failed to parse request body
+                status: 400
+                error: bad_json
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+      description: Solicitud inválida
+    KeyNotFound:
+      content:
+        application/json:
+          example:
+            title: Key Not Found
+            detail: Key with label 'NonExistentKey' not found
+            status: 404
+            error: key_not_found
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+      description: Clave no encontrada
+    MethodNotAllowed:
+      content:
+        application/json:
+          example:
+            title: Method Not Allowed
+            detail: Only POST method is allowed
+            status: 405
+            error: method_not_allowed
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+      description: Método HTTP no permitido
+    InternalServerError:
+      content:
+        application/json:
+          examples:
+            hsm_error:
+              summary: Error de HSM
+              value:
+                title: Key Generation Failed
+                detail: "Failed to generate AES key: pkcs11 session invalid"
+                status: 500
+                error: hsm_error
+            general:
+              summary: Error general
+              value:
+                title: Internal Server Error
+                detail: An unexpected error occurred
+                status: 500
+                error: internal_error
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+      description: Error interno del servidor
+    ServiceUnavailable:
+      content:
+        application/json:
+          example:
+            title: Service Unavailable
+            detail: HSM connection lost
+            status: 503
+            error: service_unavailable
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+      description: Servicio no disponible
+  schemas:
+    GenAESKeyRequest:
+      example:
+        label: MySecretKey
+        id: key001
+        bits: 256
+      properties:
+        label:
+          description: Etiqueta única para identificar la clave
+          example: MySecretKey
+          maxLength: 256
+          minLength: 1
+          type: string
+        id:
+          description: Identificador único de la clave
+          example: key001
+          maxLength: 64
+          minLength: 1
+          type: string
+        bits:
+          description: Tamaño de la clave en bits
+          enum:
+          - 128
+          - 192
+          - 256
+          example: 256
+          type: integer
+      required:
+      - bits
+      - id
+      - label
+      type: object
+    GenAESKeyResponse:
+      example:
+        bits: 256
+        handle: 123456789
+        label: MySecretKey
+        id: key001
+      properties:
+        handle:
+          description: Handle de la clave en el HSM
+          example: 123456789
+          format: uint
+          type: integer
+        label:
+          description: Etiqueta de la clave generada
+          example: MySecretKey
+          type: string
+        id:
+          description: ID de la clave generada
+          example: key001
+          type: string
+        bits:
+          description: Tamaño de la clave generada
+          example: 256
+          type: integer
+      type: object
+    EncryptRequest:
+      example:
+        key_label: MySecretKey
+        plain_b64: SGVsbG8gV29ybGQh
+      properties:
+        key_label:
+          description: Etiqueta de la clave para cifrar
+          example: MySecretKey
+          minLength: 1
+          type: string
+        plain_b64:
+          description: Datos a cifrar codificados en Base64
+          example: !!binary |-
+            U0dWc2JHOGdWMjl5YkdRaA==
+          format: byte
+          type: string
+      required:
+      - key_label
+      - plain_b64
+      type: object
+    EncryptResponse:
+      example:
+        iv_b64: !!binary |-
+          TVRJek5EVTJOemc1TUVGQ1EwUkZSZz09
+        time_created: 2024-10-03T10:15:30Z
+        cipher_b64: !!binary |-
+          WVdKalpHVm1aMmhwYW1zLi4u
+        ok: true
+        time_updated: 2024-10-03T10:15:30Z
+      properties:
+        cipher_b64:
+          description: Datos cifrados en Base64
+          example: !!binary |-
+            WVdKalpHVm1aMmhwYW1zLi4u
+          format: byte
+          type: string
+        iv_b64:
+          description: Vector de inicialización en Base64
+          example: !!binary |-
+            TVRJek5EVTJOemc1TUVGQ1EwUkZSZz09
+          format: byte
+          type: string
+        ok:
+          description: Indica si la operación fue exitosa
+          example: true
+          type: boolean
+        time_created:
+          description: Timestamp de creación en RFC3339
+          example: 2024-10-03T10:15:30Z
+          format: date-time
+          type: string
+        time_updated:
+          description: Timestamp de actualización en RFC3339
+          example: 2024-10-03T10:15:30Z
+          format: date-time
+          type: string
+      type: object
+    DecryptRequest:
+      example:
+        key_label: MySecretKey
+        cipher_b64: YWJjZGVmZ2hpams...
+        iv_b64: MTIzNDU2Nzg5MEFCQ0RFRg==
+      properties:
+        key_label:
+          description: Etiqueta de la clave para descifrar
+          example: MySecretKey
+          minLength: 1
+          type: string
+        cipher_b64:
+          description: Datos cifrados en Base64
+          example: !!binary |-
+            WVdKalpHVm1aMmhwYW1zLi4u
+          format: byte
+          type: string
+        iv_b64:
+          description: Vector de inicialización en Base64 (mismo usado para cifrar)
+          example: !!binary |-
+            TVRJek5EVTJOemc1TUVGQ1EwUkZSZz09
+          format: byte
+          type: string
+        id:
+          description: ID opcional para tracking
+          example: 12345
+          type: integer
+      required:
+      - cipher_b64
+      - iv_b64
+      - key_label
+      type: object
+    DecryptResponse:
+      example:
+        plain_b64: !!binary |-
+          U0dWc2JHOGdWMjl5YkdRaA==
+      properties:
+        plain_b64:
+          description: Datos descifrados en Base64
+          example: !!binary |-
+            U0dWc2JHOGdWMjl5YkdRaA==
+          format: byte
+          type: string
+      type: object
+    StoreKeyRequest:
+      example:
+        key_label: ImportedKey
+        id: imported001
+        key_value: !!binary |-
+          WW1GelpUWTBYMlZ1WTI5a1pXUmZhMlY1
+      properties:
+        key_label:
+          description: Etiqueta para la clave almacenada
+          example: ImportedKey
+          minLength: 1
+          type: string
+        id:
+          description: Identificador único
+          example: imported001
+          minLength: 1
+          type: string
+        key_value:
+          description: Valor de la clave en Base64
+          example: !!binary |-
+            WW1GelpUWTBYMlZ1WTI5a1pXUmZhMlY1
+          format: byte
+          type: string
+      required:
+      - id
+      - key_label
+      - key_value
+      type: object
+    StoreKeyResponse:
+      example:
+        handle: 987654321
+        cipher_key: encrypted_key_value
+      properties:
+        handle:
+          description: Handle de la clave almacenada
+          example: 987654321
+          format: uint
+          type: integer
+        cipher_key:
+          description: Clave cifrada almacenada
+          example: encrypted_key_value
+          type: string
+      type: object
+    ProblemDetails:
+      description: Detalles de error según RFC 7807
+      example:
+        instance: /generate-aes-key
+        detail: Label is required
+        title: Validation Error
+        error: validation_failed
+        status: 400
+      properties:
+        title:
+          description: Título breve del problema
+          example: Validation Error
+          type: string
+        detail:
+          description: Descripción detallada del problema
+          example: Label is required
+          type: string
+        status:
+          description: Código de estado HTTP
+          example: 400
+          type: integer
+        error:
+          description: Código de error interno
+          example: validation_failed
+          type: string
+        instance:
+          description: URI que identifica la ocurrencia específica
+          example: /generate-aes-key
+          format: uri
+          type: string
+      type: object

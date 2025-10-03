@@ -21,7 +21,7 @@ func HandleStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Reque
 }
 
 func postStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request) {
-	var req models.StoreKey
+	var req models.StoreKeyRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "bad request", http.StatusBadRequest)
@@ -29,7 +29,7 @@ func postStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request
 	}
 
 	label := req.KeyLabel
-	id := req.ID
+	id := req.Id
 	key_value, err := base64.StdEncoding.DecodeString(req.KeyValue)
 	if err != nil {
 		http.Error(w, "bad base64", http.StatusBadRequest)
@@ -45,7 +45,7 @@ func postStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request
 	w.Header().Set("Content-Type", "application/json")
 	resp := models.StoreKeyResponse{
 		Handle:    handle,
-		CipherKey: "", // Puedes asignar el valor adecuado si tienes el cipher key
+		CipherKey: nil, // Puedes asignar el valor adecuado si tienes el cipher key
 	}
 
 	findHandle, err := mgr.FindKeyByLabel(constants.LABEL_ENCRYPTION_KEY)
@@ -56,9 +56,11 @@ func postStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request
 
 	cipher, err := mgr.EncryptKey(findHandle, nil, key_value, pkcs11.CKM_AES_CBC_PAD)
 	if err != nil {
-		cipher = []byte{}
+		resp.CipherKey = nil
+		json.NewEncoder(w).Encode(resp)
+		return
 	}
-	resp.CipherKey = base64.StdEncoding.EncodeToString(cipher)
-
+	*resp.CipherKey = base64.StdEncoding.EncodeToString(cipher)
 	json.NewEncoder(w).Encode(resp)
+
 }
