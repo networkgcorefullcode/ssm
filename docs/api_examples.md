@@ -41,6 +41,7 @@ curl -X POST http://dummy/generate-aes-key \
 ```
 
 ### Generar clave AES de 192 bits
+
 ```bash
 curl -X POST http://dummy/generate-aes-key \
   --unix-socket /var/run/socket.so \
@@ -53,6 +54,7 @@ curl -X POST http://dummy/generate-aes-key \
 ```
 
 **Respuesta esperada (éxito):**
+
 ```json
 {
   "handle": 123456789,
@@ -63,6 +65,7 @@ curl -X POST http://dummy/generate-aes-key \
 ```
 
 **Respuesta de error (validación):**
+
 ```json
 {
   "title": "Validation Error",
@@ -74,13 +77,14 @@ curl -X POST http://dummy/generate-aes-key \
 ## 2. Cifrar Datos
 
 ### Cifrar texto plano
+
 ```bash
 curl -X POST http://dummy/encrypt \
   --unix-socket /var/run/socket.so \
   -H "Content-Type: application/json" \
   -d '{
-    "keyLabel": "MySecretKey",
-    "plaintext": "SGVsbG8gV29ybGQh",
+    "key_label": "MySecretKey",
+    "plain_b64": "SGVsbG8gV29ybGQh"
   }'
 ```
 
