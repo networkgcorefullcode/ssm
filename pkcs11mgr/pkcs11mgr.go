@@ -62,6 +62,8 @@ func (m *Manager) Finalize() {
 		m.ctx.Destroy()
 		m.ctx = nil
 	}
+}
+
 // GenerateAESKey creates an AES key object inside SoftHSM and returns its object handle (as uint)
 func (m *Manager) GenerateAESKey(label string, id []byte, bits int) (pkcs11.ObjectHandle, error) {
 	logger.AppLog.Infof("Generating AES key: label=%s, bits=%d", label, bits)
