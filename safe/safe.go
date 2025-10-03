@@ -1,9 +1,13 @@
 package safe
 
 import (
+	"crypto/rand"
+	"io"
 	"runtime"
 	"syscall"
 	"unsafe"
+
+	"github.com/networkgcorefullcode/ssm/logger"
 )
 
 // Zero sobrescribe la slice con ceros y evita reordenamientos
@@ -47,27 +51,27 @@ func Munlock(b []byte) {
 	syscall.Syscall(uintptr(SYS_MUNLOCK), addr, size, 0)
 }
 
-// RandRead llena el slice con bytes aleatorios usando el sistema operativo.
+// RandRead llena el slice con bytes aleatorios usando el generador criptográfico del sistema.
 func RandRead(b []byte) error {
 	if len(b) == 0 {
+		logger.AppLog.Debug("RandRead: empty slice, nothing to fill")
 		return nil
 	}
-	_, err := syscall.Read(syscall.Stdin, b)
-	if err == nil {
-		return nil
-	}
-	// Si falla, intenta usar /dev/urandom
-	f, err := syscall.Open("/dev/urandom", syscall.O_RDONLY, 0)
+
+	logger.AppLog.Debugf("RandRead: generating %d random bytes", len(b))
+
+	// Usar crypto/rand que es la forma segura y estándar
+	n, err := io.ReadFull(rand.Reader, b)
 	if err != nil {
+		logger.AppLog.Errorf("RandRead: failed to read from crypto/rand: %v", err)
 		return err
 	}
-	defer syscall.Close(f)
-	n, err := syscall.Read(f, b)
-	if err != nil {
-		return err
-	}
+
 	if n != len(b) {
-		return syscall.EIO
+		logger.AppLog.Errorf("RandRead: expected %d bytes, got %d", len(b), n)
+		return io.ErrShortBuffer
 	}
+
+	logger.AppLog.Debugf("RandRead: successfully generated %d random bytes", n)
 	return nil
 }
