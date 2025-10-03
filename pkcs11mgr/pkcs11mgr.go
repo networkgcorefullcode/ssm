@@ -29,6 +29,8 @@ func New(modulePath string, slot uint, pin string) (*Manager, error) {
 
 // Open a Session to operate with the SSM
 func (m *Manager) OpenSession() error {
+	// Open a session with the specified slot
+	logger.AppLog.Infoln("Opening PKCS#11 session")
 	session, err := m.ctx.OpenSession(m.slot, pkcs11.CKF_SERIAL_SESSION|pkcs11.CKF_RW_SESSION)
 	if err != nil {
 		return err
@@ -37,16 +39,19 @@ func (m *Manager) OpenSession() error {
 	if err := m.ctx.Login(m.session, pkcs11.CKU_USER, m.pin); err != nil {
 		return err
 	}
+	logger.AppLog.Infoln("PKCS#11 session has been opened")
 	return nil
 }
 
 // CloseSession logs out and closes the session
 func (m *Manager) CloseSession() {
+	logger.AppLog.Infoln("Closing PKCS#11 session")
 	if m.session != 0 {
 		_ = m.ctx.Logout(m.session)
 		_ = m.ctx.CloseSession(m.session)
 		m.session = 0
 	}
+	logger.AppLog.Infoln("PKCS#11 session has been closed")
 }
 
 // Finalize cleans up the PKCS#11 context
@@ -57,10 +62,9 @@ func (m *Manager) Finalize() {
 		m.ctx.Destroy()
 		m.ctx = nil
 	}
-}
-
 // GenerateAESKey creates an AES key object inside SoftHSM and returns its object handle (as uint)
 func (m *Manager) GenerateAESKey(label string, id []byte, bits int) (pkcs11.ObjectHandle, error) {
+	logger.AppLog.Infof("Generating AES key: label=%s, bits=%d", label, bits)
 	mech := pkcs11.NewMechanism(pkcs11.CKM_AES_KEY_GEN, nil)
 	template := []*pkcs11.Attribute{
 		pkcs11.NewAttribute(pkcs11.CKA_LABEL, label),
@@ -76,8 +80,10 @@ func (m *Manager) GenerateAESKey(label string, id []byte, bits int) (pkcs11.Obje
 	}
 	handle, err := m.ctx.GenerateKey(m.session, []*pkcs11.Mechanism{mech}, template)
 	if err != nil {
+		logger.AppLog.Errorf("Failed to generate AES key: %v", err)
 		return 0, err
 	}
+	logger.AppLog.Infof("AES key generated successfully: handle=%v", handle)
 	return handle, nil
 }
 
