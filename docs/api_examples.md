@@ -89,7 +89,9 @@ curl -X POST http://dummy/encrypt \
 ```
 
 ### Cifrar datos sensibles
+
 ```bash
+# TODO: Update this example is incomplete
 curl -X POST http://dummy/encrypt \
   --unix-socket /var/run/socket.so \
   -H "Content-Type: application/json" \
@@ -103,14 +105,15 @@ curl -X POST http://dummy/encrypt \
 ## 3. Descifrar Datos
 
 ### Descifrar texto
+
 ```bash
 curl -X POST http://dummy/decrypt \
   --unix-socket /var/run/socket.so \
   -H "Content-Type: application/json" \
   -d '{
-    "keyLabel": "MySecretKey",
-    "ciphertext": "YWJjZGVmZ2hpams...",
-    "iv": "MTIzNDU2Nzg5MEFCQ0RFRg=="
+    "key_label": "MySecretKey",
+    "cipher_b64": "YWJjZGVmZ2hpams...",
+    "iv_b64": "MTIzNDU2Nzg5MEFCQ0RFRg=="
   }'
 ```
 

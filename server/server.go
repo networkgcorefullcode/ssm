@@ -146,21 +146,43 @@ func (s *SSM) Start() error {
 		return err
 	}
 
+	// Encrypt endpoints POST
 	http.HandleFunc("/encrypt", func(w http.ResponseWriter, r *http.Request) {
 		logger.AppLog.Debugf("Received /encrypt request")
 		k4opt.HandleEncryptK4(s.mgr, w, r)
 	})
+
+	// Decrypt endpoints POST
 	http.HandleFunc("/decrypt", func(w http.ResponseWriter, r *http.Request) {
 		logger.AppLog.Debugf("Received /decrypt request")
 		k4opt.HandleDecryptK4(s.mgr, w, r)
 	})
+
+	// Generate Key endpoints POST
 	http.HandleFunc("/generate-aes-key", func(w http.ResponseWriter, r *http.Request) {
 		logger.AppLog.Debugf("Received /generate-aes-key request")
 		k4opt.HandleGenerateAESKey(s.mgr, w, r)
 	})
 
+	// Store Key endpoints POST
+	http.HandleFunc("/store-key", func(w http.ResponseWriter, r *http.Request) {
+		logger.AppLog.Debugf("Received /store-key request")
+		k4opt.HandleStoreKey(s.mgr, w, r) // TODO implement this handler
+	})
+
 	logger.AppLog.Infof("SSM listening on unix socket %s", socketPath)
-	if err := http.Serve(l, nil); err != nil {
+
+	// Serve HTTP requests in a separate goroutine
+	go func() error {
+		if err := http.Serve(l, nil); err != nil {
+			logger.AppLog.Errorf("Server error: %v", err)
+			return err
+		}
+		return nil
+	}()
+
+	// Use ListenAndServe to handle HTTP connections
+	if err := http.ListenAndServe(factory.SsmConfig.Configuration.BindAddr, nil); err != nil {
 		logger.AppLog.Errorf("Server error: %v", err)
 		return err
 	}

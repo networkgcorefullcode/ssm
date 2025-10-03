@@ -38,6 +38,7 @@ type Configuration struct {
 	PkcsPath   string `yaml:"pkcsPath,omitempty"`
 	Pin        string `yaml:"pin,omitempty"`
 	LotsNumber int    `yaml:"lots_number,omitempty"`
+	BindAddr   string `yaml:"bindAddr,omitempty"`
 }
 
 func (c *Config) GetVersion() string {

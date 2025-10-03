@@ -106,8 +106,8 @@ func (m *Manager) EncryptWithAESKey(keyHandle pkcs11.ObjectHandle, iv, plaintext
 	return out, nil
 }
 
-func (m *Manager) DecryptWithAESKey(keyHandle pkcs11.ObjectHandle, iv, ciphertext []byte) ([]byte, error) {
-	mech := pkcs11.NewMechanism(pkcs11.CKM_AES_CBC_PAD, iv)
+func (m *Manager) DecryptKey(keyHandle pkcs11.ObjectHandle, iv, ciphertext []byte, decriptAlgoritm int) ([]byte, error) {
+	mech := pkcs11.NewMechanism(decriptAlgoritm, iv)
 	if err := m.ctx.DecryptInit(m.session, []*pkcs11.Mechanism{mech}, keyHandle); err != nil {
 		return nil, err
 	}
@@ -116,6 +116,20 @@ func (m *Manager) DecryptWithAESKey(keyHandle pkcs11.ObjectHandle, iv, ciphertex
 		return nil, err
 	}
 	return out, nil
+}
+
+// StoreKey creates a key object inside SoftHSM from raw key bytes and returns its object handle
+func (m *Manager) StoreKey(label string, key []byte, id []byte) (pkcs11.ObjectHandle, error) {
+	template := []*pkcs11.Attribute{
+		pkcs11.NewAttribute(pkcs11.CKA_LABEL, label),
+		pkcs11.NewAttribute(pkcs11.CKA_ID, id),
+		pkcs11.NewAttribute(pkcs11.CKA_VALUE, key),
+	}
+	handle, err := m.ctx.CreateObject(m.session, template)
+	if err != nil {
+		return 0, err
+	}
+	return handle, nil
 }
 
 // FindKeyByLabel returns the object handle for a given label, or 0 if not found
