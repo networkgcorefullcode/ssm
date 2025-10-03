@@ -89,6 +89,31 @@ func (m *Manager) GenerateAESKey(label string, id []byte, bits int) (pkcs11.Obje
 	return handle, nil
 }
 
+// GenerateAESKey creates an AES key object inside SoftHSM and returns its object handle (as uint)
+func (m *Manager) GenerateAESKey(label string, id []byte, bits int) (pkcs11.ObjectHandle, error) {
+	logger.AppLog.Infof("Generating AES key: label=%s, bits=%d", label, bits)
+	mech := pkcs11.NewMechanism(pkcs11.CKM_AES_KEY_GEN, nil)
+	template := []*pkcs11.Attribute{
+		pkcs11.NewAttribute(pkcs11.CKA_LABEL, label),
+		pkcs11.NewAttribute(pkcs11.CKA_ID, id),
+		pkcs11.NewAttribute(pkcs11.CKA_VALUE_LEN, bits/8),
+		pkcs11.NewAttribute(pkcs11.CKA_ENCRYPT, true),
+		pkcs11.NewAttribute(pkcs11.CKA_DECRYPT, true),
+		pkcs11.NewAttribute(pkcs11.CKA_WRAP, true),
+		pkcs11.NewAttribute(pkcs11.CKA_UNWRAP, true),
+		pkcs11.NewAttribute(pkcs11.CKA_TOKEN, true), // store persistently in token
+		pkcs11.NewAttribute(pkcs11.CKA_SENSITIVE, true),
+		pkcs11.NewAttribute(pkcs11.CKA_EXTRACTABLE, false),
+	}
+	handle, err := m.ctx.GenerateKey(m.session, []*pkcs11.Mechanism{mech}, template)
+	if err != nil {
+		logger.AppLog.Errorf("Failed to generate AES key: %v", err)
+		return 0, err
+	}
+	logger.AppLog.Infof("AES key generated successfully: handle=%v", handle)
+	return handle, nil
+}
+
 // EncryptWithAESKey performs encryption using a key object already in the token.
 // NOTE: parámetros específicos del mecanismo (p.ej. GCM params) pueden necesitar ajustar según tu módulo.
 func (m *Manager) EncryptKey(keyHandle pkcs11.ObjectHandle, iv, plaintext []byte, encryptAlgoritm int) ([]byte, error) {
