@@ -129,7 +129,6 @@ func (m *Manager) StoreKey(label string, key []byte, id []byte, keyType string) 
 	case "DES":
 		keyTypeuint = pkcs11.CKK_DES
 	}
-
 	template := []*pkcs11.Attribute{
 		// Identificación
 		pkcs11.NewAttribute(pkcs11.CKA_LABEL, label),
@@ -143,7 +142,10 @@ func (m *Manager) StoreKey(label string, key []byte, id []byte, keyType string) 
 		pkcs11.NewAttribute(pkcs11.CKA_VALUE, key),
 
 		// Permisos de uso
+		pkcs11.NewAttribute(pkcs11.CKA_ENCRYPT, false),
 		pkcs11.NewAttribute(pkcs11.CKA_DECRYPT, true),
+		pkcs11.NewAttribute(pkcs11.CKA_WRAP, false),
+		pkcs11.NewAttribute(pkcs11.CKA_UNWRAP, false),
 
 		// Persistencia y seguridad
 		pkcs11.NewAttribute(pkcs11.CKA_TOKEN, true),        // Persistir en token
