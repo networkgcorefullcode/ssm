@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"net/http"
 
@@ -61,11 +62,11 @@ func postDecrypt(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	// Decode ciphertext y IV
-	cipher, err := base64.StdEncoding.DecodeString(req.CipherB64)
+	// Decode ciphertext and IV
+	cipher, err := hex.DecodeString(req.CipherB64)
 	if err != nil {
-		logger.AppLog.Errorf("Failed to decode ciphertext Base64: %v", err)
-		sendProblemDetails(w, "Invalid Base64", "Failed to decode ciphertext: "+err.Error(), "bad_base64", http.StatusBadRequest, r.URL.Path)
+		logger.AppLog.Errorf("Failed to decode ciphertext hex: %v", err)
+		sendProblemDetails(w, "Invalid hex", "Failed to decode ciphertext: "+err.Error(), "bad_base64", http.StatusBadRequest, r.URL.Path)
 		return
 	}
 
