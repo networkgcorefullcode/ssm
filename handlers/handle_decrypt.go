@@ -93,17 +93,29 @@ func postDecrypt(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request)
 
 	var plaintext []byte
 	switch req.EncryptionAlgoritme {
-	case constants.ALGORITM_AES_128:
-		// Get the plaintext using aes decrypt algoritm
+	case constants.ALGORITM_AES_128, constants.ALGORITM_AES_256:
 		plaintext, err = mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_AES_CBC_PAD)
-	case constants.ALGORITM_AES_256:
-		// Get the plaintext using aes decrypt algoritm
-		plaintext, err = mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_AES_CBC_PAD)
+		if err != nil {
+			plaintext, err = mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_AES_CBC)
+		}
+		if err != nil {
+			plaintext, err = mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_AES_ECB)
+		}
+		if err != nil {
+			plaintext, err = mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_AES_ECB_ENCRYPT_DATA)
+		}
 	case constants.ALGORITM_DES:
-		// Get the plaintext using aes decrypt algoritm
 		plaintext, err = mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES_CBC_PAD)
+		if err != nil {
+			plaintext, err = mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES_CBC)
+		}
+		if err != nil {
+			plaintext, err = mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES_ECB)
+		}
+		if err != nil {
+			plaintext, err = mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES_ECB_ENCRYPT_DATA)
+		}
 	case constants.ALGORITM_DES3:
-		// Get the plaintext using aes decrypt algoritm
 		plaintext, err = mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES3_CBC_PAD)
 		if err != nil {
 			plaintext, err = mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES3_CBC)
@@ -112,7 +124,7 @@ func postDecrypt(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request)
 			plaintext, err = mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES3_ECB)
 		}
 		if err != nil {
-			plaintext, err = mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES3_MAC)
+			plaintext, err = mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES3_ECB_ENCRYPT_DATA)
 		}
 	}
 
