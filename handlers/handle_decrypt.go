@@ -66,7 +66,7 @@ func postDecrypt(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request)
 	cipher, err := hex.DecodeString(req.CipherB64)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to decode ciphertext hex: %v", err)
-		sendProblemDetails(w, "Invalid hex", "Failed to decode ciphertext: "+err.Error(), "bad_base64", http.StatusBadRequest, r.URL.Path)
+		sendProblemDetails(w, "Invalid hex", "Failed to decode ciphertext: "+err.Error(), "bad_hex", http.StatusBadRequest, r.URL.Path)
 		return
 	}
 
