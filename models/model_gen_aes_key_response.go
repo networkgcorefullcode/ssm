@@ -21,7 +21,7 @@ var _ MappedNullable = &GenAESKeyResponse{}
 // GenAESKeyResponse struct for GenAESKeyResponse
 type GenAESKeyResponse struct {
 	// Handle de la clave en el HSM
-	Handle *int32 `json:"handle,omitempty"`
+	Handle uint `json:"handle,omitempty"`
 	// Etiqueta de la clave generada
 	Label *string `json:"label,omitempty"`
 	// ID de la clave generada
@@ -48,19 +48,19 @@ func NewGenAESKeyResponseWithDefaults() *GenAESKeyResponse {
 }
 
 // GetHandle returns the Handle field value if set, zero value otherwise.
-func (o *GenAESKeyResponse) GetHandle() int32 {
+func (o *GenAESKeyResponse) GetHandle() uint {
 	if o == nil || IsNil(o.Handle) {
-		var ret int32
+		var ret uint
 		return ret
 	}
-	return *o.Handle
+	return o.Handle
 }
 
 // GetHandleOk returns a tuple with the Handle field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *GenAESKeyResponse) GetHandleOk() (*int32, bool) {
+func (o *GenAESKeyResponse) GetHandleOk() (uint, bool) {
 	if o == nil || IsNil(o.Handle) {
-		return nil, false
+		return 0, false
 	}
 	return o.Handle, true
 }
@@ -74,9 +74,9 @@ func (o *GenAESKeyResponse) HasHandle() bool {
 	return false
 }
 
-// SetHandle gets a reference to the given int32 and assigns it to the Handle field.
-func (o *GenAESKeyResponse) SetHandle(v int32) {
-	o.Handle = &v
+// SetHandle gets a reference to the given uint and assigns it to the Handle field.
+func (o *GenAESKeyResponse) SetHandle(v uint) {
+	o.Handle = v
 }
 
 // GetLabel returns the Label field value if set, zero value otherwise.
