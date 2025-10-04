@@ -92,34 +92,40 @@ func (m *Manager) GenerateAESKey(label string, id []byte, bits int) (pkcs11.Obje
 // EncryptWithAESKey performs encryption using a key object already in the token.
 // NOTE: parámetros específicos del mecanismo (p.ej. GCM params) pueden necesitar ajustar según tu módulo.
 func (m *Manager) EncryptKey(keyHandle pkcs11.ObjectHandle, iv, plaintext []byte, encryptAlgoritm uint) ([]byte, error) {
-	// Aquí debemos usar un mecanismo apropiado (p. ej. CKM_AES_GCM o CKM_AES_CBC_PAD)
-	// El siguiente es un pseudocódigo/ejemplo conceptual usando CBC (menos ideal que GCM).
+	logger.AppLog.Infof("Encrypting data with key handle=%v, algorithm=%v", keyHandle, encryptAlgoritm)
 	mech := pkcs11.NewMechanism(encryptAlgoritm, iv)
 	if err := m.ctx.EncryptInit(m.session, []*pkcs11.Mechanism{mech}, keyHandle); err != nil {
+		logger.AppLog.Errorf("EncryptInit failed: %v", err)
 		return nil, err
 	}
-	// EncryptUpdate / EncryptFinal
 	out, err := m.ctx.Encrypt(m.session, plaintext)
 	if err != nil {
+		logger.AppLog.Errorf("Encrypt failed: %v", err)
 		return nil, err
 	}
+	logger.AppLog.Infof("Encryption successful, ciphertext length=%d", len(out))
 	return out, nil
 }
 
 func (m *Manager) DecryptKey(keyHandle pkcs11.ObjectHandle, iv, ciphertext []byte, decriptAlgoritm uint) ([]byte, error) {
+	logger.AppLog.Infof("Decrypting data with key handle=%v, algorithm=%v", keyHandle, decriptAlgoritm)
 	mech := pkcs11.NewMechanism(decriptAlgoritm, iv)
 	if err := m.ctx.DecryptInit(m.session, []*pkcs11.Mechanism{mech}, keyHandle); err != nil {
+		logger.AppLog.Errorf("DecryptInit failed: %v", err)
 		return nil, err
 	}
 	out, err := m.ctx.Decrypt(m.session, ciphertext)
 	if err != nil {
+		logger.AppLog.Errorf("Decrypt failed: %v", err)
 		return nil, err
 	}
+	logger.AppLog.Infof("Decryption successful, plaintext length=%d", len(out))
 	return out, nil
 }
 
 // StoreKey creates a key object inside SoftHSM from raw key bytes and returns its object handle
 func (m *Manager) StoreKey(label string, key []byte, id []byte, keyType string) (pkcs11.ObjectHandle, error) {
+	logger.AppLog.Infof("Storing key: label=%s, keyType=%s, keyLen=%d", label, keyType, len(key))
 	var keyTypeuint uint
 	switch keyType {
 	case "AES":
@@ -130,56 +136,52 @@ func (m *Manager) StoreKey(label string, key []byte, id []byte, keyType string) 
 		keyTypeuint = pkcs11.CKK_DES
 	}
 	template := []*pkcs11.Attribute{
-		// Identificación
 		pkcs11.NewAttribute(pkcs11.CKA_LABEL, label),
 		pkcs11.NewAttribute(pkcs11.CKA_ID, id),
-
-		// Tipo de objeto
 		pkcs11.NewAttribute(pkcs11.CKA_CLASS, pkcs11.CKO_SECRET_KEY),
 		pkcs11.NewAttribute(pkcs11.CKA_KEY_TYPE, keyTypeuint),
-
-		// Valor de la clave
 		pkcs11.NewAttribute(pkcs11.CKA_VALUE, key),
-
-		// Permisos de uso
 		pkcs11.NewAttribute(pkcs11.CKA_ENCRYPT, false),
 		pkcs11.NewAttribute(pkcs11.CKA_DECRYPT, true),
 		pkcs11.NewAttribute(pkcs11.CKA_WRAP, false),
 		pkcs11.NewAttribute(pkcs11.CKA_UNWRAP, false),
-
-		// Persistencia y seguridad
-		pkcs11.NewAttribute(pkcs11.CKA_TOKEN, true),        // Persistir en token
-		pkcs11.NewAttribute(pkcs11.CKA_SENSITIVE, true),    // Clave sensible
-		pkcs11.NewAttribute(pkcs11.CKA_EXTRACTABLE, false), // No extraíble
+		pkcs11.NewAttribute(pkcs11.CKA_TOKEN, true),
+		pkcs11.NewAttribute(pkcs11.CKA_SENSITIVE, true),
+		pkcs11.NewAttribute(pkcs11.CKA_EXTRACTABLE, false),
 	}
 
 	handle, err := m.ctx.CreateObject(m.session, template)
 	if err != nil {
+		logger.AppLog.Errorf("Failed to store key: %v", err)
 		return 0, err
 	}
+	logger.AppLog.Infof("Key stored successfully: handle=%v", handle)
 	return handle, nil
 }
 
 // FindKeyByLabel returns the object handle for a given label, or 0 if not found
 func (m *Manager) FindKeyByLabel(label string) (pkcs11.ObjectHandle, error) {
+	logger.AppLog.Infof("Searching for key by label: %s", label)
 	template := []*pkcs11.Attribute{
 		pkcs11.NewAttribute(pkcs11.CKA_LABEL, label),
 		pkcs11.NewAttribute(pkcs11.CKA_CLASS, pkcs11.CKO_SECRET_KEY),
 	}
 
-	// Inicializar búsqueda
 	if err := m.ctx.FindObjectsInit(m.session, template); err != nil {
+		logger.AppLog.Errorf("FindObjectsInit failed: %v", err)
 		return 0, err
 	}
 	defer m.ctx.FindObjectsFinal(m.session)
 
-	// Buscar objetos (máximo 1)
 	handles, _, err := m.ctx.FindObjects(m.session, 1)
 	if err != nil {
+		logger.AppLog.Errorf("FindObjects failed: %v", err)
 		return 0, err
 	}
 	if len(handles) == 0 {
+		logger.AppLog.Warnf("No key found with label: %s", label)
 		return 0, err
 	}
+	logger.AppLog.Infof("Key found: handle=%v", handles[0])
 	return handles[0], nil
 }
