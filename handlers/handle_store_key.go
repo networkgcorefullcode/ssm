@@ -45,6 +45,7 @@ func postStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request
 
 	label := req.KeyLabel
 	id := req.Id
+	key_type := req.KeyType
 	logger.AppLog.Infof("Decoding key value for label: %s, ID: %s", label, id)
 	key_value, err := base64.StdEncoding.DecodeString(req.KeyValue)
 	if err != nil {
@@ -54,7 +55,7 @@ func postStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request
 	}
 
 	logger.AppLog.Infof("Storing key in HSM - Label: %s", label)
-	handle, err := mgr.StoreKey(label, key_value, []byte(id))
+	handle, err := mgr.StoreKey(label, key_value, []byte(id), key_type)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to store key: %v", err)
 		sendProblemDetails(w, "Key Storage Failed", "Error al almacenar la clave en el HSM", "KEY_STORAGE_ERROR", http.StatusInternalServerError, r.URL.Path)

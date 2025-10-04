@@ -119,12 +119,38 @@ func (m *Manager) DecryptKey(keyHandle pkcs11.ObjectHandle, iv, ciphertext []byt
 }
 
 // StoreKey creates a key object inside SoftHSM from raw key bytes and returns its object handle
-func (m *Manager) StoreKey(label string, key []byte, id []byte) (pkcs11.ObjectHandle, error) {
+func (m *Manager) StoreKey(label string, key []byte, id []byte, keyType string) (pkcs11.ObjectHandle, error) {
+	var keyTypeuint uint
+	switch keyType {
+	case "AES":
+		keyTypeuint = pkcs11.CKK_AES
+	case "DES3":
+		keyTypeuint = pkcs11.CKK_DES3
+	case "DES":
+		keyTypeuint = pkcs11.CKK_DES
+	}
+
 	template := []*pkcs11.Attribute{
+		// Identificación
 		pkcs11.NewAttribute(pkcs11.CKA_LABEL, label),
 		pkcs11.NewAttribute(pkcs11.CKA_ID, id),
+
+		// Tipo de objeto
+		pkcs11.NewAttribute(pkcs11.CKA_CLASS, pkcs11.CKO_SECRET_KEY),
+		pkcs11.NewAttribute(pkcs11.CKA_KEY_TYPE, keyTypeuint),
+
+		// Valor de la clave
 		pkcs11.NewAttribute(pkcs11.CKA_VALUE, key),
+
+		// Permisos de uso
+		pkcs11.NewAttribute(pkcs11.CKA_DECRYPT, true),
+
+		// Persistencia y seguridad
+		pkcs11.NewAttribute(pkcs11.CKA_TOKEN, true),        // Persistir en token
+		pkcs11.NewAttribute(pkcs11.CKA_SENSITIVE, true),    // Clave sensible
+		pkcs11.NewAttribute(pkcs11.CKA_EXTRACTABLE, false), // No extraíble
 	}
+
 	handle, err := m.ctx.CreateObject(m.session, template)
 	if err != nil {
 		return 0, err

@@ -5,11 +5,13 @@ info:
 
 configuration:
   ssmName: "SSM"
-  ssmId: "coffe001"
+  ssmId: "cafe00"
   socketPath: "var/run/socket.so"
   pkcsPath: "/usr/lib/softhsm/libsofthsm2.so"
   pin: "1234"
-  lots_number: 0
+  lots_number: 1058236149
+  bindAddr: 0.0.0.0:9000
+  exposeSwaggerUi: true
 
 logger:
   SSM:

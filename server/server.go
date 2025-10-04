@@ -171,7 +171,6 @@ func (s *SSM) Start() error {
 	})
 
 	logger.AppLog.Infof("SSM listening on unix socket %s", socketPath)
-
 	// Serve HTTP requests in a separate goroutine
 	go func() error {
 		if err := http.Serve(l, nil); err != nil {
@@ -183,11 +182,12 @@ func (s *SSM) Start() error {
 
 	if factory.SsmConfig.Configuration.ExposeSwaggerUi {
 		go func() {
-			logger.AppLog.Infof("Swagger UI available at http://localhost:8080/swagger/index.html")
+			logger.AppLog.Infof("Swagger UI available at http://localhost:9001/swagger-ui")
 			ServerSwagger()
 		}()
 	}
 
+	logger.AppLog.Infof("SSM listening api http %s", factory.SsmConfig.Configuration.BindAddr)
 	// Use ListenAndServe to handle HTTP connections
 	if err := http.ListenAndServe(factory.SsmConfig.Configuration.BindAddr, nil); err != nil {
 		logger.AppLog.Errorf("Server error: %v", err)

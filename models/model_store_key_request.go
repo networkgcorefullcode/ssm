@@ -28,6 +28,7 @@ type StoreKeyRequest struct {
 	Id string `json:"id"`
 	// Valor de la clave en Base64
 	KeyValue string `json:"key_value"`
+	KeyType  string `json:"key_type"`
 }
 
 type _StoreKeyRequest StoreKeyRequest

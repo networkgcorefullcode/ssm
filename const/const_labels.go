@@ -17,3 +17,9 @@ const (
 	ALGORITM_DES         = 3
 	ALGORITM_3DES        = 4
 )
+
+const (
+	TYPE_AES  = "AES"
+	TYPE_DES  = "DES"
+	TYPE_DES3 = "DES3"
+)
