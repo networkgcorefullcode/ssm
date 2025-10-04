@@ -70,8 +70,13 @@ func postDecrypt(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request)
 	}
 
 	iv, err := base64.StdEncoding.DecodeString(req.IvB64)
+
 	if err != nil {
 		logger.AppLog.Errorf("Failed to decode IV Base64: %v", err)
+		iv = nil
+	}
+	if req.IvB64 == "" {
+		logger.AppLog.Info("iv is empty")
 		iv = nil
 	}
 
