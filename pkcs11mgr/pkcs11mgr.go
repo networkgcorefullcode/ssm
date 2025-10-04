@@ -116,7 +116,7 @@ func (m *Manager) GenerateAESKey(label string, id []byte, bits int) (pkcs11.Obje
 
 // EncryptWithAESKey performs encryption using a key object already in the token.
 // NOTE: parámetros específicos del mecanismo (p.ej. GCM params) pueden necesitar ajustar según tu módulo.
-func (m *Manager) EncryptKey(keyHandle pkcs11.ObjectHandle, iv, plaintext []byte, encryptAlgoritm int) ([]byte, error) {
+func (m *Manager) EncryptKey(keyHandle pkcs11.ObjectHandle, iv, plaintext []byte, encryptAlgoritm uint) ([]byte, error) {
 	// Aquí debemos usar un mecanismo apropiado (p. ej. CKM_AES_GCM o CKM_AES_CBC_PAD)
 	// El siguiente es un pseudocódigo/ejemplo conceptual usando CBC (menos ideal que GCM).
 	mech := pkcs11.NewMechanism(encryptAlgoritm, iv)
@@ -131,7 +131,7 @@ func (m *Manager) EncryptKey(keyHandle pkcs11.ObjectHandle, iv, plaintext []byte
 	return out, nil
 }
 
-func (m *Manager) DecryptKey(keyHandle pkcs11.ObjectHandle, iv, ciphertext []byte, decriptAlgoritm int) ([]byte, error) {
+func (m *Manager) DecryptKey(keyHandle pkcs11.ObjectHandle, iv, ciphertext []byte, decriptAlgoritm uint) ([]byte, error) {
 	mech := pkcs11.NewMechanism(decriptAlgoritm, iv)
 	if err := m.ctx.DecryptInit(m.session, []*pkcs11.Mechanism{mech}, keyHandle); err != nil {
 		return nil, err
