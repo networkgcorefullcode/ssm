@@ -64,7 +64,7 @@ func postStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request
 	logger.AppLog.Infof("Key stored successfully - Handle: %d", handle)
 
 	resp := models.StoreKeyResponse{
-		Handle:    handle,
+		Handle:    uint(handle),
 		CipherKey: nil, // Inicialmente nil, se asignará si se puede encriptar
 	}
 
