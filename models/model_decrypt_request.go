@@ -186,7 +186,6 @@ func (o *DecryptRequest) UnmarshalJSON(data []byte) (err error) {
 	requiredProperties := []string{
 		"key_label",
 		"cipher_b64",
-		"iv_b64",
 	}
 
 	allProperties := make(map[string]interface{})
