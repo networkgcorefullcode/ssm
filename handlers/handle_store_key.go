@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"net/http"
 
@@ -47,7 +48,7 @@ func postStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request
 	id := req.Id
 	key_type := req.KeyType
 	logger.AppLog.Infof("Decoding key value for label: %s, ID: %s", label, id)
-	key_value, err := base64.StdEncoding.DecodeString(req.KeyValue)
+	key_value, err := hex.DecodeString(req.KeyValue)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to decode base64 key value: %v", err)
 		sendProblemDetails(w, "Bad Request", "El valor de la clave en base64 no es válido", "INVALID_BASE64", http.StatusBadRequest, r.URL.Path)
