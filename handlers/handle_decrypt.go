@@ -61,12 +61,6 @@ func postDecrypt(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	if req.IvB64 == "" {
-		logger.AppLog.Error("IV is required but was empty")
-		sendProblemDetails(w, "Validation Error", "IV is required", "validation_failed", http.StatusBadRequest, r.URL.Path)
-		return
-	}
-
 	// Decode ciphertext y IV
 	cipher, err := base64.StdEncoding.DecodeString(req.CipherB64)
 	if err != nil {
@@ -78,8 +72,7 @@ func postDecrypt(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request)
 	iv, err := base64.StdEncoding.DecodeString(req.IvB64)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to decode IV Base64: %v", err)
-		sendProblemDetails(w, "Invalid Base64", "Failed to decode IV: "+err.Error(), "bad_base64", http.StatusBadRequest, r.URL.Path)
-		return
+		iv = nil
 	}
 
 	logger.AppLog.Debugf("Decoded ciphertext length: %d bytes, IV length: %d bytes", len(cipher), len(iv))
@@ -103,7 +96,7 @@ func postDecrypt(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request)
 	case constants.ALGORITM_DES:
 		// Get the plaintext using aes decrypt algoritm
 		plaintext, err = mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES_CBC_PAD)
-	case constants.ALGORITM_3DES:
+	case constants.ALGORITM_DES3:
 		// Get the plaintext using aes decrypt algoritm
 		plaintext, err = mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES3_CBC_PAD)
 	}

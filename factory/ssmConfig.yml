@@ -6,7 +6,7 @@ info:
 configuration:
   ssmName: "SSM"
   ssmId: "cafe00"
-  socketPath: "var/run/socket.so"
+  socketPath: "/var/run/socket.so"
   pkcsPath: "/usr/lib/softhsm/libsofthsm2.so"
   pin: "1234"
   lots_number: 1058236149

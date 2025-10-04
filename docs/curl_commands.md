@@ -1,4 +1,5 @@
-```
+
+``` bash
 sudo curl -X POST http://dummy/store-key \
   --unix-socket /var/run/socket.so \
   -H "Content-Type: application/json" \

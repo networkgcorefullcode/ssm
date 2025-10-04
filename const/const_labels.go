@@ -15,7 +15,7 @@ const (
 	ALGORITM_AES_256     = 1
 	ALGORITM_AES_128     = 2
 	ALGORITM_DES         = 3
-	ALGORITM_3DES        = 4
+	ALGORITM_DES3        = 4
 )
 
 const (
