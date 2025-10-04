@@ -105,7 +105,15 @@ func postDecrypt(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request)
 	case constants.ALGORITM_DES3:
 		// Get the plaintext using aes decrypt algoritm
 		plaintext, err = mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES3_CBC_PAD)
-
+		if err != nil {
+			plaintext, err = mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES3_CBC)
+		}
+		if err != nil {
+			plaintext, err = mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES3_ECB)
+		}
+		if err != nil {
+			plaintext, err = mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES3_MAC)
+		}
 	}
 
 	if err != nil {
