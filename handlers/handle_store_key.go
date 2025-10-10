@@ -72,7 +72,7 @@ func postStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request
 
 	// Intentar encontrar la clave de encriptación para encriptar el valor almacenado
 	logger.AppLog.Infof("Looking for encryption key: %s", constants.LABEL_ENCRYPTION_KEY)
-	findHandle, err := mgr.FindKeyByLabel(constants.LABEL_ENCRYPTION_KEY)
+	findHandle, err := mgr.FindKey(constants.LABEL_ENCRYPTION_KEY, "")
 	if err != nil || findHandle == 0 {
 		logger.AppLog.Warnf("Encryption key not found or error: %v. Returning response without encrypted key", err)
 		w.Header().Set("Content-Type", "application/json")

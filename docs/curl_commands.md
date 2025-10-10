@@ -21,3 +21,14 @@ sudo curl -X POST http://dummy/decrypt\
     "encryption_algoritme": 4
   }'
 ```
+
+```bash
+sudo curl -k -X POST https://192.168.12.16/store-key \
+  -H "Content-Type: application/json" \
+  -d '{
+    "key_label": "K4_DES",
+    "id": "1",
+    "key_value": "1234567890abcdef1234567890abcdef1234567890abcdef",
+    "key_type": "DES3"
+  }'
+```

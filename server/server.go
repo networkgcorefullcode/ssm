@@ -170,8 +170,8 @@ func (s *SSM) Start() error {
 		handlers.HandleGenerateAESKey(s.mgr, w, r)
 	})
 
-	logger.AppLog.Infof("SSM listening on unix socket %s", socketPath)
 	// Serve HTTP requests in a separate goroutine
+	logger.AppLog.Infof("SSM listening on unix socket %s", socketPath)
 	go func() error {
 		if err := http.Serve(l, nil); err != nil {
 			logger.AppLog.Errorf("Server error: %v", err)
@@ -180,18 +180,36 @@ func (s *SSM) Start() error {
 		return nil
 	}()
 
-	if factory.SsmConfig.Configuration.ExposeSwaggerUi {
+	if *factory.SsmConfig.Configuration.ExposeSwaggerUi {
 		go func() {
 			logger.AppLog.Infof("Swagger UI available at http://localhost:9001/swagger-ui")
 			ServerSwagger()
 		}()
 	}
 
-	logger.AppLog.Infof("SSM listening api http %s", factory.SsmConfig.Configuration.BindAddr)
-	// Use ListenAndServe to handle HTTP connections
-	if err := http.ListenAndServe(factory.SsmConfig.Configuration.BindAddr, nil); err != nil {
-		logger.AppLog.Errorf("Server error: %v", err)
-		return err
+	// Start HTTPS or HTTP server based on configuration
+	if factory.SsmConfig.Configuration.IsHttps == nil || *factory.SsmConfig.Configuration.IsHttps {
+		// HTTPS server
+		certFile := factory.SsmConfig.Configuration.CertFile
+		keyFile := factory.SsmConfig.Configuration.KeyFile
+		if certFile == "" || keyFile == "" {
+			logger.AppLog.Error("HTTPS is enabled but certFile or keyFile is not set in the configuration")
+			return fmt.Errorf("certFile or keyFile not set")
+		}
+		logger.AppLog.Infof("SSM listening api https %s", factory.SsmConfig.Configuration.BindAddr)
+		// Use ListenAndServeTLS to handle HTTPS connections
+		if err := http.ListenAndServeTLS(factory.SsmConfig.Configuration.BindAddr, certFile, keyFile, nil); err != nil {
+			logger.AppLog.Errorf("Server error: %v", err)
+			return err
+		}
+		return nil
+	} else {
+		logger.AppLog.Infof("SSM listening api http %s", factory.SsmConfig.Configuration.BindAddr)
+		// Use ListenAndServe to handle HTTP connections
+		if err := http.ListenAndServe(factory.SsmConfig.Configuration.BindAddr, nil); err != nil {
+			logger.AppLog.Errorf("Server error: %v", err)
+			return err
+		}
 	}
 
 	PkcsManager.CloseSession()

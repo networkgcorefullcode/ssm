@@ -29,7 +29,7 @@ type DecryptRequest struct {
 	// Vector de inicialización en Base64 (mismo usado para cifrar)
 	IvB64 string `json:"iv_b64,omitempty"`
 	// ID opcional para tracking
-	Id *int32 `json:"id,omitempty"`
+	Id string `json:"id,omitempty"`
 	// Details for the encryption algoritme
 	EncryptionAlgoritme int `json:"encryption_algoritme"`
 }
@@ -129,19 +129,19 @@ func (o *DecryptRequest) SetIvB64(v string) {
 }
 
 // GetId returns the Id field value if set, zero value otherwise.
-func (o *DecryptRequest) GetId() int32 {
+func (o *DecryptRequest) GetId() string {
 	if o == nil || IsNil(o.Id) {
-		var ret int32
+		var ret string
 		return ret
 	}
-	return *o.Id
+	return o.Id
 }
 
 // GetIdOk returns a tuple with the Id field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *DecryptRequest) GetIdOk() (*int32, bool) {
+func (o *DecryptRequest) GetIdOk() (string, bool) {
 	if o == nil || IsNil(o.Id) {
-		return nil, false
+		return "", false
 	}
 	return o.Id, true
 }
@@ -155,9 +155,9 @@ func (o *DecryptRequest) HasId() bool {
 	return false
 }
 
-// SetId gets a reference to the given int32 and assigns it to the Id field.
-func (o *DecryptRequest) SetId(v int32) {
-	o.Id = &v
+// SetId gets a reference to the given string and assigns it to the Id field.
+func (o *DecryptRequest) SetId(v string) {
+	o.Id = v
 }
 
 func (o DecryptRequest) MarshalJSON() ([]byte, error) {

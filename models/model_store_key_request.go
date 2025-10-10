@@ -37,10 +37,11 @@ type _StoreKeyRequest StoreKeyRequest
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewStoreKeyRequest(keyLabel string, id string, keyValue string) *StoreKeyRequest {
+func NewStoreKeyRequest(keyLabel string, id string, keyValue string, keyType string) *StoreKeyRequest {
 	this := StoreKeyRequest{}
 	this.KeyLabel = keyLabel
 	this.Id = id
+	this.KeyType = keyType
 	this.KeyValue = keyValue
 	return &this
 }
