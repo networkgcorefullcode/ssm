@@ -28,6 +28,10 @@ func HandleStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Reque
 	switch r.Method {
 	case http.MethodPost:
 		postStoreKey(mgr, w, r)
+	case http.MethodDelete:
+		deleteStoreKey(mgr, w, r)
+	case http.MethodPut:
+		updateStoreKey(mgr, w, r)
 	default:
 		sendProblemDetails(w, "Method Not Allowed", "El método HTTP no está permitido para este endpoint", "METHOD_NOT_ALLOWED", http.StatusMethodNotAllowed, r.URL.Path)
 	}
@@ -101,4 +105,113 @@ func postStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request
 		logger.AppLog.Errorf("Failed to encode response: %v", encodeErr)
 	}
 
+}
+
+func deleteStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request) {
+	logger.AppLog.Info("Processing delete key request")
+
+	var req models.DeleteKeyRequest
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		logger.AppLog.Errorf("Failed to decode request body: %v", err)
+		sendProblemDetails(w, "Bad Request", "El cuerpo de la petición no es válido JSON", "INVALID_JSON", http.StatusBadRequest, r.URL.Path)
+		return
+	}
+
+	label := req.KeyLabel
+	id := req.Id
+	logger.AppLog.Infof("Deleting key with label: %s, ID: %s", label, id)
+
+	// Eliminar la llave del HSM
+	if err := mgr.DeleteKey(label, id); err != nil {
+		logger.AppLog.Errorf("Failed to delete key: %v", err)
+		sendProblemDetails(w, "Key Deletion Failed", "Error al eliminar la clave del HSM", "KEY_DELETION_ERROR", http.StatusInternalServerError, r.URL.Path)
+		return
+	}
+
+	logger.AppLog.Infof("Key deleted successfully - Label: %s", label)
+
+	resp := models.DeleteKeyResponse{
+		Message:  "Key deleted successfully",
+		KeyLabel: label,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	if encodeErr := json.NewEncoder(w).Encode(resp); encodeErr != nil {
+		logger.AppLog.Errorf("Failed to encode response: %v", encodeErr)
+	}
+}
+
+func updateStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request) {
+	logger.AppLog.Info("Processing update key request")
+
+	var req models.UpdateKeyRequest
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		logger.AppLog.Errorf("Failed to decode request body: %v", err)
+		sendProblemDetails(w, "Bad Request", "El cuerpo de la petición no es válido JSON", "INVALID_JSON", http.StatusBadRequest, r.URL.Path)
+		return
+	}
+
+	label := req.KeyLabel
+	id := req.Id
+	keyType := req.KeyType
+	logger.AppLog.Infof("Updating key with label: %s, ID: %s, Type: %s", label, id, keyType)
+
+	// Decodificar el nuevo valor de la llave desde hexadecimal
+	keyValue, err := hex.DecodeString(req.KeyValue)
+	if err != nil {
+		logger.AppLog.Errorf("Failed to decode hex key value: %v", err)
+		sendProblemDetails(w, "Bad Request", "El valor de la clave en hexadecimal no es válido", "INVALID_HEX", http.StatusBadRequest, r.URL.Path)
+		return
+	}
+
+	// Actualizar la llave en el HSM
+	handle, err := mgr.UpdateKey(label, keyValue, []byte(id), keyType)
+	if err != nil {
+		logger.AppLog.Errorf("Failed to update key: %v", err)
+		sendProblemDetails(w, "Key Update Failed", "Error al actualizar la clave en el HSM", "KEY_UPDATE_ERROR", http.StatusInternalServerError, r.URL.Path)
+		return
+	}
+
+	logger.AppLog.Infof("Key updated successfully - Label: %s, New Handle: %d", label, handle)
+
+	resp := models.UpdateKeyResponse{
+		Message:   "Key updated successfully",
+		Handle:    uint(handle),
+		KeyLabel:  label,
+		CipherKey: nil, // Inicialmente nil, se asignará si se puede encriptar
+	}
+
+	// Intentar encontrar la clave de encriptación para encriptar el nuevo valor
+	logger.AppLog.Infof("Looking for encryption key: %s", constants.LABEL_ENCRYPTION_KEY)
+	findHandle, err := mgr.FindKey(constants.LABEL_ENCRYPTION_KEY, "")
+	if err != nil || findHandle == 0 {
+		logger.AppLog.Warnf("Encryption key not found or error: %v. Returning response without encrypted key", err)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		if encodeErr := json.NewEncoder(w).Encode(resp); encodeErr != nil {
+			logger.AppLog.Errorf("Failed to encode response: %v", encodeErr)
+		}
+		return
+	}
+
+	// Encriptar el nuevo valor de la clave
+	logger.AppLog.Info("Encrypting updated key value")
+	cipher, err := mgr.EncryptKey(findHandle, nil, keyValue, pkcs11.CKM_AES_CBC_PAD)
+	if err != nil {
+		logger.AppLog.Errorf("Failed to encrypt updated key value: %v. Returning response without encrypted key", err)
+		resp.CipherKey = nil
+	} else {
+		logger.AppLog.Info("Updated key value encrypted successfully")
+		encryptedKeyB64 := base64.StdEncoding.EncodeToString(cipher)
+		resp.CipherKey = &encryptedKeyB64
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	if encodeErr := json.NewEncoder(w).Encode(resp); encodeErr != nil {
+		logger.AppLog.Errorf("Failed to encode response: %v", encodeErr)
+	}
 }
