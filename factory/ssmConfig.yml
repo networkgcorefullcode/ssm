@@ -12,6 +12,8 @@ configuration:
   lots_number: 1058236149
   bindAddr: 0.0.0.0:9000
   exposeSwaggerUi: true
+  certFile: server.crt 
+  keyFile: server.key
 
 logger:
   SSM:
