@@ -53,7 +53,7 @@ func postEncrypt(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request)
 	}
 
 	logger.AppLog.Infof("Finding key by label: %s", req.KeyLabel)
-	keyHandle, err := mgr.FindKeyByLabel(req.KeyLabel)
+	keyHandle, err := mgr.FindKey(req.KeyLabel, "")
 	if err != nil {
 		logger.AppLog.Errorf("Key not found: %s, error: %v", req.KeyLabel, err)
 		sendProblemDetails(w, "Key Not Found", "La clave especificada no existe en el HSM", "KEY_NOT_FOUND", http.StatusNotFound, r.URL.Path)

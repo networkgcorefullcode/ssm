@@ -39,7 +39,10 @@ type Configuration struct {
 	Pin             string `yaml:"pin,omitempty"`
 	LotsNumber      int    `yaml:"lots_number,omitempty"`
 	BindAddr        string `yaml:"bindAddr,omitempty"`
-	ExposeSwaggerUi bool   `yaml:"exposeSwaggerUi,omitempty"`
+	ExposeSwaggerUi *bool  `yaml:"exposeSwaggerUi,omitempty"`
+	IsHttps         *bool  `yaml:"is_https,omitempty"`
+	CertFile        string `yaml:"certFile,omitempty"`
+	KeyFile         string `yaml:"keyFile,omitempty"`
 }
 
 func (c *Config) GetVersion() string {

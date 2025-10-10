@@ -159,12 +159,16 @@ func (m *Manager) StoreKey(label string, key []byte, id []byte, keyType string) 
 	return handle, nil
 }
 
-// FindKeyByLabel returns the object handle for a given label, or 0 if not found
-func (m *Manager) FindKeyByLabel(label string) (pkcs11.ObjectHandle, error) {
+// FindKey returns the object handle for a given label, or 0 if not found
+func (m *Manager) FindKey(label, id string) (pkcs11.ObjectHandle, error) {
 	logger.AppLog.Infof("Searching for key by label: %s", label)
 	template := []*pkcs11.Attribute{
 		pkcs11.NewAttribute(pkcs11.CKA_LABEL, label),
 		pkcs11.NewAttribute(pkcs11.CKA_CLASS, pkcs11.CKO_SECRET_KEY),
+	}
+
+	if id != "" {
+		template = append(template, pkcs11.NewAttribute(pkcs11.CKA_ID, id))
 	}
 
 	if err := m.ctx.FindObjectsInit(m.session, template); err != nil {
