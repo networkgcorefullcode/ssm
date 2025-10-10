@@ -18,4 +18,4 @@ configuration:
 
 logger:
   SSM:
-    debugLevel: info         # debug, info, warn, error
+    debugLevel: debug         # debug, info, warn, error
