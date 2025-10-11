@@ -139,10 +139,8 @@ func postDecrypt(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request)
 	// Preparar respuesta
 	w.Header().Set("Content-Type", "application/json")
 	resp := models.DecryptResponse{
-		PlainB64: nil,
+		PlainB64: base64.StdEncoding.EncodeToString(plaintext),
 	}
-
-	resp.SetPlainB64(base64.StdEncoding.EncodeToString(plaintext))
 
 	// Limpiar memoria del plaintext por seguridad
 	safe.Zero(plaintext)

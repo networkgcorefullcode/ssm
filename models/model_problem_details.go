@@ -14,13 +14,13 @@ package models
 // ProblemDetails Detalles de error según RFC 7807
 type ProblemDetails struct {
 	// Título breve del problema
-	Title *string `json:"title,omitempty"`
+	Title string `json:"title,omitempty"`
 	// Descripción detallada del problema
-	Detail *string `json:"detail,omitempty"`
+	Detail string `json:"detail,omitempty"`
 	// Código de estado HTTP
-	Status *int32 `json:"status,omitempty"`
+	Status int32 `json:"status,omitempty"`
 	// Código de error interno
-	Error *string `json:"error,omitempty"`
+	Error string `json:"error,omitempty"`
 	// URI que identifica la ocurrencia específica
-	Instance *string `json:"instance,omitempty"`
+	Instance string `json:"instance,omitempty"`
 }
