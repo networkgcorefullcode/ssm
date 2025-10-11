@@ -150,6 +150,7 @@ func (o *StoreKeyRequest) UnmarshalJSON(data []byte) (err error) {
 		"key_label",
 		"id",
 		"key_value",
+		"key_type",
 	}
 
 	allProperties := make(map[string]interface{})
