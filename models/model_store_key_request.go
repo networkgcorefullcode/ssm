@@ -139,6 +139,7 @@ func (o StoreKeyRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize["key_label"] = o.KeyLabel
 	toSerialize["id"] = o.Id
 	toSerialize["key_value"] = o.KeyValue
+	toSerialize["key_type"] = o.KeyType
 	return toSerialize, nil
 }
 
