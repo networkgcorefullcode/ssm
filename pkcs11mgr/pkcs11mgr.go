@@ -157,7 +157,7 @@ func (m *Manager) StoreKey(label string, key []byte, id []byte, keyType string) 
 	existingHandle, err := m.FindKey(label, string(id))
 	if err == nil && existingHandle != 0 {
 		logger.AppLog.Infof("Key with label '%s' already exists, returning existing handle: %v", label, existingHandle)
-		return existingHandle, nil
+		return existingHandle, errors.New("the key is in the SSM")
 	}
 
 	handle, err := m.ctx.CreateObject(m.session, template)
