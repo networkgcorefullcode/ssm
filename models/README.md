@@ -1,21 +1,21 @@
-# Go API client for openapi
+# Go API client for models
 
-API para gestión segura de claves criptográficas usando PKCS#11 y HSM.
+API for secure cryptographic key management using PKCS#11 and HSM.
 
-El SSM proporciona operaciones seguras de:
-- Generación de claves AES
-- Cifrado y descifrado de datos
-- Almacenamiento de claves
-- Gestión mediante HSM/SoftHSM
+SSM provides secure operations for:
+- AES, DES, DES3 key generation
+- Data encryption and decryption
+- Key storage and management
+- HSM/SoftHSM integration
 
-## Autenticación
-La API funciona a través de Unix Domain Sockets para mayor seguridad.
-Tambien da soporte a HTTPS con certificados TLS. No implementado aun.
+## Authentication
+The API works through Unix Domain Sockets for enhanced security.
+Also supports HTTPS with TLS certificates.
 
-## Formatos de datos
-- Todos los datos binarios (plaintext, ciphertext, IV) deben estar en Base64
-- Las respuestas incluyen timestamps en formato RFC3339
-- Los errores siguen el estándar RFC 7807 (Problem Details)
+## Data Formats
+- All binary data (plaintext, ciphertext, IV) should be in Base64/Hex
+- Responses include timestamps in RFC3339 format
+- Errors follow RFC 7807 standard (Problem Details)
 
 
 ## Overview
@@ -38,7 +38,7 @@ go get golang.org/x/net/context
 Put the package under your project folder and add the following in import:
 
 ```go
-import openapi "github.com/GIT_USER_ID/GIT_REPO_ID"
+import models "github.com/GIT_USER_ID/GIT_REPO_ID"
 ```
 
 To use a proxy, set the environment variable `HTTP_PROXY`:
@@ -53,18 +53,18 @@ Default configuration comes with `Servers` field that contains server objects as
 
 ### Select Server Configuration
 
-For using other server than the one defined on index 0 set context value `openapi.ContextServerIndex` of type `int`.
+For using other server than the one defined on index 0 set context value `models.ContextServerIndex` of type `int`.
 
 ```go
-ctx := context.WithValue(context.Background(), openapi.ContextServerIndex, 1)
+ctx := context.WithValue(context.Background(), models.ContextServerIndex, 1)
 ```
 
 ### Templated Server URL
 
-Templated server URL is formatted using default variables from configuration or from context value `openapi.ContextServerVariables` of type `map[string]string`.
+Templated server URL is formatted using default variables from configuration or from context value `models.ContextServerVariables` of type `map[string]string`.
 
 ```go
-ctx := context.WithValue(context.Background(), openapi.ContextServerVariables, map[string]string{
+ctx := context.WithValue(context.Background(), models.ContextServerVariables, map[string]string{
 	"basePath": "v2",
 })
 ```
@@ -75,13 +75,13 @@ Note, enum values are always validated and all unused variables are silently ign
 
 Each operation can use different server URL defined using `OperationServers` map in the `Configuration`.
 An operation is uniquely identified by `"{classname}Service.{nickname}"` string.
-Similar rules for overriding default operation server index and variables applies by using `openapi.ContextOperationServerIndices` and `openapi.ContextOperationServerVariables` context maps.
+Similar rules for overriding default operation server index and variables applies by using `models.ContextOperationServerIndices` and `models.ContextOperationServerVariables` context maps.
 
 ```go
-ctx := context.WithValue(context.Background(), openapi.ContextOperationServerIndices, map[string]int{
+ctx := context.WithValue(context.Background(), models.ContextOperationServerIndices, map[string]int{
 	"{classname}Service.{nickname}": 2,
 })
-ctx = context.WithValue(context.Background(), openapi.ContextOperationServerVariables, map[string]map[string]string{
+ctx = context.WithValue(context.Background(), models.ContextOperationServerVariables, map[string]map[string]string{
 	"{classname}Service.{nickname}": {
 		"port": "8443",
 	},
@@ -94,23 +94,35 @@ All URIs are relative to *http://localhost*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
-*EncryptionAPI* | [**DecryptData**](docs/EncryptionAPI.md#decryptdata) | **Post** /decrypt | Descifrar datos
-*EncryptionAPI* | [**EncryptData**](docs/EncryptionAPI.md#encryptdata) | **Post** /encrypt | Cifrar datos
-*KeyManagementAPI* | [**GenerateAESKey**](docs/KeyManagementAPI.md#generateaeskey) | **Post** /generate-aes-key | Generar nueva clave AES
-*KeyManagementAPI* | [**StoreKey**](docs/KeyManagementAPI.md#storekey) | **Post** /store-key | Almacenar clave existente
+*EncryptionAPI* | [**DecryptData**](docs/EncryptionAPI.md#decryptdata) | **Post** /decrypt | Decrypt data
+*EncryptionAPI* | [**EncryptData**](docs/EncryptionAPI.md#encryptdata) | **Post** /encrypt | Encrypt data
+*KeyManagementAPI* | [**DeleteKey**](docs/KeyManagementAPI.md#deletekey) | **Delete** /store-key | Delete key
+*KeyManagementAPI* | [**GenerateAESKey**](docs/KeyManagementAPI.md#generateaeskey) | **Post** /generate-aes-key | Generate new AES key
+*KeyManagementAPI* | [**GenerateDES3Key**](docs/KeyManagementAPI.md#generatedes3key) | **Post** /generate-des3-key | Generate new DES3 key
+*KeyManagementAPI* | [**GenerateDESKey**](docs/KeyManagementAPI.md#generatedeskey) | **Post** /generate-des-key | Generate new DES key
+*KeyManagementAPI* | [**StoreKey**](docs/KeyManagementAPI.md#storekey) | **Post** /store-key | Store existing key
+*KeyManagementAPI* | [**UpdateKey**](docs/KeyManagementAPI.md#updatekey) | **Put** /store-key | Update key
 
 
 ## Documentation For Models
 
  - [DecryptRequest](docs/DecryptRequest.md)
  - [DecryptResponse](docs/DecryptResponse.md)
+ - [DeleteKeyRequest](docs/DeleteKeyRequest.md)
+ - [DeleteKeyResponse](docs/DeleteKeyResponse.md)
  - [EncryptRequest](docs/EncryptRequest.md)
  - [EncryptResponse](docs/EncryptResponse.md)
  - [GenAESKeyRequest](docs/GenAESKeyRequest.md)
  - [GenAESKeyResponse](docs/GenAESKeyResponse.md)
+ - [GenDES3KeyRequest](docs/GenDES3KeyRequest.md)
+ - [GenDES3KeyResponse](docs/GenDES3KeyResponse.md)
+ - [GenDESKeyRequest](docs/GenDESKeyRequest.md)
+ - [GenDESKeyResponse](docs/GenDESKeyResponse.md)
  - [ProblemDetails](docs/ProblemDetails.md)
  - [StoreKeyRequest](docs/StoreKeyRequest.md)
  - [StoreKeyResponse](docs/StoreKeyResponse.md)
+ - [UpdateKeyRequest](docs/UpdateKeyRequest.md)
+ - [UpdateKeyResponse](docs/UpdateKeyResponse.md)
 
 
 ## Documentation For Authorization

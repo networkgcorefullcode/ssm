@@ -4,11 +4,11 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Title** | Pointer to **string** | Título breve del problema | [optional] 
-**Detail** | Pointer to **string** | Descripción detallada del problema | [optional] 
-**Status** | Pointer to **int32** | Código de estado HTTP | [optional] 
-**Error** | Pointer to **string** | Código de error interno | [optional] 
-**Instance** | Pointer to **string** | URI que identifica la ocurrencia específica | [optional] 
+**Title** | Pointer to **string** | Short title of the problem | [optional] 
+**Detail** | Pointer to **string** | Detailed description of the problem | [optional] 
+**Status** | Pointer to **int32** | HTTP status code | [optional] 
+**Error** | Pointer to **string** | Internal error code | [optional] 
+**Instance** | Pointer to **string** | URI identifying the specific occurrence | [optional] 
 
 ## Methods
 

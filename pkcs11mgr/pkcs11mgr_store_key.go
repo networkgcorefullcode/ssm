@@ -54,7 +54,7 @@ func (m *Manager) StoreKey(label string, key []byte, id []byte, keyType string) 
 }
 
 // DeleteKey removes a key object from the HSM by label and optionally by ID
-func (m *Manager) DeleteKey(label, id string) error {
+func (m *Manager) DeleteKey(label string, id int32) error {
 	logger.AppLog.Infof("Attempting to delete key with label: %s", label)
 
 	// Find the key first

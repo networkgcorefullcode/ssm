@@ -1,109 +1,109 @@
-# StoreKeyRequest
+# UpdateKeyRequest
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**KeyLabel** | **string** | Label for the stored key | 
-**Id** | **int32** | Unique identifier | 
-**KeyValue** | **string** | Key value in Base64 | 
+**KeyLabel** | **string** | Label of the key to update | 
+**Id** | **int32** | Key identifier | 
+**KeyValue** | **string** | New key value in hexadecimal format | 
 **KeyType** | **string** | Type of cryptographic key | 
 
 ## Methods
 
-### NewStoreKeyRequest
+### NewUpdateKeyRequest
 
-`func NewStoreKeyRequest(keyLabel string, id int32, keyValue string, keyType string, ) *StoreKeyRequest`
+`func NewUpdateKeyRequest(keyLabel string, id int32, keyValue string, keyType string, ) *UpdateKeyRequest`
 
-NewStoreKeyRequest instantiates a new StoreKeyRequest object
+NewUpdateKeyRequest instantiates a new UpdateKeyRequest object
 This constructor will assign default values to properties that have it defined,
 and makes sure properties required by API are set, but the set of arguments
 will change when the set of required properties is changed
 
-### NewStoreKeyRequestWithDefaults
+### NewUpdateKeyRequestWithDefaults
 
-`func NewStoreKeyRequestWithDefaults() *StoreKeyRequest`
+`func NewUpdateKeyRequestWithDefaults() *UpdateKeyRequest`
 
-NewStoreKeyRequestWithDefaults instantiates a new StoreKeyRequest object
+NewUpdateKeyRequestWithDefaults instantiates a new UpdateKeyRequest object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
 
 ### GetKeyLabel
 
-`func (o *StoreKeyRequest) GetKeyLabel() string`
+`func (o *UpdateKeyRequest) GetKeyLabel() string`
 
 GetKeyLabel returns the KeyLabel field if non-nil, zero value otherwise.
 
 ### GetKeyLabelOk
 
-`func (o *StoreKeyRequest) GetKeyLabelOk() (*string, bool)`
+`func (o *UpdateKeyRequest) GetKeyLabelOk() (*string, bool)`
 
 GetKeyLabelOk returns a tuple with the KeyLabel field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetKeyLabel
 
-`func (o *StoreKeyRequest) SetKeyLabel(v string)`
+`func (o *UpdateKeyRequest) SetKeyLabel(v string)`
 
 SetKeyLabel sets KeyLabel field to given value.
 
 
 ### GetId
 
-`func (o *StoreKeyRequest) GetId() int32`
+`func (o *UpdateKeyRequest) GetId() int32`
 
 GetId returns the Id field if non-nil, zero value otherwise.
 
 ### GetIdOk
 
-`func (o *StoreKeyRequest) GetIdOk() (*int32, bool)`
+`func (o *UpdateKeyRequest) GetIdOk() (*int32, bool)`
 
 GetIdOk returns a tuple with the Id field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetId
 
-`func (o *StoreKeyRequest) SetId(v int32)`
+`func (o *UpdateKeyRequest) SetId(v int32)`
 
 SetId sets Id field to given value.
 
 
 ### GetKeyValue
 
-`func (o *StoreKeyRequest) GetKeyValue() string`
+`func (o *UpdateKeyRequest) GetKeyValue() string`
 
 GetKeyValue returns the KeyValue field if non-nil, zero value otherwise.
 
 ### GetKeyValueOk
 
-`func (o *StoreKeyRequest) GetKeyValueOk() (*string, bool)`
+`func (o *UpdateKeyRequest) GetKeyValueOk() (*string, bool)`
 
 GetKeyValueOk returns a tuple with the KeyValue field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetKeyValue
 
-`func (o *StoreKeyRequest) SetKeyValue(v string)`
+`func (o *UpdateKeyRequest) SetKeyValue(v string)`
 
 SetKeyValue sets KeyValue field to given value.
 
 
 ### GetKeyType
 
-`func (o *StoreKeyRequest) GetKeyType() string`
+`func (o *UpdateKeyRequest) GetKeyType() string`
 
 GetKeyType returns the KeyType field if non-nil, zero value otherwise.
 
 ### GetKeyTypeOk
 
-`func (o *StoreKeyRequest) GetKeyTypeOk() (*string, bool)`
+`func (o *UpdateKeyRequest) GetKeyTypeOk() (*string, bool)`
 
 GetKeyTypeOk returns a tuple with the KeyType field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetKeyType
 
-`func (o *StoreKeyRequest) SetKeyType(v string)`
+`func (o *UpdateKeyRequest) SetKeyType(v string)`
 
 SetKeyType sets KeyType field to given value.
 

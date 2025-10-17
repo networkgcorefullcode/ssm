@@ -13,15 +13,27 @@ import (
 	"context"
 	"testing"
 
-	openapiclient "github.com/networkgcorefullcode/ssm/models"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func Test_openapi_KeyManagementAPIService(t *testing.T) {
+func Test_models_KeyManagementAPIService(t *testing.T) {
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
+
+	t.Run("Test KeyManagementAPIService DeleteKey", func(t *testing.T) {
+
+		t.Skip("skip test") // remove to run test
+
+		resp, httpRes, err := apiClient.KeyManagementAPI.DeleteKey(context.Background()).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
 
 	t.Run("Test KeyManagementAPIService GenerateAESKey", func(t *testing.T) {
 
@@ -35,11 +47,47 @@ func Test_openapi_KeyManagementAPIService(t *testing.T) {
 
 	})
 
+	t.Run("Test KeyManagementAPIService GenerateDES3Key", func(t *testing.T) {
+
+		t.Skip("skip test") // remove to run test
+
+		resp, httpRes, err := apiClient.KeyManagementAPI.GenerateDES3Key(context.Background()).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test KeyManagementAPIService GenerateDESKey", func(t *testing.T) {
+
+		t.Skip("skip test") // remove to run test
+
+		resp, httpRes, err := apiClient.KeyManagementAPI.GenerateDESKey(context.Background()).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
 	t.Run("Test KeyManagementAPIService StoreKey", func(t *testing.T) {
 
 		t.Skip("skip test") // remove to run test
 
 		resp, httpRes, err := apiClient.KeyManagementAPI.StoreKey(context.Background()).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test KeyManagementAPIService UpdateKey", func(t *testing.T) {
+
+		t.Skip("skip test") // remove to run test
+
+		resp, httpRes, err := apiClient.KeyManagementAPI.UpdateKey(context.Background()).Execute()
 
 		require.Nil(t, err)
 		require.NotNil(t, resp)

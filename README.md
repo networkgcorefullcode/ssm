@@ -9,5 +9,6 @@ This SSM is writing in Go, the goal of this project is to provide a point to com
 - We can storage keys that can be used by other services for example desencrypt/encrypt data
 - Support decrypt operation using keys stored in SoftHSM. Support symmetric keys like as AES128, AES192, AES256, DES, 3DES
 - Support encrypt operation using keys stored in SoftHSM. Support symmetric keys like as AES128
+- Generate models and http client using OpenAPI Generator
 
 See more in docs folder.

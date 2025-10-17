@@ -1,7 +1,7 @@
 /*
 SSM (Secure Storage Manager) API
 
-API para gestión segura de claves criptográficas usando PKCS#11 y HSM.
+API for secure cryptographic key management using PKCS#11 and HSM.  SSM provides secure operations for: - AES, DES, DES3 key generation - Data encryption and decryption - Key storage and management - HSM/SoftHSM integration  ## Authentication The API works through Unix Domain Sockets for enhanced security. Also supports HTTPS with TLS certificates.  ## Data Formats - All binary data (plaintext, ciphertext, IV) should be in Base64/Hex - Responses include timestamps in RFC3339 format - Errors follow RFC 7807 standard (Problem Details)
 
 API version: 1.0.0
 Contact: support@yourorganization.com
@@ -11,14 +11,14 @@ Contact: support@yourorganization.com
 
 package models
 
-// UpdateKeyRequest struct for UpdateKeyRequest
+// UpdateKeyRequest
 type UpdateKeyRequest struct {
-	// Etiqueta de la clave a actualizar
+	// Label of the key to update
 	KeyLabel string `json:"key_label"`
-	// Identificador único
-	Id string `json:"id"`
-	// Nuevo valor de la clave en hexadecimal
+	// Key identifier
+	Id int32 `json:"id"`
+	// New key value in hexadecimal format
 	KeyValue string `json:"key_value"`
-	// Tipo de clave (AES, DES3, DES)
+	// Type of cryptographic key
 	KeyType string `json:"key_type"`
 }

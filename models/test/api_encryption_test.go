@@ -13,12 +13,12 @@ import (
 	"context"
 	"testing"
 
-	openapiclient "github.com/networkgcorefullcode/ssm/models"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func Test_openapi_EncryptionAPIService(t *testing.T) {
+func Test_models_EncryptionAPIService(t *testing.T) {
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)

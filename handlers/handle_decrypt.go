@@ -92,7 +92,7 @@ func postDecrypt(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request)
 	}
 
 	var plaintext []byte
-	switch req.EncryptionAlgoritme {
+	switch req.EncryptionAlgorithm {
 	case constants.ALGORITM_AES_128, constants.ALGORITM_AES_256:
 		plaintext, err = mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_AES_CBC_PAD)
 		if err != nil {

@@ -73,7 +73,7 @@ paths:
                   summary: Successful response
                   value:
                     handle: 123456789
-                    id: key001
+                    id: 2
                     bits: 256
               schema:
                 $ref: '#/components/schemas/GenAESKeyResponse'
@@ -147,7 +147,7 @@ paths:
               simple:
                 summary: DES Key
                 value:
-                  id: des001
+                  id: 1
             schema:
               $ref: '#/components/schemas/GenDESKeyRequest'
         required: true
@@ -186,7 +186,7 @@ paths:
               simple:
                 summary: DES3 Key
                 value:
-                  id: des3001
+                  id: 1
             schema:
               $ref: '#/components/schemas/GenDES3KeyRequest'
         required: true
@@ -300,7 +300,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
           description: Internal server error
-  summary: Encrypt data
+      summary: Encrypt data
       tags:
       - Encryption
   /decrypt:
@@ -320,7 +320,7 @@ paths:
                   cipher: YWJjZGVmZ2hpams...
                   iv: MTIzNDU2Nzg5MEFCQ0RFRg==
                   encryption_algorithm: 1
-                  id: 2345
+                  id: 2
             schema:
               $ref: '#/components/schemas/DecryptRequest'
         required: true
@@ -389,10 +389,55 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
           description: Internal server error
-  summary: Decrypt data
+      summary: Decrypt data
       tags:
       - Encryption
   /store-key:
+    delete:
+      description: |
+        Deletes a cryptographic key from the HSM.
+        The key is identified by its label and optional ID.
+      operationId: deleteKey
+      requestBody:
+        content:
+          application/json:
+            examples:
+              simple:
+                summary: Delete key
+                value:
+                  key_label: ImportedKey
+                  id: 1
+            schema:
+              $ref: '#/components/schemas/DeleteKeyRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteKeyResponse'
+          description: Key deleted successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+          description: Invalid request
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+          description: Key not found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+          description: Internal server error
+      summary: Delete key
+      tags:
+      - Key Management
     post:
       description: |
         Stores an existing cryptographic key in the HSM.
@@ -406,7 +451,7 @@ paths:
                 summary: Store key
                 value:
                   key_label: ImportedKey
-                  id: imported001
+                  id: 3
                   key_value: YmFzZTY0X2VuY29kZWRfa2V5
                   key_type: AES
             schema:
@@ -470,51 +515,6 @@ paths:
       summary: Store existing key
       tags:
       - Key Management
-    delete:
-      description: |
-        Deletes a cryptographic key from the HSM.
-        The key is identified by its label and optional ID.
-      operationId: deleteKey
-      requestBody:
-        content:
-          application/json:
-            examples:
-              simple:
-                summary: Delete key
-                value:
-                  key_label: ImportedKey
-                  id: imported001
-            schema:
-              $ref: '#/components/schemas/DeleteKeyRequest'
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DeleteKeyResponse'
-          description: Key deleted successfully
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetails'
-          description: Invalid request
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetails'
-          description: Key not found
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetails'
-          description: Internal server error
-      summary: Delete key
-      tags:
-      - Key Management
     put:
       description: |
         Updates an existing cryptographic key in the HSM.
@@ -525,10 +525,10 @@ paths:
           application/json:
             examples:
               simple:
-                summary: Update key
+                summary: Update key example
                 value:
                   key_label: ImportedKey
-                  id: imported001
+                  id: 1
                   key_value: bmV3X2tleV92YWx1ZQ==
                   key_type: AES
             schema:
@@ -562,16 +562,6 @@ paths:
       summary: Update key
       tags:
       - Key Management
-
-# ######################################################################
-#  ____   ___  __  __ ____   ___  _   _ _____ _   _ _____ ____  
-# / ___| / _ \|  \/  |  _ \ / _ \| \ | | ____| \ | |_   _/ ___| 
-#| |    | | | | |\/| | |_) | | | |  \| |  _| |  \| | | | \___ \ 
-#| |___ | |_| | |  | |  __/| |_| | |\  | |___| |\  | | |  ___) |
-# \____| \___/|_|  |_|_|    \___/|_| \_|_____|_| \_| |_| |____/ 
-#                                                                
-# ######################################################################
-
 components:
   examples:
     Base64Examples:
@@ -664,39 +654,21 @@ components:
           schema:
             $ref: '#/components/schemas/ProblemDetails'
       description: Servicio no disponible
-
-  # =============================================================
-  #  ____   ____ _   _ _____ ___  ___  _   _  ____  
-  # / ___| / ___| | | | ____/ _ \|_ _| \ | |/ ___| 
-  # \___ \| |   | | | |  _|| | | || ||  \| | |  _  
-  #  ___) | |___| |_| | |__| |_| || || |\  | |_| | 
-  # |____/ \____|\___/|_____\___/|___|_| \_|\____| 
-  #
-  # ===================== SCHEMAS ==============================
-  
   schemas:
     GenAESKeyRequest:
       example:
         id: key001
         bits: 256
       properties:
-        # label:
-        #   description: Etiqueta única para identificar la clave
-        #   example: MySecretKey
-        #   maxLength: 256
-        #   minLength: 1
         id:
           description: Unique key identifier
-          example: key001
-          maxLength: 64
-          minLength: 1
-          type: string
+          type: integer
         bits:
           description: Key size in bits
           enum:
-            - 128
-            - 192
-            - 256
+          - 128
+          - 192
+          - 256
           example: 256
           type: integer
       required:
@@ -707,7 +679,7 @@ components:
       example:
         bits: 256
         handle: 123456789
-        id: key001
+        id: 2
       properties:
         handle:
           description: HSM key handle
@@ -716,8 +688,8 @@ components:
           type: integer
         id:
           description: Generated key identifier
-          example: key001
-          type: string
+          example: 2
+          type: integer
         bits:
           description: Size of the generated key in bits
           example: 256
@@ -735,22 +707,23 @@ components:
           type: string
         plain:
           description: Data to encrypt encoded in hexadecimal
-          example: 48656c6c6f20576f726c6421
+          example: !!binary |-
+            NDg2NTZjNmM2ZjIwNTc2ZjcyNmM2NDIx
           format: byte
           type: string
         encryption_algorithm:
-          description: Encryption algorithm to use (1: AES, 2: AES, 3: DES, 4: DES3)
-          example: 1
+          description: "Encryption algorithm to use (1: AES, 2: AES, 3: DES, 4: DES3)"
           enum:
-            - 1
-            - 2
-            - 3
-            - 4
+          - 1
+          - 2
+          - 3
+          - 4
+          example: 1
           type: integer
       required:
+      - encryption_algorithm
       - key_label
       - plain
-      - encryption_algorithm
       type: object
     EncryptResponse:
       example:
@@ -762,12 +735,14 @@ components:
       properties:
         cipher:
           description: Encrypted data in hexadecimal
-          example: 48656c6c6f20576f726c6421
+          example: !!binary |-
+            NDg2NTZjNmM2ZjIwNTc2ZjcyNmM2NDIx
           format: byte
           type: string
         iv:
           description: Initialization vector in hexadecimal
-          example: 56c6c6f2
+          example: !!binary |-
+            NTZjNmM2ZjI=
           format: byte
           type: string
         ok:
@@ -800,12 +775,14 @@ components:
           type: string
         cipher:
           description: Encrypted data in Base64
-          example: 656c6c6f20576f726c6421
+          example: !!binary |-
+            NjU2YzZjNmYyMDU3NmY3MjZjNjQyMQ==
           format: byte
           type: string
         iv:
           description: Initialization vector in Base64 (same used for encryption)
-          example: 6f20576f
+          example: !!binary |-
+            NmYyMDU3NmY=
           format: byte
           type: string
         id:
@@ -813,20 +790,20 @@ components:
           example: 12345
           type: integer
         encryption_algorithm:
-          description: Encryption algorithm to use (1: AES, 2: AES, 3: DES, 4: DES3)
-          example: 1
+          description: "Encryption algorithm to use (1: AES, 2: AES, 3: DES, 4: DES3)"
           enum:
-            - 1
-            - 2
-            - 3
-            - 4
+          - 1
+          - 2
+          - 3
+          - 4
+          example: 1
           type: integer
       required:
       - cipher
-      - iv
-      - key_label
       - encryption_algorithm
       - id
+      - iv
+      - key_label
       type: object
     DecryptResponse:
       example:
@@ -834,14 +811,15 @@ components:
       properties:
         plain:
           description: Decrypted data in Base64
-          example: 123afabe213be2
+          example: !!binary |-
+            MTIzYWZhYmUyMTNiZTI=
           format: byte
           type: string
       type: object
     StoreKeyRequest:
       example:
         key_label: ImportedKey
-        id: imported001
+        id: 2
         key_value: abcde1231312
         key_type: AES
       properties:
@@ -852,27 +830,27 @@ components:
           type: string
         id:
           description: Unique identifier
-          example: imported001
-          minLength: 1
-          type: string
+          example: 2
+          type: integer
         key_value:
           description: Key value in Base64
-          example: abcde1231312
+          example: !!binary |-
+            YWJjZGUxMjMxMzEy
           format: byte
           type: string
         key_type:
           description: Type of cryptographic key
-          example: AES
           enum:
-            - AES
-            - DES
-            - DES3
+          - AES
+          - DES
+          - DES3
+          example: AES
           type: string
       required:
       - id
       - key_label
-      - key_value
       - key_type
+      - key_value
       type: object
     StoreKeyResponse:
       example:
@@ -922,21 +900,19 @@ components:
       type: object
     GenDESKeyRequest:
       example:
-        id: des001
+        id: 1
       properties:
         id:
           description: Unique key identifier
-          example: des001
-          maxLength: 64
-          minLength: 1
-          type: string
+          example: 1
+          type: integer
       required:
       - id
       type: object
     GenDESKeyResponse:
       example:
         handle: 123456789
-        id: des001
+        id: 2
       properties:
         handle:
           description: HSM key handle
@@ -944,26 +920,24 @@ components:
           type: integer
         id:
           description: Key identifier
-          example: des001
-          type: string
+          example: 3
+          type: integer
       type: object
     GenDES3KeyRequest:
       example:
-        id: des3001
+        id: 1
       properties:
         id:
           description: Unique key identifier
-          example: des3001
-          maxLength: 64
-          minLength: 1
-          type: string
+          example: 1
+          type: integer
       required:
       - id
       type: object
     GenDES3KeyResponse:
       example:
         handle: 123456789
-        id: des3001
+        id: 1
       properties:
         handle:
           description: HSM key handle
@@ -971,13 +945,13 @@ components:
           type: integer
         id:
           description: Key identifier
-          example: des3001
-          type: string
+          example: 1
+          type: integer
       type: object
     DeleteKeyRequest:
       example:
         key_label: ImportedKey
-        id: imported001
+        id: 1
       properties:
         key_label:
           description: Label of the key to delete
@@ -987,12 +961,12 @@ components:
           type: string
         id:
           description: Key identifier (optional)
-          example: imported001
+          example: 1
           maxLength: 64
-          type: string
+          type: integer
       required:
-      - key_label
       - id
+      - key_label
       type: object
     DeleteKeyResponse:
       example:
@@ -1008,13 +982,13 @@ components:
           example: ImportedKey
           type: string
       required:
-      - message
       - key_label
+      - message
       type: object
     UpdateKeyRequest:
       example:
         key_label: ImportedKey
-        id: imported001
+        id: 2
         key_value: 1213afabe213be2
         key_type: AES
       properties:
@@ -1026,10 +1000,8 @@ components:
           type: string
         id:
           description: Key identifier
-          example: imported001
-          maxLength: 64
-          minLength: 1
-          type: string
+          example: 2
+          type: integer
         key_value:
           description: New key value in hexadecimal format
           example: bmV3X2tleV92YWx1ZQ==
@@ -1043,10 +1015,10 @@ components:
           example: AES
           type: string
       required:
-      - key_label
       - id
-      - key_value
+      - key_label
       - key_type
+      - key_value
       type: object
     UpdateKeyResponse:
       example:
@@ -1072,7 +1044,7 @@ components:
           example: encrypted_key_value
           type: string
       required:
-      - message
       - handle
       - key_label
+      - message
       type: object

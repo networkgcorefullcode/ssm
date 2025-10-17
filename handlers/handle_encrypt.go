@@ -54,7 +54,7 @@ func postEncrypt(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request)
 	}
 
 	logger.AppLog.Infof("Finding key by label: %s", req.KeyLabel)
-	keyHandle, err := mgr.FindKey(req.KeyLabel, "")
+	keyHandle, err := mgr.FindKey(req.KeyLabel, 0)
 	if err != nil {
 		logger.AppLog.Errorf("Key not found: %s, error: %v", req.KeyLabel, err)
 		sendProblemDetails(w, "Key Not Found", "The specified key does not exist in the HSM", "KEY_NOT_FOUND", http.StatusNotFound, r.URL.Path)
@@ -100,11 +100,11 @@ func postEncrypt(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request)
 
 	// Create response using the structured model
 	resp := models.EncryptResponse{
-		Cipher:      &ciphertextStr,
-		Iv:          &ivStr,
-		Ok:          &ok,
-		TimeCreated: &timeCreated,
-		TimeUpdated: &timeUpdated,
+		Cipher:      ciphertextStr,
+		Iv:          ivStr,
+		Ok:          ok,
+		TimeCreated: timeCreated,
+		TimeUpdated: timeUpdated,
 	}
 
 	w.Header().Set("Content-Type", "application/json")

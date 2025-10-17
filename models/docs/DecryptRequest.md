@@ -4,16 +4,17 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**KeyLabel** | **string** | Etiqueta de la clave para descifrar | 
-**CipherB64** | **string** | Datos cifrados en Base64 | 
-**IvB64** | **string** | Vector de inicialización en Base64 (mismo usado para cifrar) | 
-**Id** | Pointer to **int32** | ID opcional para tracking | [optional] 
+**KeyLabel** | **string** | Label of the key to decrypt | 
+**Cipher** | **string** | Encrypted data in Base64 | 
+**Iv** | **string** | Initialization vector in Base64 (same used for encryption) | 
+**Id** | **int32** | Optional ID for tracking | 
+**EncryptionAlgorithm** | **int32** | Encryption algorithm to use (1: AES, 2: AES, 3: DES, 4: DES3) | 
 
 ## Methods
 
 ### NewDecryptRequest
 
-`func NewDecryptRequest(keyLabel string, cipherB64 string, ivB64 string, ) *DecryptRequest`
+`func NewDecryptRequest(keyLabel string, cipher string, iv string, id int32, encryptionAlgorithm int32, ) *DecryptRequest`
 
 NewDecryptRequest instantiates a new DecryptRequest object
 This constructor will assign default values to properties that have it defined,
@@ -48,44 +49,44 @@ and a boolean to check if the value has been set.
 SetKeyLabel sets KeyLabel field to given value.
 
 
-### GetCipherB64
+### GetCipher
 
-`func (o *DecryptRequest) GetCipherB64() string`
+`func (o *DecryptRequest) GetCipher() string`
 
-GetCipherB64 returns the CipherB64 field if non-nil, zero value otherwise.
+GetCipher returns the Cipher field if non-nil, zero value otherwise.
 
-### GetCipherB64Ok
+### GetCipherOk
 
-`func (o *DecryptRequest) GetCipherB64Ok() (*string, bool)`
+`func (o *DecryptRequest) GetCipherOk() (*string, bool)`
 
-GetCipherB64Ok returns a tuple with the CipherB64 field if it's non-nil, zero value otherwise
+GetCipherOk returns a tuple with the Cipher field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetCipherB64
+### SetCipher
 
-`func (o *DecryptRequest) SetCipherB64(v string)`
+`func (o *DecryptRequest) SetCipher(v string)`
 
-SetCipherB64 sets CipherB64 field to given value.
+SetCipher sets Cipher field to given value.
 
 
-### GetIvB64
+### GetIv
 
-`func (o *DecryptRequest) GetIvB64() string`
+`func (o *DecryptRequest) GetIv() string`
 
-GetIvB64 returns the IvB64 field if non-nil, zero value otherwise.
+GetIv returns the Iv field if non-nil, zero value otherwise.
 
-### GetIvB64Ok
+### GetIvOk
 
-`func (o *DecryptRequest) GetIvB64Ok() (*string, bool)`
+`func (o *DecryptRequest) GetIvOk() (*string, bool)`
 
-GetIvB64Ok returns a tuple with the IvB64 field if it's non-nil, zero value otherwise
+GetIvOk returns a tuple with the Iv field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetIvB64
+### SetIv
 
-`func (o *DecryptRequest) SetIvB64(v string)`
+`func (o *DecryptRequest) SetIv(v string)`
 
-SetIvB64 sets IvB64 field to given value.
+SetIv sets Iv field to given value.
 
 
 ### GetId
@@ -107,11 +108,26 @@ and a boolean to check if the value has been set.
 
 SetId sets Id field to given value.
 
-### HasId
 
-`func (o *DecryptRequest) HasId() bool`
+### GetEncryptionAlgorithm
 
-HasId returns a boolean if a field has been set.
+`func (o *DecryptRequest) GetEncryptionAlgorithm() int32`
+
+GetEncryptionAlgorithm returns the EncryptionAlgorithm field if non-nil, zero value otherwise.
+
+### GetEncryptionAlgorithmOk
+
+`func (o *DecryptRequest) GetEncryptionAlgorithmOk() (*int32, bool)`
+
+GetEncryptionAlgorithmOk returns a tuple with the EncryptionAlgorithm field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetEncryptionAlgorithm
+
+`func (o *DecryptRequest) SetEncryptionAlgorithm(v int32)`
+
+SetEncryptionAlgorithm sets EncryptionAlgorithm field to given value.
+
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

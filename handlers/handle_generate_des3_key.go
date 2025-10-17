@@ -8,6 +8,7 @@ import (
 	"github.com/networkgcorefullcode/ssm/logger"
 	"github.com/networkgcorefullcode/ssm/models"
 	"github.com/networkgcorefullcode/ssm/pkcs11mgr"
+	"github.com/networkgcorefullcode/ssm/utils"
 )
 
 // HandleGenerateDES3Key maneja las peticiones de generación de claves DES3
@@ -40,14 +41,14 @@ func postGenerateDES3Key(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.
 		return
 	}
 
-	if req.Id == "" {
+	if req.Id <= 0 {
 		logger.AppLog.Error("ID is required but was empty")
 		sendProblemDetails(w, "Bad Request", "El campo 'id' es requerido y no puede estar vacío", "MISSING_ID", http.StatusBadRequest, r.URL.Path)
 		return
 	}
 
-	logger.AppLog.Infof("Generating DES3 key , ID: %s", req.Id)
-	handle, err := mgr.GenerateDES3Key(constants.LABEL_K4_KEY_DES3, []byte(req.Id))
+	logger.AppLog.Infof("Generating DES3 key , ID: %d", req.Id)
+	handle, err := mgr.GenerateDES3Key(constants.LABEL_K4_KEY_DES3, utils.Int32ToByte(req.Id))
 	if err != nil {
 		logger.AppLog.Errorf("DES3 key generation failed: %v", err)
 		sendProblemDetails(w, "Key Generation Failed", "Error al generar la clave DES3 en el HSM", "KEY_GENERATION_ERROR", http.StatusInternalServerError, r.URL.Path)
@@ -58,7 +59,7 @@ func postGenerateDES3Key(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.
 
 	resp := models.GenDES3KeyResponse{
 		Handle: uint(handle),
-		Id:     &req.Id,
+		Id:     req.Id,
 	}
 
 	w.Header().Set("Content-Type", "application/json")

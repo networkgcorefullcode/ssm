@@ -3,18 +3,21 @@ package pkcs11mgr
 import (
 	"github.com/miekg/pkcs11"
 	"github.com/networkgcorefullcode/ssm/logger"
+	"github.com/networkgcorefullcode/ssm/utils"
 )
 
 // FindKey returns the object handle for a given label, or 0 if not found
-func (m *Manager) FindKey(label, id string) (pkcs11.ObjectHandle, error) {
+func (m *Manager) FindKey(label string, id int32) (pkcs11.ObjectHandle, error) {
 	logger.AppLog.Infof("Searching for key by label: %s", label)
 	template := []*pkcs11.Attribute{
 		pkcs11.NewAttribute(pkcs11.CKA_LABEL, label),
 		pkcs11.NewAttribute(pkcs11.CKA_CLASS, pkcs11.CKO_SECRET_KEY),
 	}
 
-	if id != "" {
-		template = append(template, pkcs11.NewAttribute(pkcs11.CKA_ID, []byte(id)))
+	if id != 0 {
+		// Convert int32 to byte slice
+		b := utils.Int32ToByte(id)
+		template = append(template, pkcs11.NewAttribute(pkcs11.CKA_ID, b))
 	}
 
 	if err := m.ctx.FindObjectsInit(m.session, template); err != nil {

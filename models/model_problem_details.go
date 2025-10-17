@@ -1,7 +1,7 @@
 /*
 SSM (Secure Storage Manager) API
 
-API para gestión segura de claves criptográficas usando PKCS#11 y HSM.  El SSM proporciona operaciones seguras de: - Generación de claves AES - Cifrado y descifrado de datos - Almacenamiento de claves - Gestión mediante HSM/SoftHSM  ## Autenticación La API funciona a través de Unix Domain Sockets para mayor seguridad. Tambien da soporte a HTTPS con certificados TLS. No implementado aun.  ## Formatos de datos - Todos los datos binarios (plaintext, ciphertext, IV) deben estar en Base64 - Las respuestas incluyen timestamps en formato RFC3339 - Los errores siguen el estándar RFC 7807 (Problem Details)
+API for secure cryptographic key management using PKCS#11 and HSM.  SSM provides secure operations for: - AES, DES, DES3 key generation - Data encryption and decryption - Key storage and management - HSM/SoftHSM integration  ## Authentication The API works through Unix Domain Sockets for enhanced security. Also supports HTTPS with TLS certificates.  ## Data Formats - All binary data (plaintext, ciphertext, IV) should be in Base64/Hex - Responses include timestamps in RFC3339 format - Errors follow RFC 7807 standard (Problem Details)
 
 API version: 1.0.0
 Contact: support@yourorganization.com
@@ -13,14 +13,14 @@ package models
 
 // ProblemDetails Detalles de error según RFC 7807
 type ProblemDetails struct {
-	// Título breve del problema
-	Title string `json:"title,omitempty"`
-	// Descripción detallada del problema
-	Detail string `json:"detail,omitempty"`
-	// Código de estado HTTP
-	Status int32 `json:"status,omitempty"`
-	// Código de error interno
-	Error string `json:"error,omitempty"`
-	// URI que identifica la ocurrencia específica
-	Instance string `json:"instance,omitempty"`
+	// Short title of the problem
+	Title string `json:"title"`
+	// Detailed description of the problem
+	Detail string `json:"detail"`
+	// HTTP status code
+	Status int32 `json:"status"`
+	// Internal error code
+	Error string `json:"error"`
+	// URI identifying the specific occurrence
+	Instance string `json:"instance"`
 }

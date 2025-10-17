@@ -10,6 +10,7 @@ import (
 	"github.com/networkgcorefullcode/ssm/logger"
 	"github.com/networkgcorefullcode/ssm/models"
 	"github.com/networkgcorefullcode/ssm/pkcs11mgr"
+	"github.com/networkgcorefullcode/ssm/utils"
 )
 
 // HandleStoreKey handles key storage requests
@@ -67,7 +68,7 @@ func postStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request
 	}
 
 	logger.AppLog.Infof("Storing key in HSM - Label: %s", label)
-	handle, err := mgr.StoreKey(label, key_value, []byte(id), key_type)
+	handle, err := mgr.StoreKey(label, key_value, utils.Int32ToByte(id), key_type)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to store key: %v", err)
 		sendProblemDetails(w, "Key Storage Failed", "Error storing key in HSM", "KEY_STORAGE_ERROR", http.StatusInternalServerError, r.URL.Path)
@@ -78,12 +79,12 @@ func postStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request
 
 	resp := models.StoreKeyResponse{
 		Handle:    uint(handle),
-		CipherKey: nil, // Initially nil, will be assigned if encryption is possible
+		CipherKey: "", // Initially empty, will be assigned if encryption is possible
 	}
 
 	// Try to find the encryption key to encrypt the stored value
 	logger.AppLog.Infof("Looking for encryption key: %s", constants.LABEL_ENCRYPTION_KEY)
-	findHandle, err := mgr.FindKey(constants.LABEL_ENCRYPTION_KEY, "")
+	findHandle, err := mgr.FindKey(constants.LABEL_ENCRYPTION_KEY, 0)
 	if err != nil || findHandle == 0 {
 		logger.AppLog.Warnf("Encryption key not found or error: %v. Returning response without encrypted key", err)
 		w.Header().Set("Content-Type", "application/json")
@@ -99,11 +100,10 @@ func postStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request
 	cipher, err := mgr.EncryptKey(findHandle, nil, key_value, pkcs11.CKM_AES_CBC_PAD)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to encrypt key value: %v. Returning response without encrypted key", err)
-		resp.CipherKey = nil
+		resp.CipherKey = ""
 	} else {
 		logger.AppLog.Info("Key value encrypted successfully")
-		encryptedKeyB64 := hex.EncodeToString(cipher)
-		resp.CipherKey = &encryptedKeyB64
+		resp.CipherKey = hex.EncodeToString(cipher)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -175,7 +175,7 @@ func updateStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Reque
 	}
 
 	// Update the key in the HSM
-	handle, err := mgr.UpdateKey(label, keyValue, []byte(id), keyType)
+	handle, err := mgr.UpdateKey(label, keyValue, utils.Int32ToByte(req.Id), keyType)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to update key: %v", err)
 		sendProblemDetails(w, "Key Update Failed", "Error updating key in HSM", "KEY_UPDATE_ERROR", http.StatusInternalServerError, r.URL.Path)
@@ -188,12 +188,12 @@ func updateStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Reque
 		Message:   "Key updated successfully",
 		Handle:    uint(handle),
 		KeyLabel:  label,
-		CipherKey: nil, // Initially nil, will be assigned if encryption is possible
+		CipherKey: "", // Initially nil, will be assigned if encryption is possible
 	}
 
 	// Try to find the encryption key to encrypt the new value
 	logger.AppLog.Infof("Looking for encryption key: %s", constants.LABEL_ENCRYPTION_KEY)
-	findHandle, err := mgr.FindKey(constants.LABEL_ENCRYPTION_KEY, "")
+	findHandle, err := mgr.FindKey(constants.LABEL_ENCRYPTION_KEY, 0)
 	if err != nil || findHandle == 0 {
 		logger.AppLog.Warnf("Encryption key not found or error: %v. Returning response without encrypted key", err)
 		w.Header().Set("Content-Type", "application/json")
@@ -209,11 +209,10 @@ func updateStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Reque
 	cipher, err := mgr.EncryptKey(findHandle, nil, keyValue, pkcs11.CKM_AES_CBC_PAD)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to encrypt updated key value: %v. Returning response without encrypted key", err)
-		resp.CipherKey = nil
+		resp.CipherKey = ""
 	} else {
 		logger.AppLog.Info("Updated key value encrypted successfully")
-		encryptedKeyB64 := hex.EncodeToString(cipher)
-		resp.CipherKey = &encryptedKeyB64
+		resp.CipherKey = hex.EncodeToString(cipher)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
