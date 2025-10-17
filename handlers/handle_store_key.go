@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"net/http"
@@ -13,16 +12,16 @@ import (
 	"github.com/networkgcorefullcode/ssm/pkcs11mgr"
 )
 
-// HandleStoreKey maneja las peticiones de almacenamiento de claves
-// @Summary Almacenar clave
-// @Description Almacena una clave en el HSM y opcionalmente la encripta
+// HandleStoreKey handles key storage requests
+// @Summary Store key
+// @Description Stores a key in the HSM and optionally encrypts it
 // @Tags Key Management
 // @Accept json
 // @Produce json
-// @Param request body models.StoreKeyRequest true "Datos de la clave a almacenar"
-// @Success 200 {object} models.StoreKeyResponse "Clave almacenada exitosamente"
-// @Failure 400 {object} models.ProblemDetails "Petición inválida"
-// @Failure 500 {object} models.ProblemDetails "Error interno del servidor"
+// @Param request body models.StoreKeyRequest true "Key data to store"
+// @Success 200 {object} models.StoreKeyResponse "Key stored successfully"
+// @Failure 400 {object} models.ProblemDetails "Invalid request"
+// @Failure 500 {object} models.ProblemDetails "Internal server error"
 // @Router /store-key [post]
 func HandleStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
@@ -33,7 +32,7 @@ func HandleStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Reque
 	case http.MethodPut:
 		updateStoreKey(mgr, w, r)
 	default:
-		sendProblemDetails(w, "Method Not Allowed", "El método HTTP no está permitido para este endpoint", "METHOD_NOT_ALLOWED", http.StatusMethodNotAllowed, r.URL.Path)
+		sendProblemDetails(w, "Method Not Allowed", "The HTTP method is not allowed for this endpoint", "METHOD_NOT_ALLOWED", http.StatusMethodNotAllowed, r.URL.Path)
 	}
 }
 
@@ -44,7 +43,7 @@ func postStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		logger.AppLog.Errorf("Failed to decode request body: %v", err)
-		sendProblemDetails(w, "Bad Request", "El cuerpo de la petición no es válido JSON", "INVALID_JSON", http.StatusBadRequest, r.URL.Path)
+		sendProblemDetails(w, "Bad Request", "The request body is not valid JSON", "INVALID_JSON", http.StatusBadRequest, r.URL.Path)
 		return
 	}
 
@@ -54,8 +53,16 @@ func postStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request
 	logger.AppLog.Infof("Decoding key value for label: %s, ID: %s", label, id)
 	key_value, err := hex.DecodeString(req.KeyValue)
 	if err != nil {
-		logger.AppLog.Errorf("Failed to decode base64 key value: %v", err)
-		sendProblemDetails(w, "Bad Request", "El valor de la clave en base64 no es válido", "INVALID_BASE64", http.StatusBadRequest, r.URL.Path)
+		logger.AppLog.Errorf("Failed to decode HEX key value: %v", err)
+		sendProblemDetails(w, "Bad Request", "The key value in HEX is not valid", "INVALID_HEX", http.StatusBadRequest, r.URL.Path)
+		return
+	}
+
+	if req.KeyLabel != constants.LABEL_K4_KEY_AES &&
+		req.KeyLabel != constants.LABEL_K4_KEY_DES &&
+		req.KeyLabel != constants.LABEL_K4_KEY_DES3 {
+		logger.AppLog.Errorf("Unsupported key type: %s", req.KeyLabel)
+		sendProblemDetails(w, "Bad Request", "The specified key type is not supported", "UNSUPPORTED_KEY_TYPE", http.StatusBadRequest, r.URL.Path)
 		return
 	}
 
@@ -63,7 +70,7 @@ func postStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request
 	handle, err := mgr.StoreKey(label, key_value, []byte(id), key_type)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to store key: %v", err)
-		sendProblemDetails(w, "Key Storage Failed", "Error al almacenar la clave en el HSM", "KEY_STORAGE_ERROR", http.StatusInternalServerError, r.URL.Path)
+		sendProblemDetails(w, "Key Storage Failed", "Error storing key in HSM", "KEY_STORAGE_ERROR", http.StatusInternalServerError, r.URL.Path)
 		return
 	}
 
@@ -71,10 +78,10 @@ func postStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request
 
 	resp := models.StoreKeyResponse{
 		Handle:    uint(handle),
-		CipherKey: nil, // Inicialmente nil, se asignará si se puede encriptar
+		CipherKey: nil, // Initially nil, will be assigned if encryption is possible
 	}
 
-	// Intentar encontrar la clave de encriptación para encriptar el valor almacenado
+	// Try to find the encryption key to encrypt the stored value
 	logger.AppLog.Infof("Looking for encryption key: %s", constants.LABEL_ENCRYPTION_KEY)
 	findHandle, err := mgr.FindKey(constants.LABEL_ENCRYPTION_KEY, "")
 	if err != nil || findHandle == 0 {
@@ -87,7 +94,7 @@ func postStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	// Encriptar el valor de la clave almacenada
+	// Encrypt the stored key value
 	logger.AppLog.Info("Encrypting stored key value")
 	cipher, err := mgr.EncryptKey(findHandle, nil, key_value, pkcs11.CKM_AES_CBC_PAD)
 	if err != nil {
@@ -95,7 +102,7 @@ func postStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request
 		resp.CipherKey = nil
 	} else {
 		logger.AppLog.Info("Key value encrypted successfully")
-		encryptedKeyB64 := base64.StdEncoding.EncodeToString(cipher)
+		encryptedKeyB64 := hex.EncodeToString(cipher)
 		resp.CipherKey = &encryptedKeyB64
 	}
 
@@ -114,7 +121,7 @@ func deleteStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Reque
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		logger.AppLog.Errorf("Failed to decode request body: %v", err)
-		sendProblemDetails(w, "Bad Request", "El cuerpo de la petición no es válido JSON", "INVALID_JSON", http.StatusBadRequest, r.URL.Path)
+		sendProblemDetails(w, "Bad Request", "The request body is not valid JSON", "INVALID_JSON", http.StatusBadRequest, r.URL.Path)
 		return
 	}
 
@@ -122,10 +129,10 @@ func deleteStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Reque
 	id := req.Id
 	logger.AppLog.Infof("Deleting key with label: %s, ID: %s", label, id)
 
-	// Eliminar la llave del HSM
+	// Delete the key from the HSM
 	if err := mgr.DeleteKey(label, id); err != nil {
 		logger.AppLog.Errorf("Failed to delete key: %v", err)
-		sendProblemDetails(w, "Key Deletion Failed", "Error al eliminar la clave del HSM", "KEY_DELETION_ERROR", http.StatusInternalServerError, r.URL.Path)
+		sendProblemDetails(w, "Key Deletion Failed", "Error deleting key from HSM", "KEY_DELETION_ERROR", http.StatusInternalServerError, r.URL.Path)
 		return
 	}
 
@@ -150,7 +157,7 @@ func updateStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Reque
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		logger.AppLog.Errorf("Failed to decode request body: %v", err)
-		sendProblemDetails(w, "Bad Request", "El cuerpo de la petición no es válido JSON", "INVALID_JSON", http.StatusBadRequest, r.URL.Path)
+		sendProblemDetails(w, "Bad Request", "The request body is not valid JSON", "INVALID_JSON", http.StatusBadRequest, r.URL.Path)
 		return
 	}
 
@@ -159,19 +166,19 @@ func updateStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Reque
 	keyType := req.KeyType
 	logger.AppLog.Infof("Updating key with label: %s, ID: %s, Type: %s", label, id, keyType)
 
-	// Decodificar el nuevo valor de la llave desde hexadecimal
+	// Decode the new key value from hexadecimal
 	keyValue, err := hex.DecodeString(req.KeyValue)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to decode hex key value: %v", err)
-		sendProblemDetails(w, "Bad Request", "El valor de la clave en hexadecimal no es válido", "INVALID_HEX", http.StatusBadRequest, r.URL.Path)
+		sendProblemDetails(w, "Bad Request", "The key value in hexadecimal is not valid", "INVALID_HEX", http.StatusBadRequest, r.URL.Path)
 		return
 	}
 
-	// Actualizar la llave en el HSM
+	// Update the key in the HSM
 	handle, err := mgr.UpdateKey(label, keyValue, []byte(id), keyType)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to update key: %v", err)
-		sendProblemDetails(w, "Key Update Failed", "Error al actualizar la clave en el HSM", "KEY_UPDATE_ERROR", http.StatusInternalServerError, r.URL.Path)
+		sendProblemDetails(w, "Key Update Failed", "Error updating key in HSM", "KEY_UPDATE_ERROR", http.StatusInternalServerError, r.URL.Path)
 		return
 	}
 
@@ -181,10 +188,10 @@ func updateStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Reque
 		Message:   "Key updated successfully",
 		Handle:    uint(handle),
 		KeyLabel:  label,
-		CipherKey: nil, // Inicialmente nil, se asignará si se puede encriptar
+		CipherKey: nil, // Initially nil, will be assigned if encryption is possible
 	}
 
-	// Intentar encontrar la clave de encriptación para encriptar el nuevo valor
+	// Try to find the encryption key to encrypt the new value
 	logger.AppLog.Infof("Looking for encryption key: %s", constants.LABEL_ENCRYPTION_KEY)
 	findHandle, err := mgr.FindKey(constants.LABEL_ENCRYPTION_KEY, "")
 	if err != nil || findHandle == 0 {
@@ -197,7 +204,7 @@ func updateStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	// Encriptar el nuevo valor de la clave
+	// Encrypt the new key value
 	logger.AppLog.Info("Encrypting updated key value")
 	cipher, err := mgr.EncryptKey(findHandle, nil, keyValue, pkcs11.CKM_AES_CBC_PAD)
 	if err != nil {
@@ -205,7 +212,7 @@ func updateStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Reque
 		resp.CipherKey = nil
 	} else {
 		logger.AppLog.Info("Updated key value encrypted successfully")
-		encryptedKeyB64 := base64.StdEncoding.EncodeToString(cipher)
+		encryptedKeyB64 := hex.EncodeToString(cipher)
 		resp.CipherKey = &encryptedKeyB64
 	}
 

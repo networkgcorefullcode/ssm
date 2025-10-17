@@ -15,9 +15,9 @@ import "time"
 // EncryptResponse struct for EncryptResponse
 type EncryptResponse struct {
 	// Datos cifrados en Base64
-	CipherB64 *string `json:"cipher_b64,omitempty"`
+	Cipher *string `json:"cipher,omitempty"`
 	// Vector de inicialización en Base64
-	IvB64 *string `json:"iv_b64,omitempty"`
+	Iv *string `json:"iv,omitempty"`
 	// Indica si la operación fue exitosa
 	Ok *bool `json:"ok,omitempty"`
 	// Timestamp de creación en RFC3339

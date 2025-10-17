@@ -15,9 +15,9 @@ type DecryptRequest struct {
 	// Etiqueta de la clave para descifrar
 	KeyLabel string `json:"key_label"`
 	// Datos cifrados en Base64
-	CipherB64 string `json:"cipher_b64"`
+	Cipher string `json:"cipher"`
 	// Vector de inicialización en Base64 (mismo usado para cifrar)
-	IvB64 string `json:"iv_b64,omitempty"`
+	Iv string `json:"iv,omitempty"`
 	// ID opcional para tracking
 	Id string `json:"id,omitempty"`
 	// Details for the encryption algoritme

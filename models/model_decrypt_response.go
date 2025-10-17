@@ -14,5 +14,5 @@ package models
 // DecryptResponse struct for DecryptResponse
 type DecryptResponse struct {
 	// Datos descifrados en Base64
-	PlainB64 string `json:"plain_b64,omitempty"`
+	Plain string `json:"plain,omitempty"`
 }

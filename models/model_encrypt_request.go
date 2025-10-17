@@ -13,8 +13,10 @@ package models
 
 // EncryptRequest struct for EncryptRequest
 type EncryptRequest struct {
-	// Etiqueta de la clave para cifrar
+	// Key label to use for encryption
 	KeyLabel string `json:"key_label"`
-	// Datos a cifrar codificados en Base64
-	PlainB64 string `json:"plain_b64"`
+	// Data to encrypt, encoded in Base64
+	Plain string `json:"plain"`
+	// Encryption mode (e.g., AES_CBC_PAD)
+	EncryptionAlgorithm int `json:"encryption_algorithm"`
 }

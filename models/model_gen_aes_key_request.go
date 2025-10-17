@@ -13,8 +13,6 @@ package models
 
 // GenAESKeyRequest struct for GenAESKeyRequest
 type GenAESKeyRequest struct {
-	// Etiqueta única para identificar la clave
-	Label string `json:"label"`
 	// Identificador único de la clave
 	Id string `json:"id"`
 	// Tamaño de la clave en bits
