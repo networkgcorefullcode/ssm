@@ -1,6 +1,6 @@
 # SSM Aether
 
-This SSM is writing in Go, the goal of this project is to provide a point to comunicate to a SoftHSM. 
+This SSM is writing in Go, the goal of this project is to provide a point to comunicate to a SoftHSM.
 
 ## Features
 
