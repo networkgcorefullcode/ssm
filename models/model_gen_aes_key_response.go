@@ -15,8 +15,6 @@ package models
 type GenAESKeyResponse struct {
 	// Handle de la clave en el HSM
 	Handle uint `json:"handle,omitempty"`
-	// Etiqueta de la clave generada
-	Label *string `json:"label,omitempty"`
 	// ID de la clave generada
 	Id *string `json:"id,omitempty"`
 	// Tamaño de la clave generada
