@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"net/http"
@@ -70,10 +69,10 @@ func postDecrypt(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	iv, err := base64.StdEncoding.DecodeString(req.Iv)
+	iv, err := hex.DecodeString(req.Iv)
 
 	if err != nil {
-		logger.AppLog.Errorf("Failed to decode IV Base64: %v", err)
+		logger.AppLog.Errorf("Failed to decode IV hex: %v", err)
 		iv = nil
 	}
 	if req.Iv == "" {
