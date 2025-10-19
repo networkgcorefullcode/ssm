@@ -23,9 +23,7 @@ var SsmServer = &SSM{}
 var PkcsManager = &pkcs11mgr.Manager{}
 
 // TODO: create a proper server struct to hold server config if needed
-var main_server = &http.Server{
-	Addr: factory.SsmConfig.Configuration.BindAddr,
-}
+var main_server http.Server
 
 type (
 	// Config information.
@@ -78,6 +76,10 @@ func (ssm *SSM) Initialize(c *cli.Command) error {
 	}
 
 	factory.SsmConfig.CfgLocation = absPath
+
+	main_server = http.Server{
+		Addr: factory.SsmConfig.Configuration.BindAddr,
+	}
 	return nil
 }
 
