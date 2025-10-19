@@ -57,7 +57,7 @@ func postGenerateDES3Key(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.
 	logger.AppLog.Infof("DES3 key generated successfully - Handle: %d", handle)
 
 	resp := models.GenDES3KeyResponse{
-		Handle: uint(handle),
+		Handle: int32(handle),
 		Id:     req.Id,
 	}
 

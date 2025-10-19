@@ -56,7 +56,7 @@ func postGenerateDESKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.R
 	logger.AppLog.Infof("DES key generated successfully - Handle: %d", handle)
 
 	resp := models.GenDESKeyResponse{
-		Handle: uint(handle),
+		Handle: int32(handle),
 		Id:     req.Id,
 	}
 
