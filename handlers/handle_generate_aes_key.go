@@ -8,7 +8,6 @@ import (
 	"github.com/networkgcorefullcode/ssm/logger"
 	"github.com/networkgcorefullcode/ssm/models"
 	"github.com/networkgcorefullcode/ssm/pkcs11mgr"
-	"github.com/networkgcorefullcode/ssm/utils"
 )
 
 // HandleGenerateAESKey maneja las peticiones de generación de claves AES
@@ -53,7 +52,7 @@ func postGenerateAESKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.R
 
 	logger.AppLog.Infof("Generating AES key - ID: %s, Bits: %d", req.Id, req.Bits)
 
-	handle, err := mgr.GenerateAESKey(constants.LABEL_K4_KEY_AES, utils.Int32ToByte(req.Id), int(req.Bits))
+	handle, err := mgr.GenerateAESKey(constants.LABEL_K4_KEY_AES, req.Id, int(req.Bits))
 	if err != nil {
 		logger.AppLog.Errorf("AES key generation failed: %v", err)
 		sendProblemDetails(w, "Key Generation Failed", "Error al generar la clave AES en el HSM", "KEY_GENERATION_ERROR", http.StatusInternalServerError, r.URL.Path)

@@ -8,7 +8,6 @@ import (
 	"github.com/networkgcorefullcode/ssm/logger"
 	"github.com/networkgcorefullcode/ssm/models"
 	"github.com/networkgcorefullcode/ssm/pkcs11mgr"
-	"github.com/networkgcorefullcode/ssm/utils"
 )
 
 // HandleGenerateDESKey maneja las peticiones de generación de claves DES
@@ -47,7 +46,7 @@ func postGenerateDESKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.R
 	}
 
 	logger.AppLog.Infof("Generating DES key - ID: %d", req.Id)
-	handle, err := mgr.GenerateDESKey(constants.LABEL_K4_KEY_DES, utils.Int32ToByte(req.Id))
+	handle, err := mgr.GenerateDESKey(constants.LABEL_K4_KEY_DES, req.Id)
 	if err != nil {
 		logger.AppLog.Errorf("DES key generation failed: %v", err)
 		sendProblemDetails(w, "Key Generation Failed", "Error al generar la clave DES en el HSM", "KEY_GENERATION_ERROR", http.StatusInternalServerError, r.URL.Path)

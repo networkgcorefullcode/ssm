@@ -10,7 +10,6 @@ import (
 	"github.com/networkgcorefullcode/ssm/logger"
 	"github.com/networkgcorefullcode/ssm/models"
 	"github.com/networkgcorefullcode/ssm/pkcs11mgr"
-	"github.com/networkgcorefullcode/ssm/utils"
 )
 
 // HandleStoreKey handles key storage requests
@@ -68,7 +67,7 @@ func postStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request
 	}
 
 	logger.AppLog.Infof("Storing key in HSM - Label: %s", label)
-	handle, err := mgr.StoreKey(label, key_value, utils.Int32ToByte(id), key_type)
+	handle, err := mgr.StoreKey(label, key_value, id, key_type)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to store key: %v", err)
 		sendProblemDetails(w, "Key Storage Failed", "Error storing key in HSM", "KEY_STORAGE_ERROR", http.StatusInternalServerError, r.URL.Path)
@@ -175,7 +174,7 @@ func updateStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Reque
 	}
 
 	// Update the key in the HSM
-	handle, err := mgr.UpdateKey(label, keyValue, utils.Int32ToByte(req.Id), keyType)
+	handle, err := mgr.UpdateKey(label, keyValue, req.Id, keyType)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to update key: %v", err)
 		sendProblemDetails(w, "Key Update Failed", "Error updating key in HSM", "KEY_UPDATE_ERROR", http.StatusInternalServerError, r.URL.Path)
@@ -188,7 +187,7 @@ func updateStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Reque
 		Message:   "Key updated successfully",
 		Handle:    uint(handle),
 		KeyLabel:  label,
-		CipherKey: "", // Initially nil, will be assigned if encryption is possible
+		CipherKey: "", // Initially empty "", will be assigned if encryption is possible
 	}
 
 	// Try to find the encryption key to encrypt the new value

@@ -5,15 +5,16 @@ import (
 
 	"github.com/miekg/pkcs11"
 	"github.com/networkgcorefullcode/ssm/logger"
+	"github.com/networkgcorefullcode/ssm/utils"
 )
 
 // GenerateAESKey creates an AES key object inside SoftHSM and returns its object handle (as uint)
-func (m *Manager) GenerateAESKey(label string, id []byte, bits int) (pkcs11.ObjectHandle, error) {
+func (m *Manager) GenerateAESKey(label string, id int32, bits int) (pkcs11.ObjectHandle, error) {
 	logger.AppLog.Infof("Generating AES key: label=%s, bits=%d", label, bits)
 	mech := pkcs11.NewMechanism(pkcs11.CKM_AES_KEY_GEN, nil)
 	template := []*pkcs11.Attribute{
 		pkcs11.NewAttribute(pkcs11.CKA_LABEL, label),
-		pkcs11.NewAttribute(pkcs11.CKA_ID, id),
+		pkcs11.NewAttribute(pkcs11.CKA_ID, utils.Int32ToByte(id)),
 		pkcs11.NewAttribute(pkcs11.CKA_VALUE_LEN, bits/8),
 		pkcs11.NewAttribute(pkcs11.CKA_ENCRYPT, true),
 		pkcs11.NewAttribute(pkcs11.CKA_DECRYPT, true),
@@ -25,7 +26,7 @@ func (m *Manager) GenerateAESKey(label string, id []byte, bits int) (pkcs11.Obje
 	}
 
 	// Check if key already exists before creating it
-	existingHandle, err := m.FindKey(label, string(id))
+	existingHandle, err := m.FindKey(label, id)
 	if err == nil && existingHandle != 0 {
 		logger.AppLog.Infof("Key with label '%s' already exists, returning existing handle: %v", label, existingHandle)
 		return existingHandle, errors.New("the key is in the SSM")
@@ -41,12 +42,12 @@ func (m *Manager) GenerateAESKey(label string, id []byte, bits int) (pkcs11.Obje
 }
 
 // GenerateDESKey creates an DES key object inside SoftHSM and returns its object handle (as uint)
-func (m *Manager) GenerateDESKey(label string, id []byte) (pkcs11.ObjectHandle, error) {
+func (m *Manager) GenerateDESKey(label string, id int32) (pkcs11.ObjectHandle, error) {
 	logger.AppLog.Infof("Generating DES key: label=%s", label)
 	mech := pkcs11.NewMechanism(pkcs11.CKM_DES_KEY_GEN, nil)
 	template := []*pkcs11.Attribute{
 		pkcs11.NewAttribute(pkcs11.CKA_LABEL, label),
-		pkcs11.NewAttribute(pkcs11.CKA_ID, id),
+		pkcs11.NewAttribute(pkcs11.CKA_ID, utils.Int32ToByte(id)),
 		pkcs11.NewAttribute(pkcs11.CKA_ENCRYPT, true),
 		pkcs11.NewAttribute(pkcs11.CKA_DECRYPT, true),
 		pkcs11.NewAttribute(pkcs11.CKA_WRAP, true),
@@ -57,7 +58,7 @@ func (m *Manager) GenerateDESKey(label string, id []byte) (pkcs11.ObjectHandle, 
 	}
 
 	// Check if key already exists before creating it
-	existingHandle, err := m.FindKey(label, string(id))
+	existingHandle, err := m.FindKey(label, id)
 	if err == nil && existingHandle != 0 {
 		logger.AppLog.Infof("Key with label '%s' already exists, returning existing handle: %v", label, existingHandle)
 		return existingHandle, errors.New("the key is in the SSM")
@@ -73,12 +74,12 @@ func (m *Manager) GenerateDESKey(label string, id []byte) (pkcs11.ObjectHandle, 
 }
 
 // GenerateDES3Key creates an DES3 key object inside SoftHSM and returns its object handle (as uint)
-func (m *Manager) GenerateDES3Key(label string, id []byte) (pkcs11.ObjectHandle, error) {
+func (m *Manager) GenerateDES3Key(label string, id int32) (pkcs11.ObjectHandle, error) {
 	logger.AppLog.Infof("Generating DES3 key: label=%s", label)
 	mech := pkcs11.NewMechanism(pkcs11.CKM_DES3_KEY_GEN, nil)
 	template := []*pkcs11.Attribute{
 		pkcs11.NewAttribute(pkcs11.CKA_LABEL, label),
-		pkcs11.NewAttribute(pkcs11.CKA_ID, id),
+		pkcs11.NewAttribute(pkcs11.CKA_ID, utils.Int32ToByte(id)),
 		pkcs11.NewAttribute(pkcs11.CKA_ENCRYPT, true),
 		pkcs11.NewAttribute(pkcs11.CKA_DECRYPT, true),
 		pkcs11.NewAttribute(pkcs11.CKA_WRAP, true),
@@ -89,7 +90,7 @@ func (m *Manager) GenerateDES3Key(label string, id []byte) (pkcs11.ObjectHandle,
 	}
 
 	// Check if key already exists before creating it
-	existingHandle, err := m.FindKey(label, string(id))
+	existingHandle, err := m.FindKey(label, id)
 	if err == nil && existingHandle != 0 {
 		logger.AppLog.Infof("Key with label '%s' already exists, returning existing handle: %v", label, existingHandle)
 		return existingHandle, errors.New("the key is in the SSM")

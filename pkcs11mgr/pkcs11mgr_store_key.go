@@ -6,10 +6,11 @@ import (
 	"github.com/miekg/pkcs11"
 	ssm_consts "github.com/networkgcorefullcode/ssm/const"
 	"github.com/networkgcorefullcode/ssm/logger"
+	"github.com/networkgcorefullcode/ssm/utils"
 )
 
 // StoreKey creates a key object inside SoftHSM from raw key bytes and returns its object handle
-func (m *Manager) StoreKey(label string, key []byte, id []byte, keyType string) (pkcs11.ObjectHandle, error) {
+func (m *Manager) StoreKey(label string, key []byte, id int32, keyType string) (pkcs11.ObjectHandle, error) {
 	logger.AppLog.Infof("Storing key: label=%s, keyType=%s, keyLen=%d", label, keyType, len(key))
 	var keyTypeuint uint
 	switch keyType {
@@ -24,7 +25,7 @@ func (m *Manager) StoreKey(label string, key []byte, id []byte, keyType string) 
 	}
 	template := []*pkcs11.Attribute{
 		pkcs11.NewAttribute(pkcs11.CKA_LABEL, label),
-		pkcs11.NewAttribute(pkcs11.CKA_ID, id),
+		pkcs11.NewAttribute(pkcs11.CKA_ID, utils.Int32ToByte(id)),
 		pkcs11.NewAttribute(pkcs11.CKA_CLASS, pkcs11.CKO_SECRET_KEY),
 		pkcs11.NewAttribute(pkcs11.CKA_KEY_TYPE, keyTypeuint),
 		pkcs11.NewAttribute(pkcs11.CKA_VALUE, key),
@@ -38,7 +39,7 @@ func (m *Manager) StoreKey(label string, key []byte, id []byte, keyType string) 
 	}
 
 	// Check if key already exists before creating it
-	existingHandle, err := m.FindKey(label, string(id))
+	existingHandle, err := m.FindKey(label, id)
 	if err == nil && existingHandle != 0 {
 		logger.AppLog.Infof("Key with label '%s' already exists, returning existing handle: %v", label, existingHandle)
 		return existingHandle, errors.New("the key is in the SSM")
@@ -133,11 +134,11 @@ func (m *Manager) DeleteAllKeys() error {
 
 // UpdateKey updates an existing key by deleting the old one and creating a new one with the updated value
 // This function combines delete and store operations to effectively "update" a key
-func (m *Manager) UpdateKey(label string, newKeyValue []byte, id []byte, keyType string) (pkcs11.ObjectHandle, error) {
+func (m *Manager) UpdateKey(label string, newKeyValue []byte, id int32, keyType string) (pkcs11.ObjectHandle, error) {
 	logger.AppLog.Infof("Updating key: label=%s, keyType=%s, newKeyLen=%d", label, keyType, len(newKeyValue))
 
 	// First, check if the key exists
-	existingHandle, err := m.FindKey(label, string(id))
+	existingHandle, err := m.FindKey(label, id)
 	if err != nil {
 		logger.AppLog.Errorf("Error searching for key to update: %v", err)
 		return 0, err
@@ -151,7 +152,7 @@ func (m *Manager) UpdateKey(label string, newKeyValue []byte, id []byte, keyType
 	logger.AppLog.Infof("Found existing key to update: handle=%v", existingHandle)
 
 	// Delete the existing key
-	if err := m.DeleteKey(label, string(id)); err != nil {
+	if err := m.DeleteKey(label, id); err != nil {
 		logger.AppLog.Errorf("Failed to delete existing key for update: %v", err)
 		return 0, err
 	}
