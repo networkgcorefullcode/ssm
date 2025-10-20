@@ -14,4 +14,5 @@ package models
 // GetDataKeysRequest
 type GetDataKeyRequest struct {
 	KeyLabel string `json:"key_label"`
+	Id       int32  `json:"id"`
 }

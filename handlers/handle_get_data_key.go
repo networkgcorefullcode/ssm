@@ -43,7 +43,7 @@ func postGetDataKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Reque
 	label := req.KeyLabel
 
 	logger.AppLog.Infof("Searching key in HSM - using the Label: %s", label)
-	handle, err := mgr.FindKey(label, 0)
+	handle, err := mgr.FindKey(label, req.Id)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to search keys: %v", err)
 		sendProblemDetails(w, "Key find Failed", "Error searching key in HSM", "KEY_GET_ERROR", http.StatusInternalServerError, r.URL.Path)
