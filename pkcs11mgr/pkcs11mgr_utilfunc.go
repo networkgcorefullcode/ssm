@@ -55,7 +55,7 @@ func (m *Manager) FindKeysLabel(label string) ([]pkcs11.ObjectHandle, error) {
 
 	if err := m.ctx.FindObjectsInit(m.session, template); err != nil {
 		logger.AppLog.Errorf("FindObjectsInit failed: %v", err)
-		return 0, err
+		return nil, err
 	}
 	defer m.ctx.FindObjectsFinal(m.session)
 
@@ -64,12 +64,12 @@ func (m *Manager) FindKeysLabel(label string) ([]pkcs11.ObjectHandle, error) {
 		new_handles, _, err := m.ctx.FindObjects(m.session, 20) // return a []ObjectHandle the max size is 20
 		if err != nil {
 			logger.AppLog.Errorf("FindObjects failed: %v", err)
-			return 0, err
+			return nil, err
 		}
 		if len(new_handles) == 0 {
 			if len(handles) == 0 {
 				logger.AppLog.Warnf("No key found with label: %s", label)
-				return 0, err
+				return nil, err
 			}
 			logger.AppLog.Info("Key found is finished")
 			return handles, nil
@@ -104,7 +104,7 @@ func (m *Manager) FindAllKeys() (map[string][]pkcs11.ObjectHandle, error) {
 		if len(newHandles) == 0 {
 			if len(allHandles) == 0 {
 				logger.AppLog.Warnf("No key found")
-				return 0, err
+				return nil, err
 			}
 			break
 		}
