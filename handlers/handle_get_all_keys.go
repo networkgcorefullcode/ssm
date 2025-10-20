@@ -45,7 +45,7 @@ func postGetAllKeys(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Reque
 	resp := models.GetAllKeysResponse{
 		KeysByLabel: make(map[string][]models.DataKeyInfo),
 		TotalKeys:   0,
-		TotalLabels: len(keysByLabel),
+		TotalLabels: int32(len(keysByLabel)),
 	}
 
 	// Process each label and its keys
@@ -69,7 +69,7 @@ func postGetAllKeys(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Reque
 		}
 
 		resp.KeysByLabel[label] = keysInfo
-		resp.TotalKeys += len(keysInfo)
+		resp.TotalKeys += int32(len(keysInfo))
 	}
 
 	logger.AppLog.Infof("Successfully retrieved %d keys across %d labels", resp.TotalKeys, resp.TotalLabels)

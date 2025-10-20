@@ -32,7 +32,7 @@ func HandleGetDataKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Req
 func postGetDataKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request) {
 	logger.AppLog.Info("Processing get data key request")
 
-	var req models.GetDataKeyRequest
+	var req models.GetKeyRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		logger.AppLog.Errorf("Failed to decode request body: %v", err)
@@ -60,7 +60,7 @@ func postGetDataKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Reque
 	}
 
 	// Prepare the response
-	resp := models.GetDataKeyResponse{
+	resp := models.GetKeyResponse{
 		KeyInfo: models.DataKeyInfo{
 			Handle: objAtr.Handle,
 			Id:     objAtr.Id,
