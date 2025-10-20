@@ -1,6 +1,8 @@
 package pkcs11mgr
 
 import (
+	"math/rand/v2"
+
 	"github.com/miekg/pkcs11"
 	"github.com/networkgcorefullcode/ssm/logger"
 	"github.com/networkgcorefullcode/ssm/utils"
@@ -126,6 +128,17 @@ func (m *Manager) FindAllKeys() (map[string][]pkcs11.ObjectHandle, error) {
 
 	logger.AppLog.Infof("Keys grouped into %d labels", len(keysByLabel))
 	return keysByLabel, nil
+}
+
+// FindKeyLabelReturnRandom returns random object handle for a given label, or 0 if not found return a one key
+func (m *Manager) FindKeyLabelReturnRandom(label string) (pkcs11.ObjectHandle, error) {
+	logger.AppLog.Infof("Searching for key by label: %s", label)
+	handles, err := m.FindKeysLabel(label)
+	if err != nil {
+		logger.AppLog.Errorf("FindObjects failed: %v", err)
+		return 0, err
+	}
+	return handles[rand.Int64N(int64(len(handles)))], err
 }
 
 func (m *Manager) GetValuesForObjects(o []pkcs11.ObjectHandle) ([]ObjectAttributes, error) {
