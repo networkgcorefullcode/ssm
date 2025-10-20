@@ -21,6 +21,7 @@ type EncryptResponse struct {
 	Cipher string `json:"cipher"`
 	// Initialization vector in hexadecimal
 	Iv string `json:"iv"`
+	Id int32  `json:"id"`
 	// Indicates if the operation was successful
 	Ok bool `json:"ok"`
 	// Creation timestamp in RFC3339

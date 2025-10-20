@@ -60,6 +60,12 @@ func postEncrypt(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request)
 		sendProblemDetails(w, "Key Not Found", "The specified key does not exist in the HSM", "KEY_NOT_FOUND", http.StatusNotFound, r.URL.Path)
 		return
 	}
+	atrr, err := mgr.GetObjectAttributes(keyHandle)
+	if err != nil {
+		logger.AppLog.Errorf("Atributes not found: %s, error: %v", req.KeyLabel, err)
+		sendProblemDetails(w, "Atributes Not Found", "The specified key does not exist in the HSM", "KEY_NOT_FOUND", http.StatusNotFound, r.URL.Path)
+		return
+	}
 
 	logger.AppLog.Info("Generating initialization vector (IV)")
 	var size int
@@ -132,6 +138,7 @@ func postEncrypt(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request)
 		Ok:          ok,
 		TimeCreated: timeCreated,
 		TimeUpdated: timeUpdated,
+		Id:          atrr.Id,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
