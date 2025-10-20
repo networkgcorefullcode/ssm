@@ -1,6 +1,7 @@
 package pkcs11mgr
 
 import (
+	"errors"
 	"math/rand/v2"
 
 	"github.com/miekg/pkcs11"
@@ -41,7 +42,7 @@ func (m *Manager) FindKey(label string, id int32) (pkcs11.ObjectHandle, error) {
 	}
 	if len(handles) == 0 {
 		logger.AppLog.Warnf("No key found with label: %s", label)
-		return 0, err
+		return 0, errors.New("Key with the label not found")
 	}
 	logger.AppLog.Infof("Key found: handle=%v", handles[0])
 	return handles[0], nil
@@ -71,7 +72,7 @@ func (m *Manager) FindKeysLabel(label string) ([]pkcs11.ObjectHandle, error) {
 		if len(new_handles) == 0 {
 			if len(handles) == 0 {
 				logger.AppLog.Warnf("No key found with label: %s", label)
-				return nil, err
+				return nil, errors.New("Key with the label not found")
 			}
 			logger.AppLog.Info("Key found is finished")
 			return handles, nil
@@ -106,7 +107,7 @@ func (m *Manager) FindAllKeys() (map[string][]pkcs11.ObjectHandle, error) {
 		if len(newHandles) == 0 {
 			if len(allHandles) == 0 {
 				logger.AppLog.Warnf("No key found")
-				return nil, err
+				return nil, errors.New("Key with the label not found")
 			}
 			break
 		}
@@ -136,10 +137,6 @@ func (m *Manager) FindKeyLabelReturnRandom(label string) (pkcs11.ObjectHandle, e
 	handles, err := m.FindKeysLabel(label)
 	if err != nil {
 		logger.AppLog.Errorf("FindObjects failed: %v", err)
-		return 0, err
-	}
-	if len(handles) == 0 {
-		logger.AppLog.Warnf("No key found with label: %s", label)
 		return 0, err
 	}
 	return handles[rand.Int64N(int64(len(handles)))], err
