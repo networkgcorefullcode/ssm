@@ -64,6 +64,7 @@ func (m *Manager) GenerateDESKey(label string, id int32) (pkcs11.ObjectHandle, e
 		pkcs11.NewAttribute(pkcs11.CKA_PRIVATE, true),
 		pkcs11.NewAttribute(pkcs11.CKA_SENSITIVE, true),
 		pkcs11.NewAttribute(pkcs11.CKA_EXTRACTABLE, false),
+		pkcs11.NewAttribute(pkcs11.CKA_VALUE_LEN, 8),
 	}
 
 	// Check if key already exists before creating it
