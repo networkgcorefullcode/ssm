@@ -5,6 +5,4 @@ type DataKeyInfo struct {
 	Handle int32 `json:"handle"`
 	// Key identifier
 	Id int32 `json:"id"`
-	// Size of the key in bits
-	SizeBits int32 `json:"size_bits"`
 }

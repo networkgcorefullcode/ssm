@@ -65,9 +65,8 @@ func postGetDataKeys(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Requ
 	}
 	for _, attr := range objAtr {
 		resp.Keys = append(resp.Keys, models.DataKeyInfo{
-			Handle:   attr.Handle,
-			Id:       attr.Id,
-			SizeBits: attr.SizeBits,
+			Handle: attr.Handle,
+			Id:     attr.Id,
 		})
 	}
 

@@ -62,9 +62,8 @@ func postGetDataKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Reque
 	// Prepare the response
 	resp := models.GetDataKeyResponse{
 		KeyInfo: models.DataKeyInfo{
-			Handle:   objAtr.Handle,
-			Id:       objAtr.Id,
-			SizeBits: objAtr.SizeBits,
+			Handle: objAtr.Handle,
+			Id:     objAtr.Id,
 		},
 	}
 
