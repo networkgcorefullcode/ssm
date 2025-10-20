@@ -138,6 +138,10 @@ func (m *Manager) FindKeyLabelReturnRandom(label string) (pkcs11.ObjectHandle, e
 		logger.AppLog.Errorf("FindObjects failed: %v", err)
 		return 0, err
 	}
+	if len(handles) == 0 {
+		logger.AppLog.Warnf("No key found with label: %s", label)
+		return 0, err
+	}
 	return handles[rand.Int64N(int64(len(handles)))], err
 }
 
