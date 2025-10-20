@@ -18,14 +18,17 @@ var AlgorithmLabelMap = map[int]string{
 }
 
 const (
-	LABEL_ENCRYPTION_KEY = "SSM_ENC_KEY"
-	LABEL_K4_KEY_AES     = "K4_AES"
-	LABEL_K4_KEY_DES     = "K4_DES"
-	LABEL_K4_KEY_DES3    = "K4_DES3"
-	ALGORITM_AES_256     = 1
-	ALGORITM_AES_128     = 2
-	ALGORITM_DES         = 3
-	ALGORITM_DES3        = 4
+	LABEL_ENCRYPTION_KEY      = "SSM_ENC_KEY"
+	LABEL_K4_KEY_AES          = "K4_AES"
+	LABEL_K4_KEY_DES          = "K4_DES"
+	LABEL_K4_KEY_DES3         = "K4_DES3"
+	LABEL_ENCRIPTION_KEY_AES  = "K4_AES"
+	LABEL_ENCRIPTION_KEY_DES  = "K4_DES"
+	LABEL_ENCRIPTION_KEY_DES3 = "K4_DES3"
+	ALGORITM_AES_256          = 1
+	ALGORITM_AES_128          = 2
+	ALGORITM_DES              = 3
+	ALGORITM_DES3             = 4
 )
 
 const (

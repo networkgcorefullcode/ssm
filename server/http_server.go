@@ -42,4 +42,20 @@ func CreateEndpointHandlers(s *SSM) {
 		logger.AppLog.Debugf("Received /generate-des-key request")
 		handlers.HandleGenerateDESKey(s.mgr, w, r)
 	})
+
+	// Syncronization handlers
+	http.HandleFunc("/get-data-keys", func(w http.ResponseWriter, r *http.Request) {
+		logger.AppLog.Debugf("Received /get-data-keys request")
+		handlers.HandleGetDataKeys(s.mgr, w, r)
+	})
+
+	http.HandleFunc("/get-key", func(w http.ResponseWriter, r *http.Request) {
+		logger.AppLog.Debugf("Received /get-keys request")
+		handlers.HandleGetDataKey(s.mgr, w, r)
+	})
+
+	http.HandleFunc("/get-all-keys", func(w http.ResponseWriter, r *http.Request) {
+		logger.AppLog.Debugf("Received /get-keys request")
+		handlers.HandleGetAllKeys(s.mgr, w, r)
+	})
 }
