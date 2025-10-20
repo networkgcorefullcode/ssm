@@ -10,9 +10,8 @@ import (
 )
 
 type ObjectAttributes struct {
-	Handle   int32
-	Id       int32
-	SizeBits int32
+	Handle int32
+	Id     int32
 }
 
 // FindKey returns the object handle for a given label, or 0 if not found return a one key
@@ -153,9 +152,8 @@ func (m *Manager) GetValuesForObjects(o []pkcs11.ObjectHandle) ([]ObjectAttribut
 			continue
 		}
 		result = append(result, ObjectAttributes{
-			Handle:   int32(handle),
-			Id:       attr.Id,
-			SizeBits: attr.SizeBits,
+			Handle: int32(handle),
+			Id:     attr.Id,
 		})
 	}
 	return result, nil
@@ -168,7 +166,6 @@ func (m *Manager) GetObjectAttributes(handle pkcs11.ObjectHandle) (ObjectAttribu
 	// Define the attributes we want to retrieve
 	template := []*pkcs11.Attribute{
 		pkcs11.NewAttribute(pkcs11.CKA_ID, nil),
-		pkcs11.NewAttribute(pkcs11.CKA_VALUE_LEN, nil),
 	}
 
 	// Get the attribute values
@@ -187,12 +184,6 @@ func (m *Manager) GetObjectAttributes(handle pkcs11.ObjectHandle) (ObjectAttribu
 		case pkcs11.CKA_ID:
 			if len(attr.Value) > 0 {
 				result.Id = utils.ByteToInt32(attr.Value)
-			}
-		case pkcs11.CKA_VALUE_LEN:
-			if len(attr.Value) > 0 {
-				// CKA_VALUE_LEN returns the length in bytes, convert to bits
-				valueLen := utils.ByteToInt32(attr.Value)
-				result.SizeBits = valueLen * 8
 			}
 		}
 	}
