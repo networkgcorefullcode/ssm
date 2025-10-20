@@ -188,7 +188,7 @@ func (m *Manager) GetObjectAttributes(handle pkcs11.ObjectHandle) (ObjectAttribu
 		}
 	}
 
-	logger.AppLog.Infof("Attributes retrieved - Handle: %d, Id: %d, SizeBits: %d", result.Handle, result.Id, result.SizeBits)
+	logger.AppLog.Infof("Attributes retrieved - Handle: %d, Id: %d", result.Handle, result.Id)
 	return result, nil
 }
 
