@@ -62,7 +62,13 @@ func postEncrypt(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request)
 	}
 
 	logger.AppLog.Info("Generating initialization vector (IV)")
-	iv := make([]byte, 16)
+	var size int
+	if req.EncryptionAlgorithm == 3 || req.EncryptionAlgorithm == 4 {
+		size = 8
+	} else if req.EncryptionAlgorithm == 1 || req.EncryptionAlgorithm == 2 {
+		size = 16
+	}
+	iv := make([]byte, size)
 	if err := safe.RandRead(iv); err != nil {
 		logger.AppLog.Errorf("Failed to generate IV: %v", err)
 		sendProblemDetails(w, "Internal Server Error", "Error generating initialization vector", "IV_GENERATION_FAILED", http.StatusInternalServerError, r.URL.Path)
