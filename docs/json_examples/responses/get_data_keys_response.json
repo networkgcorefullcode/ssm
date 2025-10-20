@@ -1,0 +1,14 @@
+{
+  "keys": [
+    {
+      "handle": 1001,
+      "id": 1,
+      "size_bits": 256
+    },
+    {
+      "handle": 1002,
+      "id": 2,
+      "size_bits": 256
+    }
+  ]
+}

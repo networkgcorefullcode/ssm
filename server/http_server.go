@@ -8,6 +8,12 @@ import (
 )
 
 func CreateEndpointHandlers(s *SSM) {
+	// HealthCheck endpoint
+	http.HandleFunc("/health-check", func(w http.ResponseWriter, r *http.Request) {
+		logger.AppLog.Debugf("Received /health-check request")
+		handlers.HandleHealthCheck(w, r)
+	})
+
 	// Set up HTTP handlers
 	// Encrypt endpoints POST
 	http.HandleFunc("/encrypt", func(w http.ResponseWriter, r *http.Request) {
@@ -55,7 +61,7 @@ func CreateEndpointHandlers(s *SSM) {
 	})
 
 	http.HandleFunc("/get-all-keys", func(w http.ResponseWriter, r *http.Request) {
-		logger.AppLog.Debugf("Received /get-keys request")
+		logger.AppLog.Debugf("Received /get-all-keys request")
 		handlers.HandleGetAllKeys(s.mgr, w, r)
 	})
 }

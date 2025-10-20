@@ -43,32 +43,29 @@ func postGetDataKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Reque
 	label := req.KeyLabel
 
 	logger.AppLog.Infof("Searching key in HSM - using the Label: %s", label)
-	handles, err := mgr.FindKeysLabel(label)
+	handle, err := mgr.FindKey(label, 0)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to search keys: %v", err)
 		sendProblemDetails(w, "Key find Failed", "Error searching key in HSM", "KEY_GET_ERROR", http.StatusInternalServerError, r.URL.Path)
 		return
 	}
 
-	logger.AppLog.Info("Keys get successfully")
+	logger.AppLog.Info("Key get successfully")
 
-	objAtr, err := mgr.GetValuesForObjects(handles)
+	objAtr, err := mgr.GetObjectAttributes(handle)
 	if err != nil {
-		logger.AppLog.Errorf("Failed to get object attributes: %v", err)
-		sendProblemDetails(w, "Key get Failed", "Error getting key attributes", "KEY_GET_ERROR", http.StatusInternalServerError, r.URL.Path)
+		logger.AppLog.Errorf("Failed to get object attribute: %v", err)
+		sendProblemDetails(w, "Key get Failed", "Error getting key attribute", "KEY_GET_ERROR", http.StatusInternalServerError, r.URL.Path)
 		return
 	}
 
 	// Prepare the response
-	resp := models.GetDataKeysResponse{
-		Keys: make([]models.DataKeyInfo, 0, len(objAtr)),
-	}
-	for _, attr := range objAtr {
-		resp.Keys = append(resp.Keys, models.DataKeyInfo{
-			Handle:   attr.Handle,
-			Id:       attr.Id,
-			SizeBits: attr.SizeBits,
-		})
+	resp := models.GetDataKeyResponse{
+		KeyInfo: models.DataKeyInfo{
+			Handle:   objAtr.Handle,
+			Id:       objAtr.Id,
+			SizeBits: objAtr.SizeBits,
+		},
 	}
 
 	w.Header().Set("Content-Type", "application/json")
