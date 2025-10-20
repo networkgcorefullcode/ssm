@@ -115,11 +115,6 @@ func postEncrypt(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request)
 	}
 
 	safe.Zero(pt) // Clear sensitive data from memory
-	if err != nil {
-		logger.AppLog.Errorf("Encryption failed: %v", err)
-		sendProblemDetails(w, "Encryption Failed", "Error during encryption process", "ENCRYPTION_ERROR", http.StatusInternalServerError, r.URL.Path)
-		return
-	}
 
 	logger.AppLog.Info("Encryption completed successfully")
 
