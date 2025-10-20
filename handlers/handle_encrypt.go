@@ -77,17 +77,46 @@ func postEncrypt(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request)
 
 	logger.AppLog.Info("Encrypting data")
 
-	var encryptionAlgorithm uint
+	var ciphertext []byte
 	switch req.EncryptionAlgorithm {
 	case constants.ALGORITM_AES_128, constants.ALGORITM_AES_256:
-		encryptionAlgorithm = pkcs11.CKM_AES_CBC_PAD
-	case constants.ALGORITM_DES:
-		encryptionAlgorithm = pkcs11.CKM_DES_CBC_PAD
+		ciphertext, err = mgr.EncryptKey(keyHandle, iv, pt, pkcs11.CKM_AES_CBC_PAD)
+		if err != nil {
+			logger.AppLog.Errorf("Encryption failed: %v", err)
+			sendProblemDetails(w, "Encryption Failed", "Error during encryption process", "ENCRYPTION_ERROR", http.StatusInternalServerError, r.URL.Path)
+		}
+		ciphertext, err = mgr.EncryptKey(keyHandle, iv, pt, pkcs11.CKM_AES_CBC)
+		if err != nil {
+			logger.AppLog.Errorf("Encryption failed: %v", err)
+			sendProblemDetails(w, "Encryption Failed", "Error during encryption process", "ENCRYPTION_ERROR", http.StatusInternalServerError, r.URL.Path)
+			return
+		}
 	case constants.ALGORITM_DES3:
-		encryptionAlgorithm = pkcs11.CKM_DES3_CBC_PAD
+		ciphertext, err = mgr.EncryptKey(keyHandle, iv, pt, pkcs11.CKM_DES3_CBC_PAD)
+		if err != nil {
+			logger.AppLog.Errorf("Encryption failed: %v", err)
+			sendProblemDetails(w, "Encryption Failed", "Error during encryption process", "ENCRYPTION_ERROR", http.StatusInternalServerError, r.URL.Path)
+		}
+		ciphertext, err = mgr.EncryptKey(keyHandle, iv, pt, pkcs11.CKM_DES3_CBC)
+		if err != nil {
+			logger.AppLog.Errorf("Encryption failed: %v", err)
+			sendProblemDetails(w, "Encryption Failed", "Error during encryption process", "ENCRYPTION_ERROR", http.StatusInternalServerError, r.URL.Path)
+			return
+		}
+	case constants.ALGORITM_DES:
+		ciphertext, err = mgr.EncryptKey(keyHandle, iv, pt, pkcs11.CKM_DES_CBC_PAD)
+		if err != nil {
+			logger.AppLog.Errorf("Encryption failed: %v", err)
+			sendProblemDetails(w, "Encryption Failed", "Error during encryption process", "ENCRYPTION_ERROR", http.StatusInternalServerError, r.URL.Path)
+		}
+		ciphertext, err = mgr.EncryptKey(keyHandle, iv, pt, pkcs11.CKM_DES_CBC)
+		if err != nil {
+			logger.AppLog.Errorf("Encryption failed: %v", err)
+			sendProblemDetails(w, "Encryption Failed", "Error during encryption process", "ENCRYPTION_ERROR", http.StatusInternalServerError, r.URL.Path)
+			return
+		}
 	}
 
-	ciphertext, err := mgr.EncryptKey(keyHandle, iv, pt, encryptionAlgorithm)
 	safe.Zero(pt) // Clear sensitive data from memory
 	if err != nil {
 		logger.AppLog.Errorf("Encryption failed: %v", err)
