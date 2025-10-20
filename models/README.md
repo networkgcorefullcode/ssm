@@ -96,16 +96,22 @@ Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
 *EncryptionAPI* | [**DecryptData**](docs/EncryptionAPI.md#decryptdata) | **Post** /decrypt | Decrypt data
 *EncryptionAPI* | [**EncryptData**](docs/EncryptionAPI.md#encryptdata) | **Post** /encrypt | Encrypt data
+*HealthAPI* | [**HealthCheckGet**](docs/HealthAPI.md#healthcheckget) | **Get** /health-check | Health check endpoint
+*HealthAPI* | [**HealthCheckPost**](docs/HealthAPI.md#healthcheckpost) | **Post** /health-check | Health check endpoint
 *KeyManagementAPI* | [**DeleteKey**](docs/KeyManagementAPI.md#deletekey) | **Delete** /store-key | Delete key
 *KeyManagementAPI* | [**GenerateAESKey**](docs/KeyManagementAPI.md#generateaeskey) | **Post** /generate-aes-key | Generate new AES key
 *KeyManagementAPI* | [**GenerateDES3Key**](docs/KeyManagementAPI.md#generatedes3key) | **Post** /generate-des3-key | Generate new DES3 key
 *KeyManagementAPI* | [**GenerateDESKey**](docs/KeyManagementAPI.md#generatedeskey) | **Post** /generate-des-key | Generate new DES key
+*KeyManagementAPI* | [**GetAllKeys**](docs/KeyManagementAPI.md#getallkeys) | **Post** /get-all-keys | Get all keys from HSM
+*KeyManagementAPI* | [**GetDataKeys**](docs/KeyManagementAPI.md#getdatakeys) | **Post** /get-data-keys | Get multiple keys by label
+*KeyManagementAPI* | [**GetKey**](docs/KeyManagementAPI.md#getkey) | **Post** /get-key | Get single key information
 *KeyManagementAPI* | [**StoreKey**](docs/KeyManagementAPI.md#storekey) | **Post** /store-key | Store existing key
 *KeyManagementAPI* | [**UpdateKey**](docs/KeyManagementAPI.md#updatekey) | **Put** /store-key | Update key
 
 
 ## Documentation For Models
 
+ - [DataKeyInfo](docs/DataKeyInfo.md)
  - [DecryptRequest](docs/DecryptRequest.md)
  - [DecryptResponse](docs/DecryptResponse.md)
  - [DeleteKeyRequest](docs/DeleteKeyRequest.md)
@@ -118,6 +124,12 @@ Class | Method | HTTP request | Description
  - [GenDES3KeyResponse](docs/GenDES3KeyResponse.md)
  - [GenDESKeyRequest](docs/GenDESKeyRequest.md)
  - [GenDESKeyResponse](docs/GenDESKeyResponse.md)
+ - [GetAllKeysResponse](docs/GetAllKeysResponse.md)
+ - [GetDataKeysRequest](docs/GetDataKeysRequest.md)
+ - [GetDataKeysResponse](docs/GetDataKeysResponse.md)
+ - [GetKeyRequest](docs/GetKeyRequest.md)
+ - [GetKeyResponse](docs/GetKeyResponse.md)
+ - [HealthCheckResponse](docs/HealthCheckResponse.md)
  - [ProblemDetails](docs/ProblemDetails.md)
  - [StoreKeyRequest](docs/StoreKeyRequest.md)
  - [StoreKeyResponse](docs/StoreKeyResponse.md)

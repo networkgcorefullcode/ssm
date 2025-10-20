@@ -30,7 +30,7 @@ import (
 )
 
 func main() {
-	decryptRequest := *openapiclient.NewDecryptRequest("MySecretKey", string([B@17271176), string([B@2e3cdec2), int32(12345), int32(1)) // DecryptRequest | 
+	decryptRequest := *openapiclient.NewDecryptRequest("MySecretKey", string([B@6e1b9411), string([B@21d1b321), int32(12345), int32(1)) // DecryptRequest | 
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -96,7 +96,7 @@ import (
 )
 
 func main() {
-	encryptRequest := *openapiclient.NewEncryptRequest("MySecretKey", string([B@451f87af), int32(1)) // EncryptRequest | 
+	encryptRequest := *openapiclient.NewEncryptRequest("MySecretKey", string([B@117bcfdc), int32(1)) // EncryptRequest | 
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)

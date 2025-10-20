@@ -11,22 +11,10 @@ Contact: support@yourorganization.com
 
 package models
 
-import (
-	"time"
-)
-
-// EncryptResponse
-type EncryptResponse struct {
-	// Encrypted data in hexadecimal
-	Cipher string `json:"cipher"`
-	// Initialization vector in hexadecimal
-	Iv string `json:"iv"`
-	// Id key that used to encrypt plan data
-	Id int32 `json:"id"`
-	// Indicates if the operation was successful
-	Ok bool `json:"ok"`
-	// Creation timestamp in RFC3339
-	TimeCreated time.Time `json:"time_created"`
-	// Update timestamp in RFC3339
-	TimeUpdated time.Time `json:"time_updated"`
+// HealthCheckResponse
+type HealthCheckResponse struct {
+	// Health status
+	Status string `json:"status"`
+	// Additional information
+	Message string `json:"message"`
 }

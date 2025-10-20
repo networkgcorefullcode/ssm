@@ -1,7 +1,7 @@
 /*
 SSM (Secure Storage Manager) API
 
-Testing EncryptionAPIService
+Testing HealthAPIService
 
 */
 
@@ -18,16 +18,16 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func Test_models_EncryptionAPIService(t *testing.T) {
+func Test_models_HealthAPIService(t *testing.T) {
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
 
-	t.Run("Test EncryptionAPIService DecryptData", func(t *testing.T) {
+	t.Run("Test HealthAPIService HealthCheckGet", func(t *testing.T) {
 
 		t.Skip("skip test") // remove to run test
 
-		resp, httpRes, err := apiClient.EncryptionAPI.DecryptData(context.Background()).Execute()
+		resp, httpRes, err := apiClient.HealthAPI.HealthCheckGet(context.Background()).Execute()
 
 		require.Nil(t, err)
 		require.NotNil(t, resp)
@@ -35,11 +35,11 @@ func Test_models_EncryptionAPIService(t *testing.T) {
 
 	})
 
-	t.Run("Test EncryptionAPIService EncryptData", func(t *testing.T) {
+	t.Run("Test HealthAPIService HealthCheckPost", func(t *testing.T) {
 
 		t.Skip("skip test") // remove to run test
 
-		resp, httpRes, err := apiClient.EncryptionAPI.EncryptData(context.Background()).Execute()
+		resp, httpRes, err := apiClient.HealthAPI.HealthCheckPost(context.Background()).Execute()
 
 		require.Nil(t, err)
 		require.NotNil(t, resp)

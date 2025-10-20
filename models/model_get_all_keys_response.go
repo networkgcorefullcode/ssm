@@ -11,12 +11,12 @@ Contact: support@yourorganization.com
 
 package models
 
-// GetAllKeysResponse - Response containing all keys grouped by label
+// GetAllKeysResponse
 type GetAllKeysResponse struct {
-	// Map of label to list of keys with that label
+	// Map of label to array of key information
 	KeysByLabel map[string][]DataKeyInfo `json:"keys_by_label"`
 	// Total number of keys found
-	TotalKeys int `json:"total_keys"`
+	TotalKeys int32 `json:"total_keys"`
 	// Total number of unique labels
-	TotalLabels int `json:"total_labels"`
+	TotalLabels int32 `json:"total_labels"`
 }

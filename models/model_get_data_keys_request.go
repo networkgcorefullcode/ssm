@@ -13,5 +13,6 @@ package models
 
 // GetDataKeysRequest
 type GetDataKeysRequest struct {
+	// Label of the keys to retrieve
 	KeyLabel string `json:"key_label"`
 }

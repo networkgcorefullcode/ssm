@@ -11,8 +11,10 @@ Contact: support@yourorganization.com
 
 package models
 
-// GetDataKeysRequest
-type GetDataKeyRequest struct {
+// GetKeyRequest
+type GetKeyRequest struct {
+	// Label of the key to retrieve
 	KeyLabel string `json:"key_label"`
-	Id       int32  `json:"id"`
+	// Key identifier
+	Id int32 `json:"id"`
 }

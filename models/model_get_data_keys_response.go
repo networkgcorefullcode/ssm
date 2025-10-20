@@ -11,7 +11,8 @@ Contact: support@yourorganization.com
 
 package models
 
-// GetDataKeysRequest
+// GetDataKeysResponse
 type GetDataKeysResponse struct {
+	// Array of key information
 	Keys []DataKeyInfo `json:"keys"`
 }
