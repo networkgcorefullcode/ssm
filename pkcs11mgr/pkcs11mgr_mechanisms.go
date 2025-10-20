@@ -12,11 +12,11 @@ func (m *Manager) GetMechanismInfo(mechanismType uint) (*pkcs11.MechanismInfo, e
 		logger.AppLog.Errorf("Failed to get mechanism info for 0x%X: %v", mechanismType, err)
 		return nil, err
 	}
-	return info, nil
+	return &info, nil
 }
 
 // ListSupportedMechanisms lists all mechanisms supported by the slot
-func (m *Manager) ListSupportedMechanisms() ([]uint, error) {
+func (m *Manager) ListSupportedMechanisms() ([]*pkcs11.Mechanism, error) {
 	mechanisms, err := m.ctx.GetMechanismList(m.slot)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to get mechanism list: %v", err)
@@ -41,8 +41,8 @@ func (m *Manager) ListSupportedMechanisms() ([]uint, error) {
 	}
 
 	for _, mech := range mechanisms {
-		if name, ok := importantMechs[mech]; ok {
-			logger.AppLog.Infof("Mechanism supported: %s (0x%X)", name, mech)
+		if name, ok := importantMechs[mech.Mechanism]; ok {
+			logger.AppLog.Infof("Mechanism supported: %s (0x%X)", name, mech.Mechanism)
 		}
 	}
 
@@ -57,7 +57,7 @@ func (m *Manager) IsMechanismSupported(mechanismType uint) bool {
 	}
 
 	for _, mech := range mechanisms {
-		if mech == mechanismType {
+		if mech.Mechanism == mechanismType {
 			return true
 		}
 	}
