@@ -29,6 +29,10 @@ const (
 	ALGORITM_AES_128          = 2
 	ALGORITM_DES              = 3
 	ALGORITM_DES3             = 4
+	ALGORITM_AES_256_OurUsers = 5
+	ALGORITM_AES_128_OurUsers = 6
+	ALGORITM_DES_OurUsers     = 7
+	ALGORITM_DES3_OurUsers    = 8
 )
 
 var KeyLabelsAllow [6]string = [6]string{
@@ -45,3 +49,9 @@ const (
 	TYPE_DES  = "DES"
 	TYPE_DES3 = "DES3"
 )
+
+var KeyTypeAllow [6]string = [6]string{
+	TYPE_AES,
+	TYPE_DES,
+	TYPE_DES3,
+}
