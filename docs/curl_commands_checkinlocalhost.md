@@ -73,7 +73,7 @@ curl -k -X POST https://localhost:9006/generate-des3-key \
 curl -k -X POST https://localhost:9006/store-key \
   -H "Content-Type: application/json" \
   -d '{
-    "key_label": "my-stored-aes-key",
+    "key_label": "K4_AES",
     "id": 10,
     "key_value": "0123456789abcdef0123456789abcdef",
     "key_type": "AES"
@@ -99,7 +99,7 @@ curl -k -X POST https://localhost:9006/store-key \
 curl -k -X POST https://localhost:9006/store-key \
   -H "Content-Type: application/json" \
   -d '{
-    "key_label": "my-des-key",
+    "key_label": "K4_DES",
     "id": 12,
     "key_value": "0123456789abcdef",
     "key_type": "DES"
@@ -156,9 +156,9 @@ curl -k -X POST https://localhost:9006/encrypt \
 curl -k -X POST https://localhost:9006/decrypt \
   -H "Content-Type: application/json" \
   -d '{
-    "key_label": "my-aes-key",
-    "cipher": "a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2",
-    "iv": "1234567890abcdef1234567890abcdef",
+    "key_label": "fill",
+    "cipher": "fill",
+    "iv": "fill",
     "id": 1,
     "encryption_algorithm": 1
   }'
