@@ -52,7 +52,14 @@ func postGenerateAESKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.R
 
 	logger.AppLog.Infof("Generating AES key - ID: %s, Bits: %d", req.Id, req.Bits)
 
-	handle, err := mgr.GenerateAESKey(constants.LABEL_ENCRIPTION_KEY_AES, req.Id, int(req.Bits))
+	var label string
+	if req.Bits == 128 {
+		label = constants.LABEL_ENCRIPTION_KEY_AES128
+	} else if req.Bits == 256 {
+		label = constants.LABEL_ENCRIPTION_KEY_AES256
+	}
+
+	handle, err := mgr.GenerateAESKey(label, req.Id, int(req.Bits))
 	if err != nil {
 		logger.AppLog.Errorf("AES key generation failed: %v", err)
 		sendProblemDetails(w, "Key Generation Failed", "Error al generar la clave AES en el HSM", "KEY_GENERATION_ERROR", http.StatusInternalServerError, r.URL.Path)
