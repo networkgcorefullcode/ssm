@@ -1,5 +1,6 @@
 package constants
 
+// Package constants holds application-wide constant values and mappings.
 const (
 	APP_NAME         = "ssm"
 	APP_VERSION      = "0.3.0"
