@@ -1,0 +1,5 @@
+{
+  "key_label": "my-aes-key",
+  "plain": "48656c6c6f20576f726c6421",
+  "encryption_algorithm": 1
+}

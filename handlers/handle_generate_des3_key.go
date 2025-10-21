@@ -47,7 +47,7 @@ func postGenerateDES3Key(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.
 	}
 
 	logger.AppLog.Infof("Generating DES3 key , ID: %d", req.Id)
-	handle, err := mgr.GenerateDES3Key(constants.LABEL_K4_KEY_DES3, req.Id)
+	handle, err := mgr.GenerateDES3Key(constants.LABEL_ENCRIPTION_KEY_DES3, req.Id)
 	if err != nil {
 		logger.AppLog.Errorf("DES3 key generation failed: %v", err)
 		sendProblemDetails(w, "Key Generation Failed", "Error al generar la clave DES3 en el HSM", "KEY_GENERATION_ERROR", http.StatusInternalServerError, r.URL.Path)

@@ -51,6 +51,8 @@ type APIClient struct {
 
 	EncryptionAPI *EncryptionAPIService
 
+	HealthAPI *HealthAPIService
+
 	KeyManagementAPI *KeyManagementAPIService
 }
 
@@ -71,6 +73,7 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 
 	// API Services
 	c.EncryptionAPI = (*EncryptionAPIService)(&c.common)
+	c.HealthAPI = (*HealthAPIService)(&c.common)
 	c.KeyManagementAPI = (*KeyManagementAPIService)(&c.common)
 
 	return c

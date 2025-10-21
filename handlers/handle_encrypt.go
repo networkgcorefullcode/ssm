@@ -54,15 +54,27 @@ func postEncrypt(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request)
 	}
 
 	logger.AppLog.Infof("Finding key by label: %s", req.KeyLabel)
-	keyHandle, err := mgr.FindKey(req.KeyLabel, 0)
+	keyHandle, err := mgr.FindKeyLabelReturnRandom(req.KeyLabel)
 	if err != nil {
 		logger.AppLog.Errorf("Key not found: %s, error: %v", req.KeyLabel, err)
 		sendProblemDetails(w, "Key Not Found", "The specified key does not exist in the HSM", "KEY_NOT_FOUND", http.StatusNotFound, r.URL.Path)
 		return
 	}
+	atrr, err := mgr.GetObjectAttributes(keyHandle)
+	if err != nil {
+		logger.AppLog.Errorf("Atributes not found: %s, error: %v", req.KeyLabel, err)
+		sendProblemDetails(w, "Atributes Not Found", "The specified key does not exist in the HSM", "KEY_NOT_FOUND", http.StatusNotFound, r.URL.Path)
+		return
+	}
 
 	logger.AppLog.Info("Generating initialization vector (IV)")
-	iv := make([]byte, 16)
+	var size int
+	if req.EncryptionAlgorithm == 3 || req.EncryptionAlgorithm == 4 {
+		size = 8
+	} else if req.EncryptionAlgorithm == 1 || req.EncryptionAlgorithm == 2 {
+		size = 16
+	}
+	iv := make([]byte, size)
 	if err := safe.RandRead(iv); err != nil {
 		logger.AppLog.Errorf("Failed to generate IV: %v", err)
 		sendProblemDetails(w, "Internal Server Error", "Error generating initialization vector", "IV_GENERATION_FAILED", http.StatusInternalServerError, r.URL.Path)
@@ -71,23 +83,44 @@ func postEncrypt(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request)
 
 	logger.AppLog.Info("Encrypting data")
 
-	var encryptionAlgorithm uint
+	var ciphertext []byte
 	switch req.EncryptionAlgorithm {
 	case constants.ALGORITM_AES_128, constants.ALGORITM_AES_256:
-		encryptionAlgorithm = pkcs11.CKM_AES_CBC_PAD
-	case constants.ALGORITM_DES:
-		encryptionAlgorithm = pkcs11.CKM_DES_CBC_PAD
+		ciphertext, err = mgr.EncryptKey(keyHandle, iv, pt, pkcs11.CKM_AES_CBC_PAD)
+		if err != nil {
+			logger.AppLog.Errorf("Encryption failed: %v", err)
+			ciphertext, err = mgr.EncryptKey(keyHandle, iv, pt, pkcs11.CKM_AES_CBC)
+			if err != nil {
+				logger.AppLog.Errorf("Encryption failed: %v", err)
+				sendProblemDetails(w, "Encryption Failed", "Error during encryption process", "ENCRYPTION_ERROR", http.StatusInternalServerError, r.URL.Path)
+				return
+			}
+		}
 	case constants.ALGORITM_DES3:
-		encryptionAlgorithm = pkcs11.CKM_DES3_CBC_PAD
+		ciphertext, err = mgr.EncryptKey(keyHandle, iv, pt, pkcs11.CKM_DES3_CBC_PAD)
+		if err != nil {
+			logger.AppLog.Errorf("Encryption failed: %v", err)
+			ciphertext, err = mgr.EncryptKey(keyHandle, iv, pt, pkcs11.CKM_DES3_CBC)
+			if err != nil {
+				logger.AppLog.Errorf("Encryption failed: %v", err)
+				sendProblemDetails(w, "Encryption Failed", "Error during encryption process", "ENCRYPTION_ERROR", http.StatusInternalServerError, r.URL.Path)
+				return
+			}
+		}
+	case constants.ALGORITM_DES:
+		ciphertext, err = mgr.EncryptKey(keyHandle, iv, pt, pkcs11.CKM_DES_CBC_PAD)
+		if err != nil {
+			logger.AppLog.Errorf("Encryption failed: %v", err)
+			ciphertext, err = mgr.EncryptKey(keyHandle, iv, pt, pkcs11.CKM_DES_CBC)
+			if err != nil {
+				logger.AppLog.Errorf("Encryption failed: %v", err)
+				sendProblemDetails(w, "Encryption Failed", "Error during encryption process", "ENCRYPTION_ERROR", http.StatusInternalServerError, r.URL.Path)
+				return
+			}
+		}
 	}
 
-	ciphertext, err := mgr.EncryptKey(keyHandle, iv, pt, encryptionAlgorithm)
 	safe.Zero(pt) // Clear sensitive data from memory
-	if err != nil {
-		logger.AppLog.Errorf("Encryption failed: %v", err)
-		sendProblemDetails(w, "Encryption Failed", "Error during encryption process", "ENCRYPTION_ERROR", http.StatusInternalServerError, r.URL.Path)
-		return
-	}
 
 	logger.AppLog.Info("Encryption completed successfully")
 
@@ -105,6 +138,7 @@ func postEncrypt(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request)
 		Ok:          ok,
 		TimeCreated: timeCreated,
 		TimeUpdated: timeUpdated,
+		Id:          atrr.Id,
 	}
 
 	w.Header().Set("Content-Type", "application/json")

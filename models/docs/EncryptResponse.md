@@ -6,6 +6,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Cipher** | Pointer to **string** | Encrypted data in hexadecimal | [optional] 
 **Iv** | Pointer to **string** | Initialization vector in hexadecimal | [optional] 
+**Id** | Pointer to **int32** | Id key that used to encrypt plan data | [optional] 
 **Ok** | Pointer to **bool** | Indicates if the operation was successful | [optional] 
 **TimeCreated** | Pointer to **time.Time** | Creation timestamp in RFC3339 | [optional] 
 **TimeUpdated** | Pointer to **time.Time** | Update timestamp in RFC3339 | [optional] 
@@ -78,6 +79,31 @@ SetIv sets Iv field to given value.
 `func (o *EncryptResponse) HasIv() bool`
 
 HasIv returns a boolean if a field has been set.
+
+### GetId
+
+`func (o *EncryptResponse) GetId() int32`
+
+GetId returns the Id field if non-nil, zero value otherwise.
+
+### GetIdOk
+
+`func (o *EncryptResponse) GetIdOk() (*int32, bool)`
+
+GetIdOk returns a tuple with the Id field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetId
+
+`func (o *EncryptResponse) SetId(v int32)`
+
+SetId sets Id field to given value.
+
+### HasId
+
+`func (o *EncryptResponse) HasId() bool`
+
+HasId returns a boolean if a field has been set.
 
 ### GetOk
 

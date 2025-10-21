@@ -1,0 +1,7 @@
+{
+    "key_label": "my-aes-key",
+    "cipher": "deadbeef",
+    "iv": "31323334353637383930616263646566",
+    "id": 1,
+    "encryption_algorithm": 1
+}

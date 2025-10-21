@@ -1,0 +1,25 @@
+{
+  "keys_by_label": {
+    "my-aes-key": [
+      {
+        "handle": 1001,
+        "id": 1,
+        "size_bits": 256
+      },
+      {
+        "handle": 1002,
+        "id": 2,
+        "size_bits": 256
+      }
+    ],
+    "my-des3-key": [
+      {
+        "handle": 2001,
+        "id": 10,
+        "size_bits": 192
+      }
+    ]
+  },
+  "total_keys": 3,
+  "total_labels": 2
+}
