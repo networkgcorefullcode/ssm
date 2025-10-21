@@ -11,10 +11,14 @@ const (
 )
 
 var AlgorithmLabelMap = map[int]string{
-	1: "K4_AES",  // ALGORITM_AES_256
-	2: "K4_AES",  // ALGORITM_AES_128
-	3: "K4_DES",  // ALGORITM_DES
-	4: "K4_DES3", // ALGORITM_DES3
+	1: "K4_AES",              // ALGORITM_AES_256
+	2: "K4_AES",              // ALGORITM_AES_128
+	3: "K4_DES",              // ALGORITM_DES
+	4: "K4_DES3",             // ALGORITM_DES3
+	5: "KEY_ENCRIPTION_AES",  // ALGORITM_AES_256_OurUsers
+	6: "KEY_ENCRIPTION_AES",  // ALGORITM_AES_128_OurUsers
+	7: "KEY_ENCRIPTION_DES",  // ALGORITM_DES_OurUsers
+	8: "KEY_ENCRIPTION_DES3", // ALGORITM_DES3_OurUsers
 }
 
 const (
