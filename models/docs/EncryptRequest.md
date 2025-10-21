@@ -4,14 +4,15 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**KeyLabel** | **string** | Etiqueta de la clave para cifrar | 
-**PlainB64** | **string** | Datos a cifrar codificados en Base64 | 
+**KeyLabel** | **string** | Label of the key to encrypt | 
+**Plain** | **string** | Data to encrypt encoded in hexadecimal | 
+**EncryptionAlgorithm** | **int32** | Encryption algorithm to use (1: AES, 2: AES, 3: DES, 4: DES3) | 
 
 ## Methods
 
 ### NewEncryptRequest
 
-`func NewEncryptRequest(keyLabel string, plainB64 string, ) *EncryptRequest`
+`func NewEncryptRequest(keyLabel string, plain string, encryptionAlgorithm int32, ) *EncryptRequest`
 
 NewEncryptRequest instantiates a new EncryptRequest object
 This constructor will assign default values to properties that have it defined,
@@ -46,24 +47,44 @@ and a boolean to check if the value has been set.
 SetKeyLabel sets KeyLabel field to given value.
 
 
-### GetPlainB64
+### GetPlain
 
-`func (o *EncryptRequest) GetPlainB64() string`
+`func (o *EncryptRequest) GetPlain() string`
 
-GetPlainB64 returns the PlainB64 field if non-nil, zero value otherwise.
+GetPlain returns the Plain field if non-nil, zero value otherwise.
 
-### GetPlainB64Ok
+### GetPlainOk
 
-`func (o *EncryptRequest) GetPlainB64Ok() (*string, bool)`
+`func (o *EncryptRequest) GetPlainOk() (*string, bool)`
 
-GetPlainB64Ok returns a tuple with the PlainB64 field if it's non-nil, zero value otherwise
+GetPlainOk returns a tuple with the Plain field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetPlainB64
+### SetPlain
 
-`func (o *EncryptRequest) SetPlainB64(v string)`
+`func (o *EncryptRequest) SetPlain(v string)`
 
-SetPlainB64 sets PlainB64 field to given value.
+SetPlain sets Plain field to given value.
+
+
+### GetEncryptionAlgorithm
+
+`func (o *EncryptRequest) GetEncryptionAlgorithm() int32`
+
+GetEncryptionAlgorithm returns the EncryptionAlgorithm field if non-nil, zero value otherwise.
+
+### GetEncryptionAlgorithmOk
+
+`func (o *EncryptRequest) GetEncryptionAlgorithmOk() (*int32, bool)`
+
+GetEncryptionAlgorithmOk returns a tuple with the EncryptionAlgorithm field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetEncryptionAlgorithm
+
+`func (o *EncryptRequest) SetEncryptionAlgorithm(v int32)`
+
+SetEncryptionAlgorithm sets EncryptionAlgorithm field to given value.
 
 
 

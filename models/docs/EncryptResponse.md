@@ -4,11 +4,11 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**CipherB64** | Pointer to **string** | Datos cifrados en Base64 | [optional] 
-**IvB64** | Pointer to **string** | Vector de inicialización en Base64 | [optional] 
-**Ok** | Pointer to **bool** | Indica si la operación fue exitosa | [optional] 
-**TimeCreated** | Pointer to **time.Time** | Timestamp de creación en RFC3339 | [optional] 
-**TimeUpdated** | Pointer to **time.Time** | Timestamp de actualización en RFC3339 | [optional] 
+**Cipher** | Pointer to **string** | Encrypted data in hexadecimal | [optional] 
+**Iv** | Pointer to **string** | Initialization vector in hexadecimal | [optional] 
+**Ok** | Pointer to **bool** | Indicates if the operation was successful | [optional] 
+**TimeCreated** | Pointer to **time.Time** | Creation timestamp in RFC3339 | [optional] 
+**TimeUpdated** | Pointer to **time.Time** | Update timestamp in RFC3339 | [optional] 
 
 ## Methods
 
@@ -29,55 +29,55 @@ NewEncryptResponseWithDefaults instantiates a new EncryptResponse object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
 
-### GetCipherB64
+### GetCipher
 
-`func (o *EncryptResponse) GetCipherB64() string`
+`func (o *EncryptResponse) GetCipher() string`
 
-GetCipherB64 returns the CipherB64 field if non-nil, zero value otherwise.
+GetCipher returns the Cipher field if non-nil, zero value otherwise.
 
-### GetCipherB64Ok
+### GetCipherOk
 
-`func (o *EncryptResponse) GetCipherB64Ok() (*string, bool)`
+`func (o *EncryptResponse) GetCipherOk() (*string, bool)`
 
-GetCipherB64Ok returns a tuple with the CipherB64 field if it's non-nil, zero value otherwise
+GetCipherOk returns a tuple with the Cipher field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetCipherB64
+### SetCipher
 
-`func (o *EncryptResponse) SetCipherB64(v string)`
+`func (o *EncryptResponse) SetCipher(v string)`
 
-SetCipherB64 sets CipherB64 field to given value.
+SetCipher sets Cipher field to given value.
 
-### HasCipherB64
+### HasCipher
 
-`func (o *EncryptResponse) HasCipherB64() bool`
+`func (o *EncryptResponse) HasCipher() bool`
 
-HasCipherB64 returns a boolean if a field has been set.
+HasCipher returns a boolean if a field has been set.
 
-### GetIvB64
+### GetIv
 
-`func (o *EncryptResponse) GetIvB64() string`
+`func (o *EncryptResponse) GetIv() string`
 
-GetIvB64 returns the IvB64 field if non-nil, zero value otherwise.
+GetIv returns the Iv field if non-nil, zero value otherwise.
 
-### GetIvB64Ok
+### GetIvOk
 
-`func (o *EncryptResponse) GetIvB64Ok() (*string, bool)`
+`func (o *EncryptResponse) GetIvOk() (*string, bool)`
 
-GetIvB64Ok returns a tuple with the IvB64 field if it's non-nil, zero value otherwise
+GetIvOk returns a tuple with the Iv field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetIvB64
+### SetIv
 
-`func (o *EncryptResponse) SetIvB64(v string)`
+`func (o *EncryptResponse) SetIv(v string)`
 
-SetIvB64 sets IvB64 field to given value.
+SetIv sets Iv field to given value.
 
-### HasIvB64
+### HasIv
 
-`func (o *EncryptResponse) HasIvB64() bool`
+`func (o *EncryptResponse) HasIv() bool`
 
-HasIvB64 returns a boolean if a field has been set.
+HasIv returns a boolean if a field has been set.
 
 ### GetOk
 

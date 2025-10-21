@@ -1,7 +1,7 @@
 /*
 SSM (Secure Storage Manager) API
 
-API para gestión segura de claves criptográficas usando PKCS#11 y HSM.
+API for secure cryptographic key management using PKCS#11 and HSM.  SSM provides secure operations for: - AES, DES, DES3 key generation - Data encryption and decryption - Key storage and management - HSM/SoftHSM integration  ## Authentication The API works through Unix Domain Sockets for enhanced security. Also supports HTTPS with TLS certificates.  ## Data Formats - All binary data (plaintext, ciphertext, IV) should be in Base64/Hex - Responses include timestamps in RFC3339 format - Errors follow RFC 7807 standard (Problem Details)
 
 API version: 1.0.0
 Contact: support@yourorganization.com
@@ -11,177 +11,10 @@ Contact: support@yourorganization.com
 
 package models
 
-import (
-	"bytes"
-	"encoding/json"
-	"fmt"
-)
-
-// checks if the DeleteKeyResponse type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &DeleteKeyResponse{}
-
-// DeleteKeyResponse struct for DeleteKeyResponse
+// DeleteKeyResponse
 type DeleteKeyResponse struct {
-	// Mensaje de confirmación
+	// Confirmation message
 	Message string `json:"message"`
-	// Etiqueta de la clave eliminada
+	// Label of the deleted key
 	KeyLabel string `json:"key_label"`
-}
-
-type _DeleteKeyResponse DeleteKeyResponse
-
-// NewDeleteKeyResponse instantiates a new DeleteKeyResponse object
-// This constructor will assign default values to properties that have it defined,
-// and makes sure properties required by API are set, but the set of arguments
-// will change when the set of required properties is changed
-func NewDeleteKeyResponse(message string, keyLabel string) *DeleteKeyResponse {
-	this := DeleteKeyResponse{}
-	this.Message = message
-	this.KeyLabel = keyLabel
-	return &this
-}
-
-// NewDeleteKeyResponseWithDefaults instantiates a new DeleteKeyResponse object
-// This constructor will only assign default values to properties that have it defined,
-// but not the ones where the parameter is required
-func NewDeleteKeyResponseWithDefaults() *DeleteKeyResponse {
-	this := DeleteKeyResponse{}
-	return &this
-}
-
-// GetMessage returns the Message field value
-func (o *DeleteKeyResponse) GetMessage() string {
-	if o == nil {
-		var ret string
-		return ret
-	}
-
-	return o.Message
-}
-
-// GetMessageOk returns a tuple with the Message field value
-// and a boolean to check if the value has been set.
-func (o *DeleteKeyResponse) GetMessageOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.Message, true
-}
-
-// SetMessage sets field value
-func (o *DeleteKeyResponse) SetMessage(v string) {
-	o.Message = v
-}
-
-// GetKeyLabel returns the KeyLabel field value
-func (o *DeleteKeyResponse) GetKeyLabel() string {
-	if o == nil {
-		var ret string
-		return ret
-	}
-
-	return o.KeyLabel
-}
-
-// GetKeyLabelOk returns a tuple with the KeyLabel field value
-// and a boolean to check if the value has been set.
-func (o *DeleteKeyResponse) GetKeyLabelOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.KeyLabel, true
-}
-
-// SetKeyLabel sets field value
-func (o *DeleteKeyResponse) SetKeyLabel(v string) {
-	o.KeyLabel = v
-}
-
-func (o DeleteKeyResponse) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
-	}
-	return json.Marshal(toSerialize)
-}
-
-func (o DeleteKeyResponse) ToMap() (map[string]interface{}, error) {
-	toSerialize := map[string]interface{}{}
-	toSerialize["message"] = o.Message
-	toSerialize["key_label"] = o.KeyLabel
-	return toSerialize, nil
-}
-
-func (o *DeleteKeyResponse) UnmarshalJSON(data []byte) (err error) {
-	// This validates that all required properties are included in the JSON object
-	// by unmarshalling the object into a generic map with string keys and checking
-	// that every required field exists as a key in the generic map.
-	requiredProperties := []string{
-		"message",
-		"key_label",
-	}
-
-	allProperties := make(map[string]interface{})
-
-	err = json.Unmarshal(data, &allProperties)
-
-	if err != nil {
-		return err
-	}
-
-	for _, requiredProperty := range requiredProperties {
-		if _, exists := allProperties[requiredProperty]; !exists {
-			return fmt.Errorf("no value given for required property %v", requiredProperty)
-		}
-	}
-
-	varDeleteKeyResponse := _DeleteKeyResponse{}
-
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varDeleteKeyResponse)
-
-	if err != nil {
-		return err
-	}
-
-	*o = DeleteKeyResponse(varDeleteKeyResponse)
-
-	return err
-}
-
-type NullableDeleteKeyResponse struct {
-	value *DeleteKeyResponse
-	isSet bool
-}
-
-func (v NullableDeleteKeyResponse) Get() *DeleteKeyResponse {
-	return v.value
-}
-
-func (v *NullableDeleteKeyResponse) Set(val *DeleteKeyResponse) {
-	v.value = val
-	v.isSet = true
-}
-
-func (v NullableDeleteKeyResponse) IsSet() bool {
-	return v.isSet
-}
-
-func (v *NullableDeleteKeyResponse) Unset() {
-	v.value = nil
-	v.isSet = false
-}
-
-func NewNullableDeleteKeyResponse(val *DeleteKeyResponse) *NullableDeleteKeyResponse {
-	return &NullableDeleteKeyResponse{value: val, isSet: true}
-}
-
-func (v NullableDeleteKeyResponse) MarshalJSON() ([]byte, error) {
-	return json.Marshal(v.value)
-}
-
-func (v *NullableDeleteKeyResponse) UnmarshalJSON(src []byte) error {
-	v.isSet = true
-	return json.Unmarshal(src, &v.value)
 }

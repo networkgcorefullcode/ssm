@@ -4,15 +4,16 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**KeyLabel** | **string** | Etiqueta para la clave almacenada | 
-**Id** | **string** | Identificador único | 
-**KeyValue** | **string** | Valor de la clave en Base64 | 
+**KeyLabel** | **string** | Label for the stored key | 
+**Id** | **int32** | Unique identifier | 
+**KeyValue** | **string** | Key value in Base64 | 
+**KeyType** | **string** | Type of cryptographic key | 
 
 ## Methods
 
 ### NewStoreKeyRequest
 
-`func NewStoreKeyRequest(keyLabel string, id string, keyValue string, ) *StoreKeyRequest`
+`func NewStoreKeyRequest(keyLabel string, id int32, keyValue string, keyType string, ) *StoreKeyRequest`
 
 NewStoreKeyRequest instantiates a new StoreKeyRequest object
 This constructor will assign default values to properties that have it defined,
@@ -49,20 +50,20 @@ SetKeyLabel sets KeyLabel field to given value.
 
 ### GetId
 
-`func (o *StoreKeyRequest) GetId() string`
+`func (o *StoreKeyRequest) GetId() int32`
 
 GetId returns the Id field if non-nil, zero value otherwise.
 
 ### GetIdOk
 
-`func (o *StoreKeyRequest) GetIdOk() (*string, bool)`
+`func (o *StoreKeyRequest) GetIdOk() (*int32, bool)`
 
 GetIdOk returns a tuple with the Id field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetId
 
-`func (o *StoreKeyRequest) SetId(v string)`
+`func (o *StoreKeyRequest) SetId(v int32)`
 
 SetId sets Id field to given value.
 
@@ -85,6 +86,26 @@ and a boolean to check if the value has been set.
 `func (o *StoreKeyRequest) SetKeyValue(v string)`
 
 SetKeyValue sets KeyValue field to given value.
+
+
+### GetKeyType
+
+`func (o *StoreKeyRequest) GetKeyType() string`
+
+GetKeyType returns the KeyType field if non-nil, zero value otherwise.
+
+### GetKeyTypeOk
+
+`func (o *StoreKeyRequest) GetKeyTypeOk() (*string, bool)`
+
+GetKeyTypeOk returns a tuple with the KeyType field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetKeyType
+
+`func (o *StoreKeyRequest) SetKeyType(v string)`
+
+SetKeyType sets KeyType field to given value.
 
 
 

@@ -4,8 +4,8 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Handle** | Pointer to **int32** | Handle de la clave almacenada | [optional] 
-**CipherKey** | Pointer to **string** | Clave cifrada almacenada | [optional] 
+**Handle** | Pointer to **int32** | Handle of the stored key | [optional] 
+**CipherKey** | Pointer to **string** | Stored encrypted key | [optional] 
 
 ## Methods
 

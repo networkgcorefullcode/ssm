@@ -4,10 +4,9 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Handle** | Pointer to **int32** | Handle de la clave en el HSM | [optional] 
-**Label** | Pointer to **string** | Etiqueta de la clave generada | [optional] 
-**Id** | Pointer to **string** | ID de la clave generada | [optional] 
-**Bits** | Pointer to **int32** | Tamaño de la clave generada | [optional] 
+**Handle** | Pointer to **int32** | HSM key handle | [optional] 
+**Id** | Pointer to **int32** | Generated key identifier | [optional] 
+**Bits** | Pointer to **int32** | Size of the generated key in bits | [optional] 
 
 ## Methods
 
@@ -53,47 +52,22 @@ SetHandle sets Handle field to given value.
 
 HasHandle returns a boolean if a field has been set.
 
-### GetLabel
-
-`func (o *GenAESKeyResponse) GetLabel() string`
-
-GetLabel returns the Label field if non-nil, zero value otherwise.
-
-### GetLabelOk
-
-`func (o *GenAESKeyResponse) GetLabelOk() (*string, bool)`
-
-GetLabelOk returns a tuple with the Label field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetLabel
-
-`func (o *GenAESKeyResponse) SetLabel(v string)`
-
-SetLabel sets Label field to given value.
-
-### HasLabel
-
-`func (o *GenAESKeyResponse) HasLabel() bool`
-
-HasLabel returns a boolean if a field has been set.
-
 ### GetId
 
-`func (o *GenAESKeyResponse) GetId() string`
+`func (o *GenAESKeyResponse) GetId() int32`
 
 GetId returns the Id field if non-nil, zero value otherwise.
 
 ### GetIdOk
 
-`func (o *GenAESKeyResponse) GetIdOk() (*string, bool)`
+`func (o *GenAESKeyResponse) GetIdOk() (*int32, bool)`
 
 GetIdOk returns a tuple with the Id field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetId
 
-`func (o *GenAESKeyResponse) SetId(v string)`
+`func (o *GenAESKeyResponse) SetId(v int32)`
 
 SetId sets Id field to given value.
 

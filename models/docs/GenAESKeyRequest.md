@@ -4,15 +4,14 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Label** | **string** | Etiqueta única para identificar la clave | 
-**Id** | **string** | Identificador único de la clave | 
-**Bits** | **int32** | Tamaño de la clave en bits | 
+**Id** | **int32** | Unique key identifier | 
+**Bits** | **int32** | Key size in bits | 
 
 ## Methods
 
 ### NewGenAESKeyRequest
 
-`func NewGenAESKeyRequest(label string, id string, bits int32, ) *GenAESKeyRequest`
+`func NewGenAESKeyRequest(id int32, bits int32, ) *GenAESKeyRequest`
 
 NewGenAESKeyRequest instantiates a new GenAESKeyRequest object
 This constructor will assign default values to properties that have it defined,
@@ -27,42 +26,22 @@ NewGenAESKeyRequestWithDefaults instantiates a new GenAESKeyRequest object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
 
-### GetLabel
-
-`func (o *GenAESKeyRequest) GetLabel() string`
-
-GetLabel returns the Label field if non-nil, zero value otherwise.
-
-### GetLabelOk
-
-`func (o *GenAESKeyRequest) GetLabelOk() (*string, bool)`
-
-GetLabelOk returns a tuple with the Label field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetLabel
-
-`func (o *GenAESKeyRequest) SetLabel(v string)`
-
-SetLabel sets Label field to given value.
-
-
 ### GetId
 
-`func (o *GenAESKeyRequest) GetId() string`
+`func (o *GenAESKeyRequest) GetId() int32`
 
 GetId returns the Id field if non-nil, zero value otherwise.
 
 ### GetIdOk
 
-`func (o *GenAESKeyRequest) GetIdOk() (*string, bool)`
+`func (o *GenAESKeyRequest) GetIdOk() (*int32, bool)`
 
 GetIdOk returns a tuple with the Id field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetId
 
-`func (o *GenAESKeyRequest) SetId(v string)`
+`func (o *GenAESKeyRequest) SetId(v int32)`
 
 SetId sets Id field to given value.
 

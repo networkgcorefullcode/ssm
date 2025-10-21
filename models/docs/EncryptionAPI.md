@@ -4,8 +4,8 @@ All URIs are relative to *http://localhost*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**DecryptData**](EncryptionAPI.md#DecryptData) | **Post** /decrypt | Descifrar datos
-[**EncryptData**](EncryptionAPI.md#EncryptData) | **Post** /encrypt | Cifrar datos
+[**DecryptData**](EncryptionAPI.md#DecryptData) | **Post** /decrypt | Decrypt data
+[**EncryptData**](EncryptionAPI.md#EncryptData) | **Post** /encrypt | Encrypt data
 
 
 
@@ -13,7 +13,7 @@ Method | HTTP request | Description
 
 > DecryptResponse DecryptData(ctx).DecryptRequest(decryptRequest).Execute()
 
-Descifrar datos
+Decrypt data
 
 
 
@@ -30,7 +30,7 @@ import (
 )
 
 func main() {
-	decryptRequest := *openapiclient.NewDecryptRequest("MySecretKey", string([B@66d57c1b), string([B@27494e46)) // DecryptRequest | 
+	decryptRequest := *openapiclient.NewDecryptRequest("MySecretKey", string([B@17271176), string([B@2e3cdec2), int32(12345), int32(1)) // DecryptRequest | 
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -79,7 +79,7 @@ No authorization required
 
 > EncryptResponse EncryptData(ctx).EncryptRequest(encryptRequest).Execute()
 
-Cifrar datos
+Encrypt data
 
 
 
@@ -96,7 +96,7 @@ import (
 )
 
 func main() {
-	encryptRequest := *openapiclient.NewEncryptRequest("MySecretKey", string([B@534243e4)) // EncryptRequest | 
+	encryptRequest := *openapiclient.NewEncryptRequest("MySecretKey", string([B@451f87af), int32(1)) // EncryptRequest | 
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)

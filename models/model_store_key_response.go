@@ -1,7 +1,7 @@
 /*
 SSM (Secure Storage Manager) API
 
-API para gestión segura de claves criptográficas usando PKCS#11 y HSM.  El SSM proporciona operaciones seguras de: - Generación de claves AES - Cifrado y descifrado de datos - Almacenamiento de claves - Gestión mediante HSM/SoftHSM  ## Autenticación La API funciona a través de Unix Domain Sockets para mayor seguridad. Tambien da soporte a HTTPS con certificados TLS. No implementado aun.  ## Formatos de datos - Todos los datos binarios (plaintext, ciphertext, IV) deben estar en Base64 - Las respuestas incluyen timestamps en formato RFC3339 - Los errores siguen el estándar RFC 7807 (Problem Details)
+API for secure cryptographic key management using PKCS#11 and HSM.  SSM provides secure operations for: - AES, DES, DES3 key generation - Data encryption and decryption - Key storage and management - HSM/SoftHSM integration  ## Authentication The API works through Unix Domain Sockets for enhanced security. Also supports HTTPS with TLS certificates.  ## Data Formats - All binary data (plaintext, ciphertext, IV) should be in Base64/Hex - Responses include timestamps in RFC3339 format - Errors follow RFC 7807 standard (Problem Details)
 
 API version: 1.0.0
 Contact: support@yourorganization.com
@@ -11,152 +11,10 @@ Contact: support@yourorganization.com
 
 package models
 
-import (
-	"encoding/json"
-)
-
-// checks if the StoreKeyResponse type satisfies the MappedNullable interface at compile tim
-
-// StoreKeyResponse struct for StoreKeyResponse
+// StoreKeyResponse
 type StoreKeyResponse struct {
-	// Handle de la clave almacenada
-	Handle uint `json:"handle,omitempty"`
-	// Clave cifrada almacenada
-	CipherKey *string `json:"cipher_key,omitempty"`
-}
-
-// NewStoreKeyResponse instantiates a new StoreKeyResponse object
-// This constructor will assign default values to properties that have it defined,
-// and makes sure properties required by API are set, but the set of arguments
-// will change when the set of required properties is changed
-func NewStoreKeyResponse() *StoreKeyResponse {
-	this := StoreKeyResponse{}
-	return &this
-}
-
-// NewStoreKeyResponseWithDefaults instantiates a new StoreKeyResponse object
-// This constructor will only assign default values to properties that have it defined,
-// but it doesn't guarantee that properties required by API are set
-func NewStoreKeyResponseWithDefaults() *StoreKeyResponse {
-	this := StoreKeyResponse{}
-	return &this
-}
-
-// GetHandle returns the Handle field value if set, zero value otherwise.
-func (o *StoreKeyResponse) GetHandle() uint {
-	if o == nil || IsNil(o.Handle) {
-		var ret uint
-		return ret
-	}
-	return o.Handle
-}
-
-// GetHandleOk returns a tuple with the Handle field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *StoreKeyResponse) GetHandleOk() (uint, bool) {
-	if o == nil || IsNil(o.Handle) {
-		return 0, false
-	}
-	return o.Handle, true
-}
-
-// HasHandle returns a boolean if a field has been set.
-func (o *StoreKeyResponse) HasHandle() bool {
-	if o != nil && !IsNil(o.Handle) {
-		return true
-	}
-
-	return false
-}
-
-// SetHandle gets a reference to the given uint and assigns it to the Handle field.
-func (o *StoreKeyResponse) SetHandle(v uint) {
-	o.Handle = v
-}
-
-// GetCipherKey returns the CipherKey field value if set, zero value otherwise.
-func (o *StoreKeyResponse) GetCipherKey() string {
-	if o == nil || IsNil(o.CipherKey) {
-		var ret string
-		return ret
-	}
-	return *o.CipherKey
-}
-
-// GetCipherKeyOk returns a tuple with the CipherKey field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *StoreKeyResponse) GetCipherKeyOk() (*string, bool) {
-	if o == nil || IsNil(o.CipherKey) {
-		return nil, false
-	}
-	return o.CipherKey, true
-}
-
-// HasCipherKey returns a boolean if a field has been set.
-func (o *StoreKeyResponse) HasCipherKey() bool {
-	if o != nil && !IsNil(o.CipherKey) {
-		return true
-	}
-
-	return false
-}
-
-// SetCipherKey gets a reference to the given string and assigns it to the CipherKey field.
-func (o *StoreKeyResponse) SetCipherKey(v string) {
-	o.CipherKey = &v
-}
-
-func (o StoreKeyResponse) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
-	if err != nil {
-		return []byte{}, err
-	}
-	return json.Marshal(toSerialize)
-}
-
-func (o StoreKeyResponse) ToMap() (map[string]interface{}, error) {
-	toSerialize := map[string]interface{}{}
-	if !IsNil(o.Handle) {
-		toSerialize["handle"] = o.Handle
-	}
-	if !IsNil(o.CipherKey) {
-		toSerialize["cipher_key"] = o.CipherKey
-	}
-	return toSerialize, nil
-}
-
-type NullableStoreKeyResponse struct {
-	value *StoreKeyResponse
-	isSet bool
-}
-
-func (v NullableStoreKeyResponse) Get() *StoreKeyResponse {
-	return v.value
-}
-
-func (v *NullableStoreKeyResponse) Set(val *StoreKeyResponse) {
-	v.value = val
-	v.isSet = true
-}
-
-func (v NullableStoreKeyResponse) IsSet() bool {
-	return v.isSet
-}
-
-func (v *NullableStoreKeyResponse) Unset() {
-	v.value = nil
-	v.isSet = false
-}
-
-func NewNullableStoreKeyResponse(val *StoreKeyResponse) *NullableStoreKeyResponse {
-	return &NullableStoreKeyResponse{value: val, isSet: true}
-}
-
-func (v NullableStoreKeyResponse) MarshalJSON() ([]byte, error) {
-	return json.Marshal(v.value)
-}
-
-func (v *NullableStoreKeyResponse) UnmarshalJSON(src []byte) error {
-	v.isSet = true
-	return json.Unmarshal(src, &v.value)
+	// Handle of the stored key
+	Handle int32 `json:"handle"`
+	// Stored encrypted key
+	CipherKey string `json:"cipher_key"`
 }
