@@ -31,6 +31,15 @@ const (
 	ALGORITM_DES3             = 4
 )
 
+var KeyLabelsAllow [6]string = [6]string{
+	LABEL_ENCRIPTION_KEY_AES,
+	LABEL_ENCRIPTION_KEY_DES,
+	LABEL_ENCRIPTION_KEY_DES3,
+	LABEL_K4_KEY_AES,
+	LABEL_K4_KEY_DES,
+	LABEL_K4_KEY_DES3,
+}
+
 const (
 	TYPE_AES  = "AES"
 	TYPE_DES  = "DES"
