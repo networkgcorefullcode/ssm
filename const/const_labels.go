@@ -39,13 +39,16 @@ const (
 	ALGORITM_DES3_OurUsers    = 8
 )
 
-var KeyLabelsAllow [6]string = [6]string{
-	LABEL_ENCRIPTION_KEY_AES,
-	LABEL_ENCRIPTION_KEY_DES,
-	LABEL_ENCRIPTION_KEY_DES3,
+var KeyLabelsExternalAllow [3]string = [3]string{
 	LABEL_K4_KEY_AES,
 	LABEL_K4_KEY_DES,
 	LABEL_K4_KEY_DES3,
+}
+
+var KeyLabelsInternalAllow [3]string = [3]string{
+	LABEL_ENCRIPTION_KEY_AES,
+	LABEL_ENCRIPTION_KEY_DES,
+	LABEL_ENCRIPTION_KEY_DES3,
 }
 
 const (
@@ -54,7 +57,7 @@ const (
 	TYPE_DES3 = "DES3"
 )
 
-var KeyTypeAllow [6]string = [6]string{
+var KeyTypeAllow [3]string = [3]string{
 	TYPE_AES,
 	TYPE_DES,
 	TYPE_DES3,
