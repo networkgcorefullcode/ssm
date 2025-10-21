@@ -8,6 +8,9 @@ Method | HTTP request | Description
 [**GenerateAESKey**](KeyManagementAPI.md#GenerateAESKey) | **Post** /generate-aes-key | Generate new AES key
 [**GenerateDES3Key**](KeyManagementAPI.md#GenerateDES3Key) | **Post** /generate-des3-key | Generate new DES3 key
 [**GenerateDESKey**](KeyManagementAPI.md#GenerateDESKey) | **Post** /generate-des-key | Generate new DES key
+[**GetAllKeys**](KeyManagementAPI.md#GetAllKeys) | **Post** /get-all-keys | Get all keys from HSM
+[**GetDataKeys**](KeyManagementAPI.md#GetDataKeys) | **Post** /get-data-keys | Get multiple keys by label
+[**GetKey**](KeyManagementAPI.md#GetKey) | **Post** /get-key | Get single key information
 [**StoreKey**](KeyManagementAPI.md#StoreKey) | **Post** /store-key | Store existing key
 [**UpdateKey**](KeyManagementAPI.md#UpdateKey) | **Put** /store-key | Update key
 
@@ -277,6 +280,199 @@ No authorization required
 [[Back to README]](../README.md)
 
 
+## GetAllKeys
+
+> GetAllKeysResponse GetAllKeys(ctx).Execute()
+
+Get all keys from HSM
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.KeyManagementAPI.GetAllKeys(context.Background()).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `KeyManagementAPI.GetAllKeys``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `GetAllKeys`: GetAllKeysResponse
+	fmt.Fprintf(os.Stdout, "Response from `KeyManagementAPI.GetAllKeys`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+This endpoint does not need any parameter.
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetAllKeysRequest struct via the builder pattern
+
+
+### Return type
+
+[**GetAllKeysResponse**](GetAllKeysResponse.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## GetDataKeys
+
+> GetDataKeysResponse GetDataKeys(ctx).GetDataKeysRequest(getDataKeysRequest).Execute()
+
+Get multiple keys by label
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	getDataKeysRequest := *openapiclient.NewGetDataKeysRequest("my-aes-key") // GetDataKeysRequest | 
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.KeyManagementAPI.GetDataKeys(context.Background()).GetDataKeysRequest(getDataKeysRequest).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `KeyManagementAPI.GetDataKeys``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `GetDataKeys`: GetDataKeysResponse
+	fmt.Fprintf(os.Stdout, "Response from `KeyManagementAPI.GetDataKeys`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetDataKeysRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **getDataKeysRequest** | [**GetDataKeysRequest**](GetDataKeysRequest.md) |  | 
+
+### Return type
+
+[**GetDataKeysResponse**](GetDataKeysResponse.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## GetKey
+
+> GetKeyResponse GetKey(ctx).GetKeyRequest(getKeyRequest).Execute()
+
+Get single key information
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	getKeyRequest := *openapiclient.NewGetKeyRequest("my-aes-key", int32(1)) // GetKeyRequest | 
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.KeyManagementAPI.GetKey(context.Background()).GetKeyRequest(getKeyRequest).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `KeyManagementAPI.GetKey``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `GetKey`: GetKeyResponse
+	fmt.Fprintf(os.Stdout, "Response from `KeyManagementAPI.GetKey`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetKeyRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **getKeyRequest** | [**GetKeyRequest**](GetKeyRequest.md) |  | 
+
+### Return type
+
+[**GetKeyResponse**](GetKeyResponse.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
 ## StoreKey
 
 > StoreKeyResponse StoreKey(ctx).StoreKeyRequest(storeKeyRequest).Execute()
@@ -298,7 +494,7 @@ import (
 )
 
 func main() {
-	storeKeyRequest := *openapiclient.NewStoreKeyRequest("ImportedKey", int32(2), string([B@3051e0b2), "AES") // StoreKeyRequest | 
+	storeKeyRequest := *openapiclient.NewStoreKeyRequest("ImportedKey", int32(2), string([B@2324bfe7), "AES") // StoreKeyRequest | 
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)

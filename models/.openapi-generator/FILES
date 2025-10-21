@@ -4,9 +4,11 @@
 README.md
 api/openapi.yaml
 api_encryption.go
+api_health.go
 api_key_management.go
 client.go
 configuration.go
+docs/DataKeyInfo.md
 docs/DecryptRequest.md
 docs/DecryptResponse.md
 docs/DeleteKeyRequest.md
@@ -20,6 +22,13 @@ docs/GenDES3KeyRequest.md
 docs/GenDES3KeyResponse.md
 docs/GenDESKeyRequest.md
 docs/GenDESKeyResponse.md
+docs/GetAllKeysResponse.md
+docs/GetDataKeysRequest.md
+docs/GetDataKeysResponse.md
+docs/GetKeyRequest.md
+docs/GetKeyResponse.md
+docs/HealthAPI.md
+docs/HealthCheckResponse.md
 docs/KeyManagementAPI.md
 docs/ProblemDetails.md
 docs/StoreKeyRequest.md
@@ -29,6 +38,7 @@ docs/UpdateKeyResponse.md
 git_push.sh
 go.mod
 go.sum
+model_data_key_info.go
 model_decrypt_request.go
 model_decrypt_response.go
 model_delete_key_request.go
@@ -41,6 +51,12 @@ model_gen_des3_key_request.go
 model_gen_des3_key_response.go
 model_gen_des_key_request.go
 model_gen_des_key_response.go
+model_get_all_keys_response.go
+model_get_data_keys_request.go
+model_get_data_keys_response.go
+model_get_key_request.go
+model_get_key_response.go
+model_health_check_response.go
 model_problem_details.go
 model_store_key_request.go
 model_store_key_response.go
@@ -48,5 +64,6 @@ model_update_key_request.go
 model_update_key_response.go
 response.go
 test/api_encryption_test.go
+test/api_health_test.go
 test/api_key_management_test.go
 utils.go

@@ -562,6 +562,229 @@ paths:
       summary: Update key
       tags:
       - Key Management
+  /get-key:
+    post:
+      description: |
+        Retrieves information about a single key from the HSM by its label and ID.
+        Returns the key handle, ID, and size in bits.
+      operationId: getKey
+      requestBody:
+        content:
+          application/json:
+            examples:
+              simple:
+                summary: Get key by label
+                value:
+                  key_label: my-aes-key
+                  id: 1
+            schema:
+              $ref: '#/components/schemas/GetKeyRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                success:
+                  summary: Key retrieved successfully
+                  value:
+                    key_info:
+                      handle: 1001
+                      id: 1
+                      size_bits: 256
+              schema:
+                $ref: '#/components/schemas/GetKeyResponse'
+          description: Key information retrieved successfully
+        "400":
+          content:
+            application/json:
+              examples:
+                validation:
+                  summary: Validation error
+                  value:
+                    title: Validation Error
+                    detail: key_label is required
+                    status: 400
+                    error: validation_failed
+                badJson:
+                  summary: Invalid JSON
+                  value:
+                    title: Invalid JSON
+                    detail: Failed to parse request body
+                    status: 400
+                    error: bad_json
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+          description: Invalid request
+        "404":
+          content:
+            application/json:
+              example:
+                title: Key Not Found
+                detail: Key with label 'my-aes-key' not found
+                status: 404
+                error: key_not_found
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+          description: Key not found
+        "500":
+          content:
+            application/json:
+              examples:
+                hsm_error:
+                  summary: HSM error
+                  value:
+                    title: Key Retrieval Failed
+                    detail: "Failed to retrieve key: pkcs11 session invalid"
+                    status: 500
+                    error: hsm_error
+                general:
+                  summary: General error
+                  value:
+                    title: Internal Server Error
+                    detail: An unexpected error occurred
+                    status: 500
+                    error: internal_error
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+          description: Internal server error
+      summary: Get single key information
+      tags:
+      - Key Management
+  /get-data-keys:
+    post:
+      description: |
+        Retrieves information about all keys from the HSM that match the specified label.
+        Returns an array of key information including handle, ID, and size.
+      operationId: getDataKeys
+      requestBody:
+        content:
+          application/json:
+            examples:
+              simple:
+                summary: Get keys by label
+                value:
+                  key_label: my-aes-key
+            schema:
+              $ref: '#/components/schemas/GetDataKeysRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                success:
+                  summary: Keys retrieved successfully
+                  value:
+                    keys:
+                      - handle: 1001
+                        id: 1
+                        size_bits: 256
+                      - handle: 1002
+                        id: 2
+                        size_bits: 256
+              schema:
+                $ref: '#/components/schemas/GetDataKeysResponse'
+          description: Keys retrieved successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+          description: Invalid request
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+          description: Internal server error
+      summary: Get multiple keys by label
+      tags:
+      - Key Management
+  /get-all-keys:
+    post:
+      description: |
+        Retrieves information about all keys stored in the HSM.
+        Returns keys grouped by label with their handles, IDs, and sizes.
+      operationId: getAllKeys
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                success:
+                  summary: All keys retrieved
+                  value:
+                    keys_by_label:
+                      my-aes-key:
+                        - handle: 1001
+                          id: 1
+                          size_bits: 256
+                        - handle: 1002
+                          id: 2
+                          size_bits: 256
+                      my-des3-key:
+                        - handle: 2001
+                          id: 10
+                          size_bits: 192
+                    total_keys: 3
+                    total_labels: 2
+              schema:
+                $ref: '#/components/schemas/GetAllKeysResponse'
+          description: All keys retrieved successfully
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+          description: Internal server error
+      summary: Get all keys from HSM
+      tags:
+      - Key Management
+  /health-check:
+    post:
+      description: |
+        Health Check info to send periodical request to the SSM
+        if don't get a response the SSM is down
+      operationId: health-check-post
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                success:
+                  summary: Service is healthy
+                  value:
+                    status: OK
+                    message: Service is healthy
+              schema:
+                $ref: '#/components/schemas/HealthCheckResponse'
+          description: Service is healthy
+      summary: Health check endpoint
+      tags:
+      - Health
+    get:
+      description: |
+        Health Check info to send periodical request to the SSM
+        if don't get a response the SSM is down
+      operationId: health-check-get
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                success:
+                  summary: Service is healthy
+                  value:
+                    status: OK
+                    message: Service is healthy
+              schema:
+                $ref: '#/components/schemas/HealthCheckResponse'
+          description: Service is healthy
+      summary: Health check endpoint
+      tags:
+      - Health
+
 components:
   examples:
     Base64Examples:
@@ -745,6 +968,12 @@ components:
             NTZjNmM2ZjI=
           format: byte
           type: string
+        id: 
+          description: Id key that used to encrypt plan data
+          example: !!binary |-
+            NTZjNmM2ZjI=
+          format: byte
+          type: integer
         ok:
           description: Indicates if the operation was successful
           example: true
@@ -1047,4 +1276,141 @@ components:
       - handle
       - key_label
       - message
+      type: object
+    HealthCheckResponse:
+      example:
+        status: OK
+        message: Status is ok
+      properties:
+        status:
+          description: Health status
+          example: OK
+          type: string
+        message:
+          description: Additional information
+          example: Status is ok
+          type: string
+      required:
+      - status
+      - message
+      type: object
+    GetKeyRequest:
+      example:
+        key_label: my-aes-key
+        id: 1
+      properties:
+        key_label:
+          description: Label of the key to retrieve
+          example: my-aes-key
+          minLength: 1
+          type: string
+        id:
+          description: Key identifier
+          example: 1
+          type: integer
+      required:
+      - key_label
+      - id
+      type: object
+    GetKeyResponse:
+      example:
+        key_info:
+          handle: 1001
+          id: 1
+          size_bits: 256
+      properties:
+        key_info:
+          $ref: '#/components/schemas/DataKeyInfo'
+      required:
+      - key_info
+      type: object
+    GetDataKeysRequest:
+      example:
+        key_label: my-aes-key
+      properties:
+        key_label:
+          description: Label of the keys to retrieve
+          example: my-aes-key
+          minLength: 1
+          type: string
+      required:
+      - key_label
+      type: object
+    GetDataKeysResponse:
+      example:
+        keys:
+          - handle: 1001
+            id: 1
+            size_bits: 256
+          - handle: 1002
+            id: 2
+            size_bits: 256
+      properties:
+        keys:
+          description: Array of key information
+          items:
+            $ref: '#/components/schemas/DataKeyInfo'
+          type: array
+      required:
+      - keys
+      type: object
+    GetAllKeysResponse:
+      example:
+        keys_by_label:
+          my-aes-key:
+            - handle: 1001
+              id: 1
+              size_bits: 256
+            - handle: 1002
+              id: 2
+              size_bits: 256
+          my-des3-key:
+            - handle: 2001
+              id: 10
+              size_bits: 192
+        total_keys: 3
+        total_labels: 2
+      properties:
+        keys_by_label:
+          description: Map of label to array of key information
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/DataKeyInfo'
+        total_keys:
+          description: Total number of keys found
+          example: 3
+          type: integer
+        total_labels:
+          description: Total number of unique labels
+          example: 2
+          type: integer
+      required:
+      - keys_by_label
+      - total_keys
+      - total_labels
+      type: object
+    DataKeyInfo:
+      example:
+        handle: 1001
+        id: 1
+        size_bits: 256
+      properties:
+        handle:
+          description: HSM key handle
+          example: 1001
+          type: integer
+        id:
+          description: Key identifier
+          example: 1
+          type: integer
+        size_bits:
+          description: Size of the key in bits
+          example: 256
+          type: integer
+      required:
+      - handle
+      - id
+      - size_bits
       type: object

@@ -44,15 +44,24 @@ func (m *Manager) GenerateAESKey(label string, id int32, bits int) (pkcs11.Objec
 // GenerateDESKey creates an DES key object inside SoftHSM and returns its object handle (as uint)
 func (m *Manager) GenerateDESKey(label string, id int32) (pkcs11.ObjectHandle, error) {
 	logger.AppLog.Infof("Generating DES key: label=%s", label)
+
+	// Check if DES_CBC_PAD is supported
+	if !m.IsMechanismSupported(pkcs11.CKM_DES_CBC_PAD) {
+		logger.AppLog.Warn("CKM_DES_CBC_PAD mechanism not supported by HSM")
+	}
+
 	mech := pkcs11.NewMechanism(pkcs11.CKM_DES_KEY_GEN, nil)
 	template := []*pkcs11.Attribute{
 		pkcs11.NewAttribute(pkcs11.CKA_LABEL, label),
 		pkcs11.NewAttribute(pkcs11.CKA_ID, utils.Int32ToByte(id)),
+		pkcs11.NewAttribute(pkcs11.CKA_CLASS, pkcs11.CKO_SECRET_KEY),
+		pkcs11.NewAttribute(pkcs11.CKA_KEY_TYPE, pkcs11.CKK_DES),
 		pkcs11.NewAttribute(pkcs11.CKA_ENCRYPT, true),
 		pkcs11.NewAttribute(pkcs11.CKA_DECRYPT, true),
 		pkcs11.NewAttribute(pkcs11.CKA_WRAP, true),
 		pkcs11.NewAttribute(pkcs11.CKA_UNWRAP, true),
-		pkcs11.NewAttribute(pkcs11.CKA_TOKEN, true), // store persistently in token
+		pkcs11.NewAttribute(pkcs11.CKA_TOKEN, true),
+		pkcs11.NewAttribute(pkcs11.CKA_PRIVATE, true),
 		pkcs11.NewAttribute(pkcs11.CKA_SENSITIVE, true),
 		pkcs11.NewAttribute(pkcs11.CKA_EXTRACTABLE, false),
 	}
@@ -76,15 +85,24 @@ func (m *Manager) GenerateDESKey(label string, id int32) (pkcs11.ObjectHandle, e
 // GenerateDES3Key creates an DES3 key object inside SoftHSM and returns its object handle (as uint)
 func (m *Manager) GenerateDES3Key(label string, id int32) (pkcs11.ObjectHandle, error) {
 	logger.AppLog.Infof("Generating DES3 key: label=%s", label)
+
+	// Check if DES3_CBC_PAD is supported
+	if !m.IsMechanismSupported(pkcs11.CKM_DES3_CBC_PAD) {
+		logger.AppLog.Warn("CKM_DES_CBC_PAD mechanism not supported by HSM")
+	}
+
 	mech := pkcs11.NewMechanism(pkcs11.CKM_DES3_KEY_GEN, nil)
 	template := []*pkcs11.Attribute{
 		pkcs11.NewAttribute(pkcs11.CKA_LABEL, label),
 		pkcs11.NewAttribute(pkcs11.CKA_ID, utils.Int32ToByte(id)),
+		pkcs11.NewAttribute(pkcs11.CKA_CLASS, pkcs11.CKO_SECRET_KEY),
+		pkcs11.NewAttribute(pkcs11.CKA_KEY_TYPE, pkcs11.CKK_DES3),
 		pkcs11.NewAttribute(pkcs11.CKA_ENCRYPT, true),
 		pkcs11.NewAttribute(pkcs11.CKA_DECRYPT, true),
 		pkcs11.NewAttribute(pkcs11.CKA_WRAP, true),
 		pkcs11.NewAttribute(pkcs11.CKA_UNWRAP, true),
 		pkcs11.NewAttribute(pkcs11.CKA_TOKEN, true), // store persistently in token
+		pkcs11.NewAttribute(pkcs11.CKA_PRIVATE, true),
 		pkcs11.NewAttribute(pkcs11.CKA_SENSITIVE, true),
 		pkcs11.NewAttribute(pkcs11.CKA_EXTRACTABLE, false),
 	}
