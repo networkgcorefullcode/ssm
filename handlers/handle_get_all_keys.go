@@ -33,7 +33,7 @@ func postGetAllKeys(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Reque
 	// Find all keys grouped by label
 	logger.AppLog.Info("Searching all keys in HSM")
 	keysByLabel, err := mgr.FindAllKeys()
-	if len(keysByLabel) == 0 {
+	if keysByLabel != nil && len(keysByLabel) == 0 {
 		// Prepare the response
 		// Prepare the response
 		// Prepare the response

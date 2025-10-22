@@ -44,7 +44,7 @@ func postGetDataKeys(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Requ
 
 	logger.AppLog.Infof("Searching key in HSM - using the Label: %s", label)
 	handles, err := mgr.FindKeysLabel(label)
-	if len(handles) == 0 {
+	if handles != nil && len(handles) == 0 {
 		// Prepare the response
 		resp := models.GetDataKeysResponse{
 			Keys: make([]models.DataKeyInfo, 0, 0),
