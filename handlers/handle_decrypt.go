@@ -15,7 +15,7 @@ import (
 
 // @title        Decrypt Data API
 // @version 	 1.0.0
-// @description  Decrypt a Key using simetrics algoritms as AES 128 and AES 256, DES, 3DES
+// @description  Decrypt a Key using simetrics ALGORITHMs as AES 128 and AES 256, DES, 3DES
 // @Accept       json
 // @Produce      json
 // @Param        request  body      models.DecryptRequest  true  "Data to decrypt"
@@ -92,7 +92,7 @@ func postDecrypt(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request)
 
 	var plaintext []byte
 	switch req.EncryptionAlgorithm {
-	case constants.ALGORITM_AES128, constants.ALGORITM_AES256:
+	case constants.ALGORITHM_AES128, constants.ALGORITHM_AES256:
 		plaintext, err = mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_AES_CBC_PAD)
 		if err != nil {
 			plaintext, err = mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_AES_CBC)
@@ -103,7 +103,7 @@ func postDecrypt(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request)
 		if err != nil {
 			plaintext, err = mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_AES_ECB_ENCRYPT_DATA)
 		}
-	case constants.ALGORITM_DES:
+	case constants.ALGORITHM_DES:
 		plaintext, err = mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES_CBC_PAD)
 		if err != nil {
 			plaintext, err = mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES_CBC)
@@ -114,7 +114,7 @@ func postDecrypt(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request)
 		if err != nil {
 			plaintext, err = mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES_ECB_ENCRYPT_DATA)
 		}
-	case constants.ALGORITM_DES3:
+	case constants.ALGORITHM_DES3:
 		plaintext, err = mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES3_CBC_PAD)
 		if err != nil {
 			plaintext, err = mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES3_CBC)

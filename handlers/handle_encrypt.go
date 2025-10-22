@@ -85,7 +85,7 @@ func postEncrypt(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request)
 
 	var ciphertext []byte
 	switch req.EncryptionAlgorithm {
-	case constants.ALGORITM_AES128_OurUsers, constants.ALGORITM_AES256_OurUsers:
+	case constants.ALGORITHM_AES128_OurUsers, constants.ALGORITHM_AES256_OurUsers:
 		ciphertext, err = mgr.EncryptKey(keyHandle, iv, pt, pkcs11.CKM_AES_CBC_PAD)
 		if err != nil {
 			logger.AppLog.Errorf("Encryption failed: %v", err)
@@ -96,7 +96,7 @@ func postEncrypt(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request)
 				return
 			}
 		}
-	case constants.ALGORITM_DES3_OurUsers:
+	case constants.ALGORITHM_DES3_OurUsers:
 		ciphertext, err = mgr.EncryptKey(keyHandle, iv, pt, pkcs11.CKM_DES3_CBC_PAD)
 		if err != nil {
 			logger.AppLog.Errorf("Encryption failed: %v", err)
@@ -107,7 +107,7 @@ func postEncrypt(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request)
 				return
 			}
 		}
-	case constants.ALGORITM_DES_OurUsers:
+	case constants.ALGORITHM_DES_OurUsers:
 		ciphertext, err = mgr.EncryptKey(keyHandle, iv, pt, pkcs11.CKM_DES_CBC_PAD)
 		if err != nil {
 			logger.AppLog.Errorf("Encryption failed: %v", err)

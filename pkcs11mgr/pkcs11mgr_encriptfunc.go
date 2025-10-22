@@ -7,16 +7,16 @@ import (
 
 // EncryptWithAESKey performs encryption using a key object already in the token.
 // NOTE: parámetros específicos del mecanismo (p.ej. GCM params) pueden necesitar ajustar según tu módulo.
-func (m *Manager) EncryptKey(keyHandle pkcs11.ObjectHandle, iv, plaintext []byte, encryptAlgoritm uint) ([]byte, error) {
-	logger.AppLog.Infof("Encrypting data with key handle=%v, algorithm=%v (0x%X)", keyHandle, encryptAlgoritm, encryptAlgoritm)
+func (m *Manager) EncryptKey(keyHandle pkcs11.ObjectHandle, iv, plaintext []byte, encryptALGORITHM uint) ([]byte, error) {
+	logger.AppLog.Infof("Encrypting data with key handle=%v, algorithm=%v (0x%X)", keyHandle, encryptALGORITHM, encryptALGORITHM)
 	logger.AppLog.Infof("IV length: %d bytes, Plaintext length: %d bytes", len(iv), len(plaintext))
 
 	// Create mechanism with IV parameter
-	mech := pkcs11.NewMechanism(encryptAlgoritm, iv)
+	mech := pkcs11.NewMechanism(encryptALGORITHM, iv)
 	logger.AppLog.Infof("Mechanism created successfully")
 
 	if err := m.ctx.EncryptInit(m.session, []*pkcs11.Mechanism{mech}, keyHandle); err != nil {
-		logger.AppLog.Errorf("EncryptInit failed for mechanism 0x%X: %v", encryptAlgoritm, err)
+		logger.AppLog.Errorf("EncryptInit failed for mechanism 0x%X: %v", encryptALGORITHM, err)
 		return nil, err
 	}
 	out, err := m.ctx.Encrypt(m.session, plaintext)
@@ -28,9 +28,9 @@ func (m *Manager) EncryptKey(keyHandle pkcs11.ObjectHandle, iv, plaintext []byte
 	return out, nil
 }
 
-func (m *Manager) DecryptKey(keyHandle pkcs11.ObjectHandle, iv, ciphertext []byte, decriptAlgoritm uint) ([]byte, error) {
-	logger.AppLog.Infof("Decrypting data with key handle=%v, algorithm=%v", keyHandle, decriptAlgoritm)
-	mech := pkcs11.NewMechanism(decriptAlgoritm, iv)
+func (m *Manager) DecryptKey(keyHandle pkcs11.ObjectHandle, iv, ciphertext []byte, decriptALGORITHM uint) ([]byte, error) {
+	logger.AppLog.Infof("Decrypting data with key handle=%v, algorithm=%v", keyHandle, decriptALGORITHM)
+	mech := pkcs11.NewMechanism(decriptALGORITHM, iv)
 	if err := m.ctx.DecryptInit(m.session, []*pkcs11.Mechanism{mech}, keyHandle); err != nil {
 		logger.AppLog.Errorf("DecryptInit failed: %v", err)
 		return nil, err
