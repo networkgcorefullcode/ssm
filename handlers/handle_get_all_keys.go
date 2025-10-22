@@ -33,6 +33,23 @@ func postGetAllKeys(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Reque
 	// Find all keys grouped by label
 	logger.AppLog.Info("Searching all keys in HSM")
 	keysByLabel, err := mgr.FindAllKeys()
+	if len(keysByLabel) == 0 {
+		// Prepare the response
+		// Prepare the response
+		// Prepare the response
+		resp := models.GetAllKeysResponse{
+			KeysByLabel: make(map[string][]models.DataKeyInfo),
+			TotalKeys:   0,
+			TotalLabels: int32(len(keysByLabel)),
+		}
+		logger.AppLog.Info("Not key found")
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		if err := json.NewEncoder(w).Encode(resp); err != nil {
+			logger.AppLog.Errorf("Failed to encode response: %v", err)
+			sendProblemDetails(w, "Internal Server Error", "Failed to encode response", "INTERNAL_SERVER_ERROR", http.StatusInternalServerError, r.URL.Path)
+		}
+	}
 	if err != nil {
 		logger.AppLog.Errorf("Failed to search all keys: %v", err)
 		sendProblemDetails(w, "Key Search Failed", "Error searching all keys in HSM", "KEY_GET_ERROR", http.StatusInternalServerError, r.URL.Path)

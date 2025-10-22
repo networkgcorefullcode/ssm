@@ -71,7 +71,7 @@ func (m *Manager) FindKeysLabel(label string) ([]pkcs11.ObjectHandle, error) {
 		if len(new_handles) == 0 {
 			if len(handles) == 0 {
 				logger.AppLog.Warnf("No key found with label: %s", label)
-				return nil, errors.New("Key with the label not found")
+				return handles, errors.New("Key with the label not found")
 			}
 			logger.AppLog.Info("Key found is finished")
 			return handles, nil
@@ -106,7 +106,7 @@ func (m *Manager) FindAllKeys() (map[string][]pkcs11.ObjectHandle, error) {
 		if len(newHandles) == 0 {
 			if len(allHandles) == 0 {
 				logger.AppLog.Warnf("No key found")
-				return nil, errors.New("Key with the label not found")
+				return map[string][]pkcs11.ObjectHandle{}, errors.New("Key with the label not found")
 			}
 			break
 		}

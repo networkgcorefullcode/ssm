@@ -44,6 +44,23 @@ func postGetDataKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Reque
 
 	logger.AppLog.Infof("Searching key in HSM - using the Label: %s", label)
 	handle, err := mgr.FindKey(label, req.Id)
+	if handle == 0 {
+		// Prepare the response
+		// Prepare the response
+		resp := models.GetKeyResponse{
+			KeyInfo: models.DataKeyInfo{
+				Handle: 0,
+				Id:     0,
+			},
+		}
+		logger.AppLog.Info("Not key found")
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		if err := json.NewEncoder(w).Encode(resp); err != nil {
+			logger.AppLog.Errorf("Failed to encode response: %v", err)
+			sendProblemDetails(w, "Internal Server Error", "Failed to encode response", "INTERNAL_SERVER_ERROR", http.StatusInternalServerError, r.URL.Path)
+		}
+	}
 	if err != nil {
 		logger.AppLog.Errorf("Failed to search keys: %v", err)
 		sendProblemDetails(w, "Key find Failed", "Error searching key in HSM", "KEY_GET_ERROR", http.StatusInternalServerError, r.URL.Path)
