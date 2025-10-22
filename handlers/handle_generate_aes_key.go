@@ -54,9 +54,9 @@ func postGenerateAESKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.R
 
 	var label string
 	if req.Bits == 128 {
-		label = constants.LABEL_ENCRIPTION_KEY_AES128
+		label = constants.LABEL_ENCRYPTION_KEY_AES128
 	} else if req.Bits == 256 {
-		label = constants.LABEL_ENCRIPTION_KEY_AES256
+		label = constants.LABEL_ENCRYPTION_KEY_AES256
 	}
 
 	handle, err := mgr.GenerateAESKey(label, req.Id, int(req.Bits))
