@@ -33,15 +33,11 @@ func postGetAllKeys(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Reque
 	// Find all keys grouped by label
 	logger.AppLog.Info("Searching all keys in HSM")
 	keysByLabel, err := mgr.FindAllKeys()
-	if err.Error() == "Key with the label not found" {
+	if err != nil && err.Error() == "Key with the label not found" {
 		// Prepare the response
 		// Prepare the response
 		// Prepare the response
-		resp := models.GetAllKeysResponse{
-			KeysByLabel: make(map[string][]models.DataKeyInfo),
-			TotalKeys:   0,
-			TotalLabels: int32(len(keysByLabel)),
-		}
+		resp := models.GetAllKeysResponse{}
 		logger.AppLog.Info("Not key found")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)

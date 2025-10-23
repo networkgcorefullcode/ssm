@@ -44,7 +44,7 @@ func postGetDataKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Reque
 
 	logger.AppLog.Infof("Searching key in HSM - using the Label: %s", label)
 	handle, err := mgr.FindKey(label, req.Id)
-	if err.Error() == "Key with the label not found" {
+	if err != nil && err.Error() == "Key with the label not found" {
 		// Prepare the response
 		// Prepare the response
 		resp := models.GetKeyResponse{}
