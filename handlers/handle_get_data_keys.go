@@ -46,7 +46,9 @@ func postGetDataKeys(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Requ
 	handles, err := mgr.FindKeysLabel(label)
 	if err != nil && err.Error() == "Key with the label not found" {
 		// Prepare the response
-		resp := models.GetDataKeysResponse{}
+		resp := models.GetDataKeysResponse{
+			Keys: make([]models.DataKeyInfo, 0, 0),
+		}
 		logger.AppLog.Info("Not key found")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
