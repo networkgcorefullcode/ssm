@@ -56,6 +56,7 @@ func postGetDataKeys(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Requ
 			logger.AppLog.Errorf("Failed to encode response: %v", err)
 			sendProblemDetails(w, "Internal Server Error", "Failed to encode response", "INTERNAL_SERVER_ERROR", http.StatusInternalServerError, r.URL.Path)
 		}
+		return
 	}
 	if err != nil {
 		logger.AppLog.Errorf("Failed to search keys: %v", err)
