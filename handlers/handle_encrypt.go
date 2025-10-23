@@ -69,9 +69,9 @@ func postEncrypt(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request)
 
 	logger.AppLog.Info("Generating initialization vector (IV)")
 	var size int
-	if req.EncryptionAlgorithm == 3 || req.EncryptionAlgorithm == 4 {
+	if req.EncryptionAlgorithm == constants.ALGORITHM_DES3_OurUsers || req.EncryptionAlgorithm == constants.ALGORITHM_DES_OurUsers {
 		size = 8
-	} else if req.EncryptionAlgorithm == 1 || req.EncryptionAlgorithm == 2 {
+	} else if req.EncryptionAlgorithm == constants.ALGORITHM_AES128_OurUsers || req.EncryptionAlgorithm == constants.ALGORITHM_AES256_OurUsers {
 		size = 16
 	}
 	iv := make([]byte, size)
