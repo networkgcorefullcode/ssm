@@ -7,6 +7,7 @@ import (
 
 	"github.com/miekg/pkcs11"
 	constants "github.com/networkgcorefullcode/ssm/const"
+	"github.com/networkgcorefullcode/ssm/factory"
 	"github.com/networkgcorefullcode/ssm/logger"
 	"github.com/networkgcorefullcode/ssm/models"
 	"github.com/networkgcorefullcode/ssm/pkcs11mgr"
@@ -23,21 +24,40 @@ import (
 // @Failure 400 {object} models.ProblemDetails "Invalid request"
 // @Failure 500 {object} models.ProblemDetails "Internal server error"
 // @Router /store-key [post]
-func HandleStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request) {
+func HandleStoreKey(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
-		postStoreKey(mgr, w, r)
+		postStoreKey(w, r)
 	case http.MethodDelete:
-		deleteStoreKey(mgr, w, r)
+		deleteStoreKey(w, r)
 	case http.MethodPut:
-		updateStoreKey(mgr, w, r)
+		updateStoreKey(w, r)
 	default:
 		sendProblemDetails(w, "Method Not Allowed", "The HTTP method is not allowed for this endpoint", "METHOD_NOT_ALLOWED", http.StatusMethodNotAllowed, r.URL.Path)
 	}
 }
 
-func postStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request) {
+func postStoreKey(w http.ResponseWriter, r *http.Request) {
 	logger.AppLog.Info("Processing store key request")
+	// init the pkcs manager
+	mgr, err := pkcs11mgr.New(factory.SsmConfig.Configuration.PkcsPath,
+		uint(factory.SsmConfig.Configuration.LotsNumber),
+		factory.SsmConfig.Configuration.Pin)
+	if err != nil {
+		logger.AppLog.Errorf("Failed to create PKCS11 manager: %v", err)
+		sendProblemDetails(w, "Internal Server Error", "Failed to initialize PKCS11 manager", "PKCS_INIT_ERROR", http.StatusInternalServerError, r.URL.Path)
+		return
+	}
+
+	err = mgr.OpenSession()
+	if err != nil {
+		logger.AppLog.Errorf("Failed to OpenSession PKCS11 manager: %v", err)
+		sendProblemDetails(w, "Internal Server Error", "The pkcs session have a error during stablishment", "PKCS_ERROR", http.StatusInternalServerError, r.URL.Path)
+		return
+	}
+
+	defer mgr.CloseSession()
+	defer mgr.Finalize()
 
 	var req models.StoreKeyRequest
 
@@ -113,8 +133,27 @@ func postStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request
 
 }
 
-func deleteStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request) {
+func deleteStoreKey(w http.ResponseWriter, r *http.Request) {
 	logger.AppLog.Info("Processing delete key request")
+	// init the pkcs manager
+	mgr, err := pkcs11mgr.New(factory.SsmConfig.Configuration.PkcsPath,
+		uint(factory.SsmConfig.Configuration.LotsNumber),
+		factory.SsmConfig.Configuration.Pin)
+	if err != nil {
+		logger.AppLog.Errorf("Failed to create PKCS11 manager: %v", err)
+		sendProblemDetails(w, "Internal Server Error", "Failed to initialize PKCS11 manager", "PKCS_INIT_ERROR", http.StatusInternalServerError, r.URL.Path)
+		return
+	}
+
+	err = mgr.OpenSession()
+	if err != nil {
+		logger.AppLog.Errorf("Failed to OpenSession PKCS11 manager: %v", err)
+		sendProblemDetails(w, "Internal Server Error", "The pkcs session have a error during stablishment", "PKCS_ERROR", http.StatusInternalServerError, r.URL.Path)
+		return
+	}
+
+	defer mgr.CloseSession()
+	defer mgr.Finalize()
 
 	var req models.DeleteKeyRequest
 
@@ -149,8 +188,27 @@ func deleteStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Reque
 	}
 }
 
-func updateStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request) {
+func updateStoreKey(w http.ResponseWriter, r *http.Request) {
 	logger.AppLog.Info("Processing update key request")
+	// init the pkcs manager
+	mgr, err := pkcs11mgr.New(factory.SsmConfig.Configuration.PkcsPath,
+		uint(factory.SsmConfig.Configuration.LotsNumber),
+		factory.SsmConfig.Configuration.Pin)
+	if err != nil {
+		logger.AppLog.Errorf("Failed to create PKCS11 manager: %v", err)
+		sendProblemDetails(w, "Internal Server Error", "Failed to initialize PKCS11 manager", "PKCS_INIT_ERROR", http.StatusInternalServerError, r.URL.Path)
+		return
+	}
+
+	err = mgr.OpenSession()
+	if err != nil {
+		logger.AppLog.Errorf("Failed to OpenSession PKCS11 manager: %v", err)
+		sendProblemDetails(w, "Internal Server Error", "The pkcs session have a error during stablishment", "PKCS_ERROR", http.StatusInternalServerError, r.URL.Path)
+		return
+	}
+
+	defer mgr.CloseSession()
+	defer mgr.Finalize()
 
 	var req models.UpdateKeyRequest
 

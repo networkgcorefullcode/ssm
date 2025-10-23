@@ -2,16 +2,19 @@ package pkcs11mgr
 
 import (
 	"errors"
+	"time"
 
 	"github.com/miekg/pkcs11"
 	"github.com/networkgcorefullcode/ssm/logger"
 )
 
 type Manager struct {
-	ctx     *pkcs11.Ctx
-	slot    uint
-	session pkcs11.SessionHandle
-	pin     string
+	ctx       *pkcs11.Ctx
+	slot      uint
+	session   pkcs11.SessionHandle
+	pin       string
+	createdAt time.Time
+	lastUsed  time.Time
 }
 
 func New(modulePath string, slot uint, pin string) (*Manager, error) {

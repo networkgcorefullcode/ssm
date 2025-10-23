@@ -15,6 +15,7 @@ configuration:
   is_https: true
   certFile: server.crt 
   keyFile: server.key
+  handlers-pool-conect: true
 
 logger:
   SSM:

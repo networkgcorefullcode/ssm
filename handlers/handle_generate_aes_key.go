@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	constants "github.com/networkgcorefullcode/ssm/const"
+	"github.com/networkgcorefullcode/ssm/factory"
 	"github.com/networkgcorefullcode/ssm/logger"
 	"github.com/networkgcorefullcode/ssm/models"
 	"github.com/networkgcorefullcode/ssm/pkcs11mgr"
@@ -21,17 +22,36 @@ import (
 // @Failure 400 {object} models.ProblemDetails "Petición inválida"
 // @Failure 500 {object} models.ProblemDetails "Error interno del servidor"
 // @Router /generate-aes-key [post]
-func HandleGenerateAESKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request) {
+func HandleGenerateAESKey(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
-		postGenerateAESKey(mgr, w, r)
+		postGenerateAESKey(w, r)
 	default:
 		sendProblemDetails(w, "Method Not Allowed", "El método HTTP no está permitido para este endpoint", "METHOD_NOT_ALLOWED", http.StatusMethodNotAllowed, r.URL.Path)
 	}
 }
 
-func postGenerateAESKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request) {
+func postGenerateAESKey(w http.ResponseWriter, r *http.Request) {
 	logger.AppLog.Info("Processing AES key generation request")
+	// init the pkcs manager
+	mgr, err := pkcs11mgr.New(factory.SsmConfig.Configuration.PkcsPath,
+		uint(factory.SsmConfig.Configuration.LotsNumber),
+		factory.SsmConfig.Configuration.Pin)
+	if err != nil {
+		logger.AppLog.Errorf("Failed to create PKCS11 manager: %v", err)
+		sendProblemDetails(w, "Internal Server Error", "Failed to initialize PKCS11 manager", "PKCS_INIT_ERROR", http.StatusInternalServerError, r.URL.Path)
+		return
+	}
+
+	err = mgr.OpenSession()
+	if err != nil {
+		logger.AppLog.Errorf("Failed to OpenSession PKCS11 manager: %v", err)
+		sendProblemDetails(w, "Internal Server Error", "The pkcs session have a error during stablishment", "PKCS_ERROR", http.StatusInternalServerError, r.URL.Path)
+		return
+	}
+
+	defer mgr.CloseSession()
+	defer mgr.Finalize()
 
 	var req models.GenAESKeyRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {

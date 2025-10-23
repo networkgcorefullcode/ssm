@@ -7,6 +7,7 @@ import (
 
 	"github.com/miekg/pkcs11"
 	constants "github.com/networkgcorefullcode/ssm/const"
+	"github.com/networkgcorefullcode/ssm/factory"
 	"github.com/networkgcorefullcode/ssm/logger"
 	"github.com/networkgcorefullcode/ssm/models"
 	"github.com/networkgcorefullcode/ssm/pkcs11mgr"
@@ -25,19 +26,38 @@ import (
 // @Failure      405      {object}  models.ProblemDetails  "HTTP method not allowed"
 // @Failure      500      {object}  models.ProblemDetails  "Internal server error"
 // @Router       /decrypt [post]
-func HandleDecrypt(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request) {
+func HandleDecrypt(w http.ResponseWriter, r *http.Request) {
 	logger.AppLog.Debugf("Received decrypt request from %s", r.RemoteAddr)
 
 	switch r.Method {
 	case http.MethodPost:
-		postDecrypt(mgr, w, r)
+		postDecrypt(w, r)
 	default:
 		sendProblemDetails(w, "Method Not Allowed", "Only POST method is allowed", "method_not_allowed", http.StatusMethodNotAllowed, r.URL.Path)
 	}
 }
 
-func postDecrypt(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request) {
+func postDecrypt(w http.ResponseWriter, r *http.Request) {
 	logger.AppLog.Debugf("Processing decrypt request for %s", r.URL.Path)
+	// init the pkcs manager
+	mgr, err := pkcs11mgr.New(factory.SsmConfig.Configuration.PkcsPath,
+		uint(factory.SsmConfig.Configuration.LotsNumber),
+		factory.SsmConfig.Configuration.Pin)
+	if err != nil {
+		logger.AppLog.Errorf("Failed to create PKCS11 manager: %v", err)
+		sendProblemDetails(w, "Internal Server Error", "Failed to initialize PKCS11 manager", "PKCS_INIT_ERROR", http.StatusInternalServerError, r.URL.Path)
+		return
+	}
+
+	err = mgr.OpenSession()
+	if err != nil {
+		logger.AppLog.Errorf("Failed to OpenSession PKCS11 manager: %v", err)
+		sendProblemDetails(w, "Internal Server Error", "The pkcs session have a error during stablishment", "PKCS_ERROR", http.StatusInternalServerError, r.URL.Path)
+		return
+	}
+
+	defer mgr.CloseSession()
+	defer mgr.Finalize()
 
 	var req models.DecryptRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {

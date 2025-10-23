@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/networkgcorefullcode/ssm/factory"
 	"github.com/networkgcorefullcode/ssm/logger"
 	"github.com/networkgcorefullcode/ssm/models"
 	"github.com/networkgcorefullcode/ssm/pkcs11mgr"
@@ -20,17 +21,36 @@ import (
 // @Failure 400 {object} models.ProblemDetails "Invalid request"
 // @Failure 500 {object} models.ProblemDetails "Internal server error"
 // @Router /store-key [post]
-func HandleGetDataKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request) {
+func HandleGetDataKey(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
-		postGetDataKey(mgr, w, r)
+		postGetDataKey(w, r)
 	default:
 		sendProblemDetails(w, "Method Not Allowed", "The HTTP method is not allowed for this endpoint", "METHOD_NOT_ALLOWED", http.StatusMethodNotAllowed, r.URL.Path)
 	}
 }
 
-func postGetDataKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request) {
+func postGetDataKey(w http.ResponseWriter, r *http.Request) {
 	logger.AppLog.Info("Processing get data key request")
+	// init the pkcs manager
+	mgr, err := pkcs11mgr.New(factory.SsmConfig.Configuration.PkcsPath,
+		uint(factory.SsmConfig.Configuration.LotsNumber),
+		factory.SsmConfig.Configuration.Pin)
+	if err != nil {
+		logger.AppLog.Errorf("Failed to create PKCS11 manager: %v", err)
+		sendProblemDetails(w, "Internal Server Error", "Failed to initialize PKCS11 manager", "PKCS_INIT_ERROR", http.StatusInternalServerError, r.URL.Path)
+		return
+	}
+
+	err = mgr.OpenSession()
+	if err != nil {
+		logger.AppLog.Errorf("Failed to OpenSession PKCS11 manager: %v", err)
+		sendProblemDetails(w, "Internal Server Error", "The pkcs session have a error during stablishment", "PKCS_ERROR", http.StatusInternalServerError, r.URL.Path)
+		return
+	}
+
+	defer mgr.CloseSession()
+	defer mgr.Finalize()
 
 	var req models.GetKeyRequest
 

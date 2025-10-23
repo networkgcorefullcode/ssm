@@ -8,6 +8,7 @@ import (
 
 	"github.com/miekg/pkcs11"
 	constants "github.com/networkgcorefullcode/ssm/const"
+	"github.com/networkgcorefullcode/ssm/factory"
 	"github.com/networkgcorefullcode/ssm/logger"
 	"github.com/networkgcorefullcode/ssm/models"
 	"github.com/networkgcorefullcode/ssm/pkcs11mgr"
@@ -26,16 +27,37 @@ import (
 // @Failure 404 {object} models.ProblemDetails "Key not found"
 // @Failure 500 {object} models.ProblemDetails "Internal server error"
 // @Router /encrypt [post]
-func HandleEncrypt(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request) {
+func HandleEncrypt(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
-		postEncrypt(mgr, w, r)
+		postEncrypt(w, r)
 	default:
 		sendProblemDetails(w, "Method Not Allowed", "The HTTP method is not allowed for this endpoint", "METHOD_NOT_ALLOWED", http.StatusMethodNotAllowed, r.URL.Path)
 	}
 }
 
-func postEncrypt(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request) {
+func postEncrypt(w http.ResponseWriter, r *http.Request) {
+
+	// init the pkcs manager
+	mgr, err := pkcs11mgr.New(factory.SsmConfig.Configuration.PkcsPath,
+		uint(factory.SsmConfig.Configuration.LotsNumber),
+		factory.SsmConfig.Configuration.Pin)
+	if err != nil {
+		logger.AppLog.Errorf("Failed to create PKCS11 manager: %v", err)
+		sendProblemDetails(w, "Internal Server Error", "Failed to initialize PKCS11 manager", "PKCS_INIT_ERROR", http.StatusInternalServerError, r.URL.Path)
+		return
+	}
+
+	err = mgr.OpenSession()
+	if err != nil {
+		logger.AppLog.Errorf("Failed to OpenSession PKCS11 manager: %v", err)
+		sendProblemDetails(w, "Internal Server Error", "The pkcs session have a error during stablishment", "PKCS_ERROR", http.StatusInternalServerError, r.URL.Path)
+		return
+	}
+
+	defer mgr.CloseSession()
+	defer mgr.Finalize()
+
 	logger.AppLog.Info("Processing encrypt request")
 
 	var req models.EncryptRequest
