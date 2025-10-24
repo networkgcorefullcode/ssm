@@ -50,7 +50,6 @@ var SessionPool chan *Session
 var maxSessions int
 var currentSessions int = 0
 var mutexPool sync.Mutex
-var mutexGet sync.Mutex
 
 func SetChanMaxSessions(n int) {
 	SessionPool = make(chan *Session, n)
@@ -58,8 +57,6 @@ func SetChanMaxSessions(n int) {
 }
 
 func (m *Manager) NewSession() {
-	mutexPool.Lock()
-	defer mutexPool.Unlock()
 	if currentSessions >= maxSessions {
 		logger.AppLog.Debugln("The sessions get the max interval")
 		return
@@ -101,12 +98,13 @@ func (m *Manager) NewSession() {
 // }
 
 func (m *Manager) GetSession() *Session {
-	mutexGet.Lock()
-	defer mutexGet.Unlock()
-	if currentSessions < maxSessions {
+	mutexPool.Lock()
+	if len(SessionPool) == 0 && currentSessions < maxSessions {
 		m.NewSession()
 	}
-	return <-SessionPool
+	mutexPool.Unlock() // Liberar temporalmente para leer del channel
+	session := <-SessionPool
+	return session
 }
 
 // CloseSession closes an independent session
