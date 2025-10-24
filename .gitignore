@@ -4,3 +4,4 @@ server.crt
 go-structs-only
 ssm.exe 
 ssm
+vendor
