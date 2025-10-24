@@ -11,11 +11,13 @@ import (
 
 // Manager manages PKCS#11 context without holding a specific session
 type Manager struct {
-	ctx       *pkcs11.Ctx
-	slot      uint
-	pin       string
-	createdAt time.Time
-	lastUsed  time.Time
+	ctx        *pkcs11.Ctx
+	slot       uint
+	pin        string
+	createdAt  time.Time
+	lastUsed   time.Time
+	isLoggedIn bool       // ✅ Track login state
+	loginMutex sync.Mutex // ✅ Protect login operations
 }
 
 // Session represents an independent PKCS#11 session
@@ -35,11 +37,12 @@ func New(modulePath string, slot uint, pin string) (*Manager, error) {
 
 	now := time.Now()
 	mgr := &Manager{
-		ctx:       ctx,
-		slot:      slot,
-		pin:       pin,
-		createdAt: now,
-		lastUsed:  now,
+		ctx:        ctx,
+		slot:       slot,
+		pin:        pin,
+		createdAt:  now,
+		lastUsed:   now,
+		isLoggedIn: false,
 	}
 	logger.AppLog.Infoln("PKCS#11 module initialized")
 	return mgr, nil
@@ -57,10 +60,14 @@ func SetChanMaxSessions(n int) {
 }
 
 func (m *Manager) NewSession() {
+	mutexPool.Lock()
 	if currentSessions >= maxSessions {
-		logger.AppLog.Debugln("The sessions get the max interval")
+		mutexPool.Unlock()
+		logger.AppLog.Debugln("The sessions reached max limit")
 		return
 	}
+	mutexPool.Unlock()
+
 	logger.AppLog.Debugln("Creating new PKCS#11 session")
 
 	handle, err := m.ctx.OpenSession(m.slot, pkcs11.CKF_SERIAL_SESSION|pkcs11.CKF_RW_SESSION)
@@ -69,13 +76,28 @@ func (m *Manager) NewSession() {
 		return
 	}
 
-	// Login una sola vez al crear la sesión
-	logger.AppLog.Debugf("Logging into session: %d", handle)
-	if err := m.ctx.Login(handle, pkcs11.CKU_USER, m.pin); err != nil {
-		logger.AppLog.Errorf("Failed to login to session: %v", err)
-		_ = m.ctx.CloseSession(handle)
-		return
+	// ✅ Login solo una vez por slot (thread-safe)
+	m.loginMutex.Lock()
+	if !m.isLoggedIn {
+		logger.AppLog.Debugf("Logging into slot %d with session: %d", m.slot, handle)
+		if err := m.ctx.Login(handle, pkcs11.CKU_USER, m.pin); err != nil {
+			// ✅ Verificar si el error es porque ya está logueado
+			if err.Error() == "pkcs11: 0x100: CKR_USER_ALREADY_LOGGED_IN" {
+				logger.AppLog.Debugf("Slot %d already logged in, continuing", m.slot)
+				m.isLoggedIn = true
+			} else {
+				// ❌ Error real de login
+				logger.AppLog.Errorf("Failed to login to session: %v", err)
+				m.loginMutex.Unlock()
+				_ = m.ctx.CloseSession(handle)
+				return
+			}
+		} else {
+			m.isLoggedIn = true
+			logger.AppLog.Debugf("Successfully logged into slot %d", m.slot)
+		}
 	}
+	m.loginMutex.Unlock()
 
 	m.lastUsed = time.Now()
 	session := &Session{
@@ -83,77 +105,91 @@ func (m *Manager) NewSession() {
 		Ctx:    m.ctx,
 	}
 
-	logger.AppLog.Debugf("PKCS#11 session created and logged in: %d", handle)
+	logger.AppLog.Debugf("PKCS#11 session created: %d (total sessions: %d)", handle, currentSessions+1)
+
+	mutexPool.Lock()
 	currentSessions++
-	logger.AppLog.Debugf("current session pkcs11 pools: %d", currentSessions)
+	mutexPool.Unlock()
+
 	SessionPool <- session
 }
 
-// func (m *Manager) Login(s *Session) error {
-// 	if err := m.ctx.Login(s.Handle, pkcs11.CKU_USER, m.pin); err != nil {
-// 		_ = m.ctx.CloseSession(s.Handle)
-// 		logger.AppLog.Errorf("Failed to login to session: %v", err)
-// 		return err
-// 	}
-// 	return nil
-// }
-
 func (m *Manager) GetSession() *Session {
-	mutexPool.Lock()
-	defer mutexPool.Unlock()
-	if len(SessionPool) == 0 && currentSessions < maxSessions {
-		m.NewSession()
+	// ✅ No usar lock aquí para evitar deadlock
+	if len(SessionPool) == 0 {
+		mutexPool.Lock()
+		needsNewSession := currentSessions < maxSessions
+		mutexPool.Unlock()
+
+		if needsNewSession {
+			m.NewSession()
+		}
 	}
+
 	session := <-SessionPool
+	logger.AppLog.Debugf("Got session from pool: %d", session.Handle)
 	return session
 }
 
-// CloseSession closes an independent session
+// LogoutSession returns session to pool (NO hace logout)
 func (m *Manager) LogoutSession(session *Session) {
 	if session == nil || session.Handle == 0 {
 		return
 	}
 	logger.AppLog.Debugf("Returning PKCS#11 session to pool: %d", session.Handle)
-	// ❌ NO hacer logout - mantener sesión logueada para reutilizar
 	SessionPool <- session
 }
 
-// Nueva función para cerrar sesión definitivamente
+// CloseSession closes a session definitively
 func (m *Manager) CloseSession(session *Session) {
 	if session == nil || session.Handle == 0 {
 		return
 	}
+
 	logger.AppLog.Debugf("Closing PKCS#11 session: %d", session.Handle)
-	_ = m.ctx.Logout(session.Handle)
+
+	// ✅ Solo cerrar la sesión, NO hacer logout (afectaría otras sesiones)
 	_ = m.ctx.CloseSession(session.Handle)
 
 	mutexPool.Lock()
 	currentSessions--
+	logger.AppLog.Debugf("Session closed. Remaining sessions: %d", currentSessions)
 	mutexPool.Unlock()
 }
 
-// CloseSession closes an independent session
+// CloseAllSessions closes all sessions and does logout
 func (m *Manager) CloseAllSessions() {
-	logger.AppLog.Debugf("Close all sessions for the slot %d", m.slot)
+	m.loginMutex.Lock()
+	defer m.loginMutex.Unlock()
+
+	logger.AppLog.Debugf("Closing all sessions for slot %d", m.slot)
+
+	// ✅ Hacer logout antes de cerrar todas las sesiones
+	if m.isLoggedIn {
+		// Necesitamos una sesión válida para hacer logout
+		if len(SessionPool) > 0 {
+			session := <-SessionPool
+			_ = m.ctx.Logout(session.Handle)
+			SessionPool <- session
+		}
+		m.isLoggedIn = false
+	}
+
 	_ = m.ctx.CloseAllSessions(m.slot)
+
+	mutexPool.Lock()
+	currentSessions = 0
+	mutexPool.Unlock()
 }
-
-// func (m *Manager) CloseSession() {
-// 	for v := range SessionPool {
-// 		_ = m.ctx.CloseSession(v.Handle)
-// 		logger.AppLog.Debugf("Logout PKCS#11 session: %d", v.Handle)
-// 	}
-// }
-
-// // GetSessionHandle returns the session handle (for compatibility with existing code)
-// func (s *Session) GetHandle() pkcs11.SessionHandle {
-// 	return s.Handle
-// }
 
 // Finalize cleans up the PKCS#11 context
 func (m *Manager) Finalize() {
 	if m.ctx != nil {
 		logger.AppLog.Infoln("Finalizing PKCS#11 context")
+
+		// ✅ Cerrar todas las sesiones antes de finalizar
+		m.CloseAllSessions()
+
 		_ = m.ctx.Finalize()
 		m.ctx.Destroy()
 		m.ctx = nil
