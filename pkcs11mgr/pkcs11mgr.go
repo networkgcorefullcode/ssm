@@ -2,6 +2,7 @@ package pkcs11mgr
 
 import (
 	"errors"
+	"sync"
 	"time"
 
 	"github.com/miekg/pkcs11"
@@ -45,21 +46,38 @@ func New(modulePath string, slot uint, pin string) (*Manager, error) {
 }
 
 // NewSession creates and returns a new independent PKCS#11 session
-func (m *Manager) NewSession() (*Session, error) {
+var SessionPool chan *Session
+var maxSessions int
+var currentSessions int = 0
+var mutexPool sync.Mutex
+var mutexGet sync.Mutex
+
+func SetChanMaxSessions(n int) {
+	SessionPool = make(chan *Session, n)
+	maxSessions = n
+}
+
+func (m *Manager) NewSession() {
+	mutexPool.Lock()
+	defer mutexPool.Unlock()
+	if currentSessions >= maxSessions {
+		logger.AppLog.Debugln("The sessions get the max interval")
+		return
+	}
 	logger.AppLog.Debugln("Creating new PKCS#11 session")
 
-	// Open a new session with the specified slot
 	handle, err := m.ctx.OpenSession(m.slot, pkcs11.CKF_SERIAL_SESSION|pkcs11.CKF_RW_SESSION)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to open session: %v", err)
-		return nil, err
+		return
 	}
 
-	// Login to the session
+	// Login una sola vez al crear la sesión
+	logger.AppLog.Debugf("Logging into session: %d", handle)
 	if err := m.ctx.Login(handle, pkcs11.CKU_USER, m.pin); err != nil {
-		_ = m.ctx.CloseSession(handle)
 		logger.AppLog.Errorf("Failed to login to session: %v", err)
-		return nil, err
+		_ = m.ctx.CloseSession(handle)
+		return
 	}
 
 	m.lastUsed = time.Now()
@@ -68,27 +86,70 @@ func (m *Manager) NewSession() (*Session, error) {
 		Ctx:    m.ctx,
 	}
 
-	logger.AppLog.Debugf("PKCS#11 session created: %d", handle)
-	return session, nil
+	logger.AppLog.Debugf("PKCS#11 session created and logged in: %d", handle)
+	currentSessions++
+	SessionPool <- session
+}
+
+// func (m *Manager) Login(s *Session) error {
+// 	if err := m.ctx.Login(s.Handle, pkcs11.CKU_USER, m.pin); err != nil {
+// 		_ = m.ctx.CloseSession(s.Handle)
+// 		logger.AppLog.Errorf("Failed to login to session: %v", err)
+// 		return err
+// 	}
+// 	return nil
+// }
+
+func (m *Manager) GetSession() *Session {
+	mutexGet.Lock()
+	defer mutexGet.Unlock()
+	if currentSessions < maxSessions {
+		m.NewSession()
+	}
+	return <-SessionPool
 }
 
 // CloseSession closes an independent session
+func (m *Manager) LogoutSession(session *Session) {
+	if session == nil || session.Handle == 0 {
+		return
+	}
+	logger.AppLog.Debugf("Returning PKCS#11 session to pool: %d", session.Handle)
+	// ❌ NO hacer logout - mantener sesión logueada para reutilizar
+	SessionPool <- session
+}
+
+// Nueva función para cerrar sesión definitivamente
 func (m *Manager) CloseSession(session *Session) {
 	if session == nil || session.Handle == 0 {
 		return
 	}
-
 	logger.AppLog.Debugf("Closing PKCS#11 session: %d", session.Handle)
 	_ = m.ctx.Logout(session.Handle)
 	_ = m.ctx.CloseSession(session.Handle)
-	session.Handle = 0
-	logger.AppLog.Debugln("PKCS#11 session closed")
+
+	mutexPool.Lock()
+	currentSessions--
+	mutexPool.Unlock()
 }
 
-// GetSessionHandle returns the session handle (for compatibility with existing code)
-func (s *Session) GetHandle() pkcs11.SessionHandle {
-	return s.Handle
+// CloseSession closes an independent session
+func (m *Manager) CloseAllSessions() {
+	logger.AppLog.Debugf("Close all sessions for the slot %d", m.slot)
+	_ = m.ctx.CloseAllSessions(m.slot)
 }
+
+// func (m *Manager) CloseSession() {
+// 	for v := range SessionPool {
+// 		_ = m.ctx.CloseSession(v.Handle)
+// 		logger.AppLog.Debugf("Logout PKCS#11 session: %d", v.Handle)
+// 	}
+// }
+
+// // GetSessionHandle returns the session handle (for compatibility with existing code)
+// func (s *Session) GetHandle() pkcs11.SessionHandle {
+// 	return s.Handle
+// }
 
 // Finalize cleans up the PKCS#11 context
 func (m *Manager) Finalize() {
@@ -98,12 +159,4 @@ func (m *Manager) Finalize() {
 		m.ctx.Destroy()
 		m.ctx = nil
 	}
-}
-
-// Legacy methods for backward compatibility (DEPRECATED - use NewSession/CloseSession instead)
-
-// OpenSession creates a default session (DEPRECATED: use NewSession instead)
-func (m *Manager) OpenSession() (*Session, error) {
-	logger.AppLog.Warnln("OpenSession is deprecated, use NewSession instead")
-	return m.NewSession()
 }

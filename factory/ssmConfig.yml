@@ -15,6 +15,7 @@ configuration:
   isHttps: true
   certFile: server.crt 
   keyFile: server.key
+  maxSessions: 5
   # handlersPoolConect: true
 
 logger:

@@ -144,7 +144,7 @@ func (s *SSM) Start() error {
 	// 	logger.AppLog.Errorf("Failed to initialize PKCS11 connection pool: %v", err)
 	// 	return err
 	// }
-	logger.AppLog.Info("PKCS11 connection pool initialized successfully")
+	// logger.AppLog.Info("PKCS11 connection pool initialized successfully")
 
 	// init the pkcs manager
 	pkcsManager, err := pkcs11mgr.New(factory.SsmConfig.Configuration.PkcsPath,
@@ -155,6 +155,8 @@ func (s *SSM) Start() error {
 		return err
 	}
 
+	pkcsManager.CloseAllSessions()
+	pkcs11mgr.SetChanMaxSessions(factory.SsmConfig.Configuration.MaxSessions)
 	handlers.SetPKCS11Manager(pkcsManager)
 
 	// SsmServer.mgr = PkcsManager
@@ -167,10 +169,10 @@ func (s *SSM) Start() error {
 	// }
 
 	// Pool monitoring endpoint
-	http.HandleFunc("/pool/stats", func(w http.ResponseWriter, r *http.Request) {
-		logger.AppLog.Debugf("Received /pool/stats request")
-		handlers.HandlePoolStats(w, r)
-	})
+	// http.HandleFunc("/pool/stats", func(w http.ResponseWriter, r *http.Request) {
+	// 	logger.AppLog.Debugf("Received /pool/stats request")
+	// 	handlers.HandlePoolStats(w, r)
+	// })
 
 	// HealthCheck endpoint
 	http.HandleFunc("/health-check", func(w http.ResponseWriter, r *http.Request) {
@@ -233,6 +235,7 @@ func (s *SSM) Start() error {
 	// }
 
 	// PkcsManager.CloseSession()
+	pkcsManager.CloseAllSessions()
 	pkcsManager.Finalize()
 
 	logger.AppLog.Info("SSM server stopped gracefully")

@@ -43,6 +43,7 @@ type Configuration struct {
 	IsHttps         *bool  `yaml:"isHttps,omitempty"`
 	CertFile        string `yaml:"certFile,omitempty"`
 	KeyFile         string `yaml:"keyFile,omitempty"`
+	MaxSessions     int    `yaml:"maxSessions,omitempty"`
 	// HandlersPoolConect bool   `yaml:"handlersPoolConect,omitempty"`
 	// PoolConfig         *pkcs11mgr.PoolConfig `yaml:"poolConfig,omitempty"`
 }

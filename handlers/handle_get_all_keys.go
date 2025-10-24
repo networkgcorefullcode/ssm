@@ -30,13 +30,10 @@ func HandleGetAllKeys(w http.ResponseWriter, r *http.Request) {
 func postGetAllKeys(w http.ResponseWriter, r *http.Request) {
 	logger.AppLog.Info("Processing get all keys request")
 	//// init the session
-	s, err := mgr.NewSession()
-	if err != nil {
-		logger.AppLog.Errorf("Failed to create PKCS11 session: %v", err)
-		sendProblemDetails(w, "Internal Server Error", "Failed to create PKCS11 session: "+err.Error(), "session_creation_failed", http.StatusInternalServerError, r.URL.Path)
-		return
-	}
-	defer mgr.CloseSession(s)
+	s := mgr.GetSession()
+	//
+
+	defer mgr.LogoutSession(s)
 
 	// Find all keys grouped by label
 	logger.AppLog.Info("Searching all keys in HSM")

@@ -32,13 +32,10 @@ func HandleGetDataKeys(w http.ResponseWriter, r *http.Request) {
 func postGetDataKeys(w http.ResponseWriter, r *http.Request) {
 	logger.AppLog.Info("Processing store key request")
 	//// init the session
-	s, err := mgr.NewSession()
-	if err != nil {
-		logger.AppLog.Errorf("Failed to create PKCS11 session: %v", err)
-		sendProblemDetails(w, "Internal Server Error", "Failed to create PKCS11 session: "+err.Error(), "session_creation_failed", http.StatusInternalServerError, r.URL.Path)
-		return
-	}
-	defer mgr.CloseSession(s)
+	s := mgr.GetSession()
+	//
+
+	defer mgr.LogoutSession(s)
 
 	var req models.GetDataKeysRequest
 
@@ -55,7 +52,7 @@ func postGetDataKeys(w http.ResponseWriter, r *http.Request) {
 	if err != nil && err.Error() == "error Key With The Label Not Found" {
 		// Prepare the response
 		resp := models.GetDataKeysResponse{
-			Keys: make([]models.DataKeyInfo, 0, 0),
+			Keys: make([]models.DataKeyInfo, 0),
 		}
 		logger.AppLog.Info("Not key found")
 		w.Header().Set("Content-Type", "application/json")

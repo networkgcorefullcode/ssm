@@ -39,13 +39,10 @@ func HandleStoreKey(w http.ResponseWriter, r *http.Request) {
 func postStoreKey(w http.ResponseWriter, r *http.Request) {
 	logger.AppLog.Info("Processing store key request")
 	//// init the session
-	s, err := mgr.NewSession()
-	if err != nil {
-		logger.AppLog.Errorf("Failed to create PKCS11 session: %v", err)
-		sendProblemDetails(w, "Internal Server Error", "Failed to create PKCS11 session: "+err.Error(), "session_creation_failed", http.StatusInternalServerError, r.URL.Path)
-		return
-	}
-	defer mgr.CloseSession(s)
+	s := mgr.GetSession()
+	//
+
+	defer mgr.LogoutSession(s)
 
 	var req models.StoreKeyRequest
 
@@ -124,13 +121,10 @@ func postStoreKey(w http.ResponseWriter, r *http.Request) {
 func deleteStoreKey(w http.ResponseWriter, r *http.Request) {
 	logger.AppLog.Info("Processing delete key request")
 	//// init the session
-	s, err := mgr.NewSession()
-	if err != nil {
-		logger.AppLog.Errorf("Failed to create PKCS11 session: %v", err)
-		sendProblemDetails(w, "Internal Server Error", "Failed to create PKCS11 session: "+err.Error(), "session_creation_failed", http.StatusInternalServerError, r.URL.Path)
-		return
-	}
-	defer mgr.CloseSession(s)
+	s := mgr.GetSession()
+	//
+
+	defer mgr.LogoutSession(s)
 
 	var req models.DeleteKeyRequest
 
@@ -168,13 +162,10 @@ func deleteStoreKey(w http.ResponseWriter, r *http.Request) {
 func updateStoreKey(w http.ResponseWriter, r *http.Request) {
 	logger.AppLog.Info("Processing update key request")
 	//// init the session
-	s, err := mgr.NewSession()
-	if err != nil {
-		logger.AppLog.Errorf("Failed to create PKCS11 session: %v", err)
-		sendProblemDetails(w, "Internal Server Error", "Failed to create PKCS11 session: "+err.Error(), "session_creation_failed", http.StatusInternalServerError, r.URL.Path)
-		return
-	}
-	defer mgr.CloseSession(s)
+	s := mgr.GetSession()
+	//
+
+	defer mgr.LogoutSession(s)
 
 	var req models.UpdateKeyRequest
 

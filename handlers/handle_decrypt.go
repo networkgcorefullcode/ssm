@@ -39,14 +39,10 @@ func HandleDecrypt(w http.ResponseWriter, r *http.Request) {
 func postDecrypt(w http.ResponseWriter, r *http.Request) {
 	logger.AppLog.Debugf("Processing decrypt request for %s", r.URL.Path)
 	// init the session
-	s, err := mgr.NewSession()
-	if err != nil {
-		logger.AppLog.Errorf("Failed to create PKCS11 session: %v", err)
-		sendProblemDetails(w, "Internal Server Error", "Failed to create PKCS11 session: "+err.Error(), "session_creation_failed", http.StatusInternalServerError, r.URL.Path)
-		return
-	}
+	s := mgr.GetSession()
+	//
 
-	defer mgr.CloseSession(s)
+	defer mgr.LogoutSession(s)
 
 	var req models.DecryptRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
