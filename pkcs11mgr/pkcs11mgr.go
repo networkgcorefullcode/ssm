@@ -99,10 +99,10 @@ func (m *Manager) NewSession() {
 
 func (m *Manager) GetSession() *Session {
 	mutexPool.Lock()
+	defer mutexPool.Unlock()
 	if len(SessionPool) == 0 && currentSessions < maxSessions {
 		m.NewSession()
 	}
-	mutexPool.Unlock() // Liberar temporalmente para leer del channel
 	session := <-SessionPool
 	return session
 }
