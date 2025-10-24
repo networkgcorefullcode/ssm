@@ -10,6 +10,7 @@ import (
 	"regexp"
 
 	"github.com/networkgcorefullcode/ssm/logger"
+	"github.com/networkgcorefullcode/ssm/pkcs11mgr"
 	"gopkg.in/yaml.v2"
 )
 
@@ -31,6 +32,11 @@ func InitConfigFactory(f string) error {
 		logger.CfgLog.Infof("ssmId not set in configuration file. Using %s", SsmConfig.Configuration.SsmId)
 	}
 	err = validateSsmId(SsmConfig.Configuration.SsmId)
+
+	if SsmConfig.Configuration.PoolConfig == nil {
+		SsmConfig.Configuration.PoolConfig = pkcs11mgr.DefaultPoolConfig()
+		logger.CfgLog.Infoln("pkcs11 poolConfig not set in configuration file. Using default values")
+	}
 
 	return err
 }

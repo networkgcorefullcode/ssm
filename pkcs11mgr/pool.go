@@ -24,13 +24,13 @@ type ConnectionPool struct {
 
 // PoolConfig holds configuration for the connection pool
 type PoolConfig struct {
-	MaxSize     int           // Maximum number of connections in pool
-	MinSize     int           // Minimum number of connections to maintain
-	IdleTimeout time.Duration // How long a connection can be idle before being closed
-	MaxLifetime time.Duration // Maximum lifetime of a connection
-	PkcsPath    string        // Path to PKCS11 library
-	SlotNumber  uint          // HSM slot number
-	Pin         string        // HSM PIN
+	MaxSize     int           `yaml:"maxSize"`     // Maximum number of connections in pool
+	MinSize     int           `yaml:"minSize"`     // Minimum number of connections to maintain
+	IdleTimeout time.Duration `yaml:"idleTimeout"` // How long a connection can be idle before being closed
+	MaxLifetime time.Duration `yaml:"maxLifetime"` // Maximum lifetime of a connection
+	PkcsPath    string        `yaml:"pkcsPath"`    // Path to PKCS11 library
+	SlotNumber  uint          `yaml:"slotNumber"`  // HSM slot number
+	Pin         string        `yaml:"pin"`         // HSM PIN
 }
 
 // DefaultPoolConfig returns a default pool configuration

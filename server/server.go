@@ -132,12 +132,12 @@ func (s *SSM) Start() error {
 	}
 
 	// Initialize PKCS11 connection pool
-	poolConfig := pkcs11mgr.DefaultPoolConfig()
+	poolConfig := factory.SsmConfig.Configuration.PoolConfig
 	poolConfig.PkcsPath = factory.SsmConfig.Configuration.PkcsPath
 	poolConfig.SlotNumber = uint(factory.SsmConfig.Configuration.LotsNumber)
 	poolConfig.Pin = factory.SsmConfig.Configuration.Pin
-	poolConfig.MaxSize = 10 // Configure based on expected load
-	poolConfig.MinSize = 2  // Minimum connections to maintain
+	poolConfig.MaxSize = factory.SsmConfig.Configuration.PoolConfig.MaxSize // Configure based on expected load
+	poolConfig.MinSize = factory.SsmConfig.Configuration.PoolConfig.MinSize // Minimum connections to maintain
 
 	logger.AppLog.Info("Initializing PKCS11 connection pool...")
 	if err := pkcs11mgr.InitializeGlobalPool(poolConfig); err != nil {
