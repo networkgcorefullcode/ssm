@@ -9,7 +9,7 @@ import (
 )
 
 // GenerateAESKey creates an AES key object inside SoftHSM and returns its object handle (as uint)
-func (m *Manager) GenerateAESKey(label string, id int32, bits int) (pkcs11.ObjectHandle, error) {
+func GenerateAESKey(label string, id int32, bits int, s Session) (pkcs11.ObjectHandle, error) {
 	logger.AppLog.Infof("Generating AES key: label=%s, bits=%d", label, bits)
 	mech := pkcs11.NewMechanism(pkcs11.CKM_AES_KEY_GEN, nil)
 	template := []*pkcs11.Attribute{
@@ -26,13 +26,13 @@ func (m *Manager) GenerateAESKey(label string, id int32, bits int) (pkcs11.Objec
 	}
 
 	// Check if key already exists before creating it
-	existingHandle, err := m.FindKey(label, id)
+	existingHandle, err := FindKey(label, id, s)
 	if err == nil && existingHandle != 0 {
 		logger.AppLog.Infof("Key with label '%s' already exists, returning existing handle: %v", label, existingHandle)
 		return existingHandle, errors.New("the key is in the SSM")
 	}
 
-	handle, err := m.ctx.GenerateKey(m.session, []*pkcs11.Mechanism{mech}, template)
+	handle, err := s.Ctx.GenerateKey(s.Handle, []*pkcs11.Mechanism{mech}, template)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to generate AES key: %v", err)
 		return 0, err
@@ -42,13 +42,8 @@ func (m *Manager) GenerateAESKey(label string, id int32, bits int) (pkcs11.Objec
 }
 
 // GenerateDESKey creates an DES key object inside SoftHSM and returns its object handle (as uint)
-func (m *Manager) GenerateDESKey(label string, id int32) (pkcs11.ObjectHandle, error) {
+func GenerateDESKey(label string, id int32, s Session) (pkcs11.ObjectHandle, error) {
 	logger.AppLog.Infof("Generating DES key: label=%s", label)
-
-	// Check if DES_CBC_PAD is supported
-	if !m.IsMechanismSupported(pkcs11.CKM_DES_CBC_PAD) {
-		logger.AppLog.Warn("CKM_DES_CBC_PAD mechanism not supported by HSM")
-	}
 
 	mech := pkcs11.NewMechanism(pkcs11.CKM_DES_KEY_GEN, nil)
 	template := []*pkcs11.Attribute{
@@ -67,13 +62,13 @@ func (m *Manager) GenerateDESKey(label string, id int32) (pkcs11.ObjectHandle, e
 	}
 
 	// Check if key already exists before creating it
-	existingHandle, err := m.FindKey(label, id)
+	existingHandle, err := FindKey(label, id, s)
 	if err == nil && existingHandle != 0 {
 		logger.AppLog.Infof("Key with label '%s' already exists, returning existing handle: %v", label, existingHandle)
 		return existingHandle, errors.New("the key is in the SSM")
 	}
 
-	handle, err := m.ctx.GenerateKey(m.session, []*pkcs11.Mechanism{mech}, template)
+	handle, err := s.Ctx.GenerateKey(s.Handle, []*pkcs11.Mechanism{mech}, template)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to generate DES key: %v", err)
 		return 0, err
@@ -83,13 +78,8 @@ func (m *Manager) GenerateDESKey(label string, id int32) (pkcs11.ObjectHandle, e
 }
 
 // GenerateDES3Key creates an DES3 key object inside SoftHSM and returns its object handle (as uint)
-func (m *Manager) GenerateDES3Key(label string, id int32) (pkcs11.ObjectHandle, error) {
+func GenerateDES3Key(label string, id int32, s Session) (pkcs11.ObjectHandle, error) {
 	logger.AppLog.Infof("Generating DES3 key: label=%s", label)
-
-	// Check if DES3_CBC_PAD is supported
-	if !m.IsMechanismSupported(pkcs11.CKM_DES3_CBC_PAD) {
-		logger.AppLog.Warn("CKM_DES_CBC_PAD mechanism not supported by HSM")
-	}
 
 	mech := pkcs11.NewMechanism(pkcs11.CKM_DES3_KEY_GEN, nil)
 	template := []*pkcs11.Attribute{
@@ -108,13 +98,13 @@ func (m *Manager) GenerateDES3Key(label string, id int32) (pkcs11.ObjectHandle, 
 	}
 
 	// Check if key already exists before creating it
-	existingHandle, err := m.FindKey(label, id)
+	existingHandle, err := FindKey(label, id, s)
 	if err == nil && existingHandle != 0 {
 		logger.AppLog.Infof("Key with label '%s' already exists, returning existing handle: %v", label, existingHandle)
 		return existingHandle, errors.New("the key is in the SSM")
 	}
 
-	handle, err := m.ctx.GenerateKey(m.session, []*pkcs11.Mechanism{mech}, template)
+	handle, err := s.Ctx.GenerateKey(s.Handle, []*pkcs11.Mechanism{mech}, template)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to generate DES3 key: %v", err)
 		return 0, err

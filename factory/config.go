@@ -37,12 +37,15 @@ type Configuration struct {
 	SocketPath      string `yaml:"socketPath,omitempty"`
 	PkcsPath        string `yaml:"pkcsPath,omitempty"`
 	Pin             string `yaml:"pin,omitempty"`
-	LotsNumber      int    `yaml:"lots_number,omitempty"`
+	LotsNumber      int    `yaml:"lotsNumber,omitempty"`
 	BindAddr        string `yaml:"bindAddr,omitempty"`
 	ExposeSwaggerUi *bool  `yaml:"exposeSwaggerUi,omitempty"`
-	IsHttps         *bool  `yaml:"is_https,omitempty"`
+	IsHttps         *bool  `yaml:"isHttps,omitempty"`
 	CertFile        string `yaml:"certFile,omitempty"`
 	KeyFile         string `yaml:"keyFile,omitempty"`
+	MaxSessions     int    `yaml:"maxSessions,omitempty"`
+	// HandlersPoolConect bool   `yaml:"handlersPoolConect,omitempty"`
+	// PoolConfig         *pkcs11mgr.PoolConfig `yaml:"poolConfig,omitempty"`
 }
 
 func (c *Config) GetVersion() string {

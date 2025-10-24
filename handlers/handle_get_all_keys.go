@@ -18,21 +18,40 @@ import (
 // @Success 200 {object} models.GetAllKeysResponse "All keys retrieved successfully"
 // @Failure 500 {object} models.ProblemDetails "Internal server error"
 // @Router /get-all-keys [post]
-func HandleGetAllKeys(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request) {
+func HandleGetAllKeys(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
-		postGetAllKeys(mgr, w, r)
+		postGetAllKeys(w, r)
 	default:
 		sendProblemDetails(w, "Method Not Allowed", "The HTTP method is not allowed for this endpoint", "METHOD_NOT_ALLOWED", http.StatusMethodNotAllowed, r.URL.Path)
 	}
 }
 
-func postGetAllKeys(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request) {
+func postGetAllKeys(w http.ResponseWriter, r *http.Request) {
 	logger.AppLog.Info("Processing get all keys request")
+	//// init the session
+	s := mgr.GetSession()
+	//
+
+	defer mgr.LogoutSession(s)
 
 	// Find all keys grouped by label
 	logger.AppLog.Info("Searching all keys in HSM")
-	keysByLabel, err := mgr.FindAllKeys()
+	keysByLabel, err := pkcs11mgr.FindAllKeys(*s)
+	if err != nil && err.Error() == "error Key With The Label Not Found" {
+		// Prepare the response
+		// Prepare the response
+		// Prepare the response
+		resp := models.GetAllKeysResponse{}
+		logger.AppLog.Info("Not key found")
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		if err := json.NewEncoder(w).Encode(resp); err != nil {
+			logger.AppLog.Errorf("Failed to encode response: %v", err)
+			sendProblemDetails(w, "Internal Server Error", "Failed to encode response", "INTERNAL_SERVER_ERROR", http.StatusInternalServerError, r.URL.Path)
+		}
+		return
+	}
 	if err != nil {
 		logger.AppLog.Errorf("Failed to search all keys: %v", err)
 		sendProblemDetails(w, "Key Search Failed", "Error searching all keys in HSM", "KEY_GET_ERROR", http.StatusInternalServerError, r.URL.Path)
@@ -52,7 +71,7 @@ func postGetAllKeys(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Reque
 	for label, handles := range keysByLabel {
 		logger.AppLog.Infof("Processing label: %s with %d keys", label, len(handles))
 
-		objAttrs, err := mgr.GetValuesForObjects(handles)
+		objAttrs, err := pkcs11mgr.GetValuesForObjects(handles, *s)
 		if err != nil {
 			logger.AppLog.Errorf("Failed to get object attributes for label %s: %v", label, err)
 			sendProblemDetails(w, "Key Attributes Failed", "Error getting key attributes", "KEY_GET_ERROR", http.StatusInternalServerError, r.URL.Path)

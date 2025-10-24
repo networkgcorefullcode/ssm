@@ -23,21 +23,26 @@ import (
 // @Failure 400 {object} models.ProblemDetails "Invalid request"
 // @Failure 500 {object} models.ProblemDetails "Internal server error"
 // @Router /store-key [post]
-func HandleStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request) {
+func HandleStoreKey(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
-		postStoreKey(mgr, w, r)
+		postStoreKey(w, r)
 	case http.MethodDelete:
-		deleteStoreKey(mgr, w, r)
+		deleteStoreKey(w, r)
 	case http.MethodPut:
-		updateStoreKey(mgr, w, r)
+		updateStoreKey(w, r)
 	default:
 		sendProblemDetails(w, "Method Not Allowed", "The HTTP method is not allowed for this endpoint", "METHOD_NOT_ALLOWED", http.StatusMethodNotAllowed, r.URL.Path)
 	}
 }
 
-func postStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request) {
+func postStoreKey(w http.ResponseWriter, r *http.Request) {
 	logger.AppLog.Info("Processing store key request")
+	//// init the session
+	s := mgr.GetSession()
+	//
+
+	defer mgr.LogoutSession(s)
 
 	var req models.StoreKeyRequest
 
@@ -67,7 +72,7 @@ func postStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request
 	}
 
 	logger.AppLog.Infof("Storing key in HSM - Label: %s", label)
-	handle, err := mgr.StoreKey(label, key_value, id, key_type)
+	handle, err := pkcs11mgr.StoreKey(label, key_value, id, key_type, *s)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to store key: %v", err)
 		sendProblemDetails(w, "Key Storage Failed", "Error storing key in HSM", "KEY_STORAGE_ERROR", http.StatusInternalServerError, r.URL.Path)
@@ -83,7 +88,7 @@ func postStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request
 
 	// Try to find the encryption key to encrypt the stored value
 	logger.AppLog.Infof("Looking for encryption key: %s", constants.LABEL_ENCRYPTION_KEY)
-	findHandle, err := mgr.FindKey(constants.LABEL_ENCRYPTION_KEY, 0)
+	findHandle, err := pkcs11mgr.FindKey(constants.LABEL_ENCRYPTION_KEY, 0, *s)
 	if err != nil || findHandle == 0 {
 		logger.AppLog.Warnf("Encryption key not found or error: %v. Returning response without encrypted key", err)
 		w.Header().Set("Content-Type", "application/json")
@@ -96,7 +101,7 @@ func postStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request
 
 	// Encrypt the stored key value
 	logger.AppLog.Info("Encrypting stored key value")
-	cipher, err := mgr.EncryptKey(findHandle, nil, key_value, pkcs11.CKM_AES_CBC_PAD)
+	cipher, err := pkcs11mgr.EncryptKey(findHandle, nil, key_value, pkcs11.CKM_AES_CBC_PAD, *s)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to encrypt key value: %v. Returning response without encrypted key", err)
 		resp.CipherKey = ""
@@ -113,8 +118,13 @@ func postStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request
 
 }
 
-func deleteStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request) {
+func deleteStoreKey(w http.ResponseWriter, r *http.Request) {
 	logger.AppLog.Info("Processing delete key request")
+	//// init the session
+	s := mgr.GetSession()
+	//
+
+	defer mgr.LogoutSession(s)
 
 	var req models.DeleteKeyRequest
 
@@ -129,7 +139,7 @@ func deleteStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Reque
 	logger.AppLog.Infof("Deleting key with label: %s, ID: %s", label, id)
 
 	// Delete the key from the HSM
-	if err := mgr.DeleteKey(label, id); err != nil {
+	if err := pkcs11mgr.DeleteKey(label, id, *s); err != nil {
 		logger.AppLog.Errorf("Failed to delete key: %v", err)
 		sendProblemDetails(w, "Key Deletion Failed", "Error deleting key from HSM", "KEY_DELETION_ERROR", http.StatusInternalServerError, r.URL.Path)
 		return
@@ -149,8 +159,13 @@ func deleteStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Reque
 	}
 }
 
-func updateStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request) {
+func updateStoreKey(w http.ResponseWriter, r *http.Request) {
 	logger.AppLog.Info("Processing update key request")
+	//// init the session
+	s := mgr.GetSession()
+	//
+
+	defer mgr.LogoutSession(s)
 
 	var req models.UpdateKeyRequest
 
@@ -174,7 +189,7 @@ func updateStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Reque
 	}
 
 	// Update the key in the HSM
-	handle, err := mgr.UpdateKey(label, keyValue, req.Id, keyType)
+	handle, err := pkcs11mgr.UpdateKey(label, keyValue, req.Id, keyType, *s)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to update key: %v", err)
 		sendProblemDetails(w, "Key Update Failed", "Error updating key in HSM", "KEY_UPDATE_ERROR", http.StatusInternalServerError, r.URL.Path)
@@ -192,7 +207,7 @@ func updateStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Reque
 
 	// Try to find the encryption key to encrypt the new value
 	logger.AppLog.Infof("Looking for encryption key: %s", constants.LABEL_ENCRYPTION_KEY)
-	findHandle, err := mgr.FindKey(constants.LABEL_ENCRYPTION_KEY, 0)
+	findHandle, err := pkcs11mgr.FindKey(constants.LABEL_ENCRYPTION_KEY, 0, *s)
 	if err != nil || findHandle == 0 {
 		logger.AppLog.Warnf("Encryption key not found or error: %v. Returning response without encrypted key", err)
 		w.Header().Set("Content-Type", "application/json")
@@ -205,7 +220,7 @@ func updateStoreKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Reque
 
 	// Encrypt the new key value
 	logger.AppLog.Info("Encrypting updated key value")
-	cipher, err := mgr.EncryptKey(findHandle, nil, keyValue, pkcs11.CKM_AES_CBC_PAD)
+	cipher, err := pkcs11mgr.EncryptKey(findHandle, nil, keyValue, pkcs11.CKM_AES_CBC_PAD, *s)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to encrypt updated key value: %v. Returning response without encrypted key", err)
 		resp.CipherKey = ""

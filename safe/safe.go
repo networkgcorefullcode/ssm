@@ -4,8 +4,6 @@ import (
 	"crypto/rand"
 	"io"
 	"runtime"
-	"syscall"
-	"unsafe"
 
 	"github.com/networkgcorefullcode/ssm/logger"
 )
@@ -23,33 +21,33 @@ func Zero(b []byte) {
 
 // Mlock attempts to lock memory to prevent swapping.
 // On Windows uses VirtualLock, on Linux uses mlock.
-func Mlock(b []byte) error {
-	if len(b) == 0 {
-		return nil
-	}
+// func Mlock(b []byte) error {
+// 	if len(b) == 0 {
+// 		return nil
+// 	}
 
-	// For Linux/Unix
-	addr := uintptr(unsafe.Pointer(&b[0]))
-	size := uintptr(len(b))
-	const SYS_MLOCK = 149 // Linux/amd64
-	_, _, err := syscall.Syscall(uintptr(SYS_MLOCK), addr, size, 0)
-	if err != 0 {
-		return err
-	}
-	return nil
-}
+// 	// For Linux/Unix
+// 	addr := uintptr(unsafe.Pointer(&b[0]))
+// 	size := uintptr(len(b))
+// 	const SYS_MLOCK = 149 // Linux/amd64
+// 	_, _, err := syscall.Syscall(uintptr(SYS_MLOCK), addr, size, 0)
+// 	if err != 0 {
+// 		return err
+// 	}
+// 	return nil
+// }
 
-func Munlock(b []byte) {
-	if len(b) == 0 {
-		return
-	}
+// func Munlock(b []byte) {
+// 	if len(b) == 0 {
+// 		return
+// 	}
 
-	// For Linux/Unix
-	addr := uintptr(unsafe.Pointer(&b[0]))
-	size := uintptr(len(b))
-	const SYS_MUNLOCK = 150 // Linux/amd64
-	syscall.Syscall(uintptr(SYS_MUNLOCK), addr, size, 0)
-}
+// 	// For Linux/Unix
+// 	addr := uintptr(unsafe.Pointer(&b[0]))
+// 	size := uintptr(len(b))
+// 	const SYS_MUNLOCK = 150 // Linux/amd64
+// 	syscall.Syscall(uintptr(SYS_MUNLOCK), addr, size, 0)
+// }
 
 // RandRead fills the slice with random bytes using the system's cryptographic generator.
 func RandRead(b []byte) error {

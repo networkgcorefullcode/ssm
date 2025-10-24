@@ -21,17 +21,22 @@ import (
 // @Failure 400 {object} models.ProblemDetails "Petición inválida"
 // @Failure 500 {object} models.ProblemDetails "Error interno del servidor"
 // @Router /generate-des3-key [post]
-func HandleGenerateDES3Key(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request) {
+func HandleGenerateDES3Key(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
-		postGenerateDES3Key(mgr, w, r)
+		postGenerateDES3Key(w, r)
 	default:
 		sendProblemDetails(w, "Method Not Allowed", "El método HTTP no está permitido para este endpoint", "METHOD_NOT_ALLOWED", http.StatusMethodNotAllowed, r.URL.Path)
 	}
 }
 
-func postGenerateDES3Key(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request) {
+func postGenerateDES3Key(w http.ResponseWriter, r *http.Request) {
 	logger.AppLog.Info("Processing DES3 key generation request")
+	//// init the session
+	s := mgr.GetSession()
+	//
+
+	defer mgr.LogoutSession(s)
 
 	var req models.GenDES3KeyRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -47,7 +52,7 @@ func postGenerateDES3Key(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.
 	}
 
 	logger.AppLog.Infof("Generating DES3 key , ID: %d", req.Id)
-	handle, err := mgr.GenerateDES3Key(constants.LABEL_ENCRIPTION_KEY_DES3, req.Id)
+	handle, err := pkcs11mgr.GenerateDES3Key(constants.LABEL_ENCRYPTION_KEY_DES3, req.Id, *s)
 	if err != nil {
 		logger.AppLog.Errorf("DES3 key generation failed: %v", err)
 		sendProblemDetails(w, "Key Generation Failed", "Error al generar la clave DES3 en el HSM", "KEY_GENERATION_ERROR", http.StatusInternalServerError, r.URL.Path)

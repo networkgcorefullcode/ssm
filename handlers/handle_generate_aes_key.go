@@ -21,17 +21,22 @@ import (
 // @Failure 400 {object} models.ProblemDetails "Petición inválida"
 // @Failure 500 {object} models.ProblemDetails "Error interno del servidor"
 // @Router /generate-aes-key [post]
-func HandleGenerateAESKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request) {
+func HandleGenerateAESKey(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
-		postGenerateAESKey(mgr, w, r)
+		postGenerateAESKey(w, r)
 	default:
 		sendProblemDetails(w, "Method Not Allowed", "El método HTTP no está permitido para este endpoint", "METHOD_NOT_ALLOWED", http.StatusMethodNotAllowed, r.URL.Path)
 	}
 }
 
-func postGenerateAESKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request) {
+func postGenerateAESKey(w http.ResponseWriter, r *http.Request) {
 	logger.AppLog.Info("Processing AES key generation request")
+	//// init the session
+	s := mgr.GetSession()
+	//
+
+	defer mgr.LogoutSession(s)
 
 	var req models.GenAESKeyRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -52,7 +57,14 @@ func postGenerateAESKey(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.R
 
 	logger.AppLog.Infof("Generating AES key - ID: %s, Bits: %d", req.Id, req.Bits)
 
-	handle, err := mgr.GenerateAESKey(constants.LABEL_ENCRIPTION_KEY_AES, req.Id, int(req.Bits))
+	var label string
+	if req.Bits == 128 {
+		label = constants.LABEL_ENCRYPTION_KEY_AES128
+	} else if req.Bits == 256 {
+		label = constants.LABEL_ENCRYPTION_KEY_AES256
+	}
+
+	handle, err := pkcs11mgr.GenerateAESKey(label, req.Id, int(req.Bits), *s)
 	if err != nil {
 		logger.AppLog.Errorf("AES key generation failed: %v", err)
 		sendProblemDetails(w, "Key Generation Failed", "Error al generar la clave AES en el HSM", "KEY_GENERATION_ERROR", http.StatusInternalServerError, r.URL.Path)

@@ -15,7 +15,7 @@ import (
 
 // @title        Decrypt Data API
 // @version 	 1.0.0
-// @description  Decrypt a Key using simetrics algoritms as AES 128 and AES 256, DES, 3DES
+// @description  Decrypt a Key using simetrics ALGORITHMs as AES 128 and AES 256, DES, 3DES
 // @Accept       json
 // @Produce      json
 // @Param        request  body      models.DecryptRequest  true  "Data to decrypt"
@@ -25,19 +25,24 @@ import (
 // @Failure      405      {object}  models.ProblemDetails  "HTTP method not allowed"
 // @Failure      500      {object}  models.ProblemDetails  "Internal server error"
 // @Router       /decrypt [post]
-func HandleDecrypt(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request) {
+func HandleDecrypt(w http.ResponseWriter, r *http.Request) {
 	logger.AppLog.Debugf("Received decrypt request from %s", r.RemoteAddr)
 
 	switch r.Method {
 	case http.MethodPost:
-		postDecrypt(mgr, w, r)
+		postDecrypt(w, r)
 	default:
 		sendProblemDetails(w, "Method Not Allowed", "Only POST method is allowed", "method_not_allowed", http.StatusMethodNotAllowed, r.URL.Path)
 	}
 }
 
-func postDecrypt(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request) {
+func postDecrypt(w http.ResponseWriter, r *http.Request) {
 	logger.AppLog.Debugf("Processing decrypt request for %s", r.URL.Path)
+	// init the session
+	s := mgr.GetSession()
+	//
+
+	defer mgr.LogoutSession(s)
 
 	var req models.DecryptRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -83,7 +88,7 @@ func postDecrypt(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request)
 	logger.AppLog.Debugf("Decoded ciphertext length: %d bytes, IV length: %d bytes", len(cipher), len(iv))
 
 	// Find key by label
-	keyHandle, err := mgr.FindKey(req.KeyLabel, req.Id)
+	keyHandle, err := pkcs11mgr.FindKey(req.KeyLabel, req.Id, *s)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to find key by label '%s': %v", req.KeyLabel, err)
 		sendProblemDetails(w, "Key Search Failed", "Failed to search for key: "+err.Error(), "key_search_failed", http.StatusInternalServerError, r.URL.Path)
@@ -92,44 +97,56 @@ func postDecrypt(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request)
 
 	var plaintext []byte
 	switch req.EncryptionAlgorithm {
-	case constants.ALGORITM_AES_128, constants.ALGORITM_AES_256:
-		plaintext, err = mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_AES_CBC_PAD)
-		if err != nil {
-			plaintext, err = mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_AES_CBC)
+	case constants.ALGORITHM_AES128, constants.ALGORITHM_AES256, constants.ALGORITHM_AES128_OurUsers, constants.ALGORITHM_AES256_OurUsers:
+		if len(iv) == 16 {
+			plaintext, err = pkcs11mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_AES_CBC_PAD, *s)
+			if err != nil {
+				plaintext, err = pkcs11mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_AES_CBC, *s)
+			}
+		} else if iv == nil {
+			plaintext, err = pkcs11mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_AES_ECB, *s)
 		}
-		if err != nil {
-			plaintext, err = mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_AES_ECB)
+		// if err != nil {
+		// 	plaintext, err = pkcs11mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_AES_ECB_ENCRYPT_DATA)
+		// }
+	case constants.ALGORITHM_DES, constants.ALGORITHM_DES_OurUsers:
+		if len(iv) == 8 {
+			plaintext, err = pkcs11mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES_CBC_PAD, *s)
+			if err != nil {
+				plaintext, err = pkcs11mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES_CBC, *s)
+			}
+		} else if iv == nil {
+			plaintext, err = pkcs11mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES_ECB, *s)
 		}
-		if err != nil {
-			plaintext, err = mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_AES_ECB_ENCRYPT_DATA)
+		// if err != nil {
+		// 	plaintext, err = pkcs11mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES_ECB_ENCRYPT_DATA)
+		// }
+	case constants.ALGORITHM_DES3, constants.ALGORITHM_DES3_OurUsers:
+		if len(iv) == 8 {
+			plaintext, err = pkcs11mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES3_CBC_PAD, *s)
+			if err != nil {
+				plaintext, err = pkcs11mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES3_CBC, *s)
+			}
+		} else if iv == nil {
+			plaintext, err = pkcs11mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES3_ECB, *s)
 		}
-	case constants.ALGORITM_DES:
-		plaintext, err = mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES_CBC_PAD)
-		if err != nil {
-			plaintext, err = mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES_CBC)
-		}
-		if err != nil {
-			plaintext, err = mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES_ECB)
-		}
-		if err != nil {
-			plaintext, err = mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES_ECB_ENCRYPT_DATA)
-		}
-	case constants.ALGORITM_DES3:
-		plaintext, err = mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES3_CBC_PAD)
-		if err != nil {
-			plaintext, err = mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES3_CBC)
-		}
-		if err != nil {
-			plaintext, err = mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES3_ECB)
-		}
-		if err != nil {
-			plaintext, err = mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES3_ECB_ENCRYPT_DATA)
-		}
+		// if err != nil {
+		// 	plaintext, err = pkcs11mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES3_ECB_ENCRYPT_DATA)
+		// }
+	default:
+		logger.AppLog.Errorf("Unsupported decryption algorithm: %d", req.EncryptionAlgorithm)
+		sendProblemDetails(w, "Bad Request", "Unsupported decryption algorithm", "UNSUPPORTED_ALGORITHM", http.StatusBadRequest, r.URL.Path)
+		return
 	}
 
 	if err != nil {
 		logger.AppLog.Errorf("Decryption failed: %v", err)
 		sendProblemDetails(w, "Decryption Failed", "Failed to decrypt data: "+err.Error(), "decryption_failed", http.StatusInternalServerError, r.URL.Path)
+		return
+	}
+	if len(plaintext) == 0 {
+		logger.AppLog.Error("Decryption resulted in empty plaintext")
+		sendProblemDetails(w, "Decryption Failed", "Decryption resulted in empty plaintext", "empty_plaintext", http.StatusInternalServerError, r.URL.Path)
 		return
 	}
 

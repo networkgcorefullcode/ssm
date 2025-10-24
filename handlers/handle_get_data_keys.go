@@ -20,17 +20,22 @@ import (
 // @Failure 400 {object} models.ProblemDetails "Invalid request"
 // @Failure 500 {object} models.ProblemDetails "Internal server error"
 // @Router /store-key [post]
-func HandleGetDataKeys(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request) {
+func HandleGetDataKeys(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
-		postGetDataKeys(mgr, w, r)
+		postGetDataKeys(w, r)
 	default:
 		sendProblemDetails(w, "Method Not Allowed", "The HTTP method is not allowed for this endpoint", "METHOD_NOT_ALLOWED", http.StatusMethodNotAllowed, r.URL.Path)
 	}
 }
 
-func postGetDataKeys(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Request) {
+func postGetDataKeys(w http.ResponseWriter, r *http.Request) {
 	logger.AppLog.Info("Processing store key request")
+	//// init the session
+	s := mgr.GetSession()
+	//
+
+	defer mgr.LogoutSession(s)
 
 	var req models.GetDataKeysRequest
 
@@ -43,7 +48,21 @@ func postGetDataKeys(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Requ
 	label := req.KeyLabel
 
 	logger.AppLog.Infof("Searching key in HSM - using the Label: %s", label)
-	handles, err := mgr.FindKeysLabel(label)
+	handles, err := pkcs11mgr.FindKeysLabel(label, *s)
+	if err != nil && err.Error() == "error Key With The Label Not Found" {
+		// Prepare the response
+		resp := models.GetDataKeysResponse{
+			Keys: make([]models.DataKeyInfo, 0),
+		}
+		logger.AppLog.Info("Not key found")
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		if err := json.NewEncoder(w).Encode(resp); err != nil {
+			logger.AppLog.Errorf("Failed to encode response: %v", err)
+			sendProblemDetails(w, "Internal Server Error", "Failed to encode response", "INTERNAL_SERVER_ERROR", http.StatusInternalServerError, r.URL.Path)
+		}
+		return
+	}
 	if err != nil {
 		logger.AppLog.Errorf("Failed to search keys: %v", err)
 		sendProblemDetails(w, "Key find Failed", "Error searching key in HSM", "KEY_GET_ERROR", http.StatusInternalServerError, r.URL.Path)
@@ -52,7 +71,7 @@ func postGetDataKeys(mgr *pkcs11mgr.Manager, w http.ResponseWriter, r *http.Requ
 
 	logger.AppLog.Info("Keys get successfully")
 
-	objAtr, err := mgr.GetValuesForObjects(handles)
+	objAtr, err := pkcs11mgr.GetValuesForObjects(handles, *s)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to get object attributes: %v", err)
 		sendProblemDetails(w, "Key get Failed", "Error getting key attributes", "KEY_GET_ERROR", http.StatusInternalServerError, r.URL.Path)

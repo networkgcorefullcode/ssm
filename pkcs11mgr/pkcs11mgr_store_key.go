@@ -10,7 +10,7 @@ import (
 )
 
 // StoreKey creates a key object inside SoftHSM from raw key bytes and returns its object handle
-func (m *Manager) StoreKey(label string, key []byte, id int32, keyType string) (pkcs11.ObjectHandle, error) {
+func StoreKey(label string, key []byte, id int32, keyType string, s Session) (pkcs11.ObjectHandle, error) {
 	logger.AppLog.Infof("Storing key: label=%s, keyType=%s, keyLen=%d", label, keyType, len(key))
 	var keyTypeuint uint
 	switch keyType {
@@ -39,13 +39,13 @@ func (m *Manager) StoreKey(label string, key []byte, id int32, keyType string) (
 	}
 
 	// Check if key already exists before creating it
-	existingHandle, err := m.FindKey(label, id)
+	existingHandle, err := FindKey(label, id, s)
 	if err == nil && existingHandle != 0 {
 		logger.AppLog.Infof("Key with label '%s' already exists, returning existing handle: %v", label, existingHandle)
 		return existingHandle, errors.New("the key is in the SSM")
 	}
 
-	handle, err := m.ctx.CreateObject(m.session, template)
+	handle, err := s.Ctx.CreateObject(s.Handle, template)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to store key: %v", err)
 		return 0, err
@@ -55,11 +55,11 @@ func (m *Manager) StoreKey(label string, key []byte, id int32, keyType string) (
 }
 
 // DeleteKey removes a key object from the HSM by label and optionally by ID
-func (m *Manager) DeleteKey(label string, id int32) error {
+func DeleteKey(label string, id int32, s Session) error {
 	logger.AppLog.Infof("Attempting to delete key with label: %s", label)
 
 	// Find the key first
-	handle, err := m.FindKey(label, id)
+	handle, err := FindKey(label, id, s)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to find key for deletion: %v", err)
 		return err
@@ -72,7 +72,7 @@ func (m *Manager) DeleteKey(label string, id int32) error {
 	}
 
 	// Delete the key object
-	if err := m.ctx.DestroyObject(m.session, handle); err != nil {
+	if err := s.Ctx.DestroyObject(s.Handle, handle); err != nil {
 		logger.AppLog.Errorf("Failed to delete key with handle %v: %v", handle, err)
 		return err
 	}
@@ -81,9 +81,9 @@ func (m *Manager) DeleteKey(label string, id int32) error {
 	return nil
 }
 
-// DeleteAllKeys removes all secret key objects from the current session/slot
+// DeleteAllKeys removes all secret key objects from the current s.Handle/slot
 // WARNING: This will delete ALL keys in the token - use with caution!
-func (m *Manager) DeleteAllKeys() error {
+func DeleteAllKeys(s Session) error {
 	logger.AppLog.Warnln("Attempting to delete ALL keys from the HSM token")
 
 	// Search for all secret key objects
@@ -91,14 +91,14 @@ func (m *Manager) DeleteAllKeys() error {
 		pkcs11.NewAttribute(pkcs11.CKA_CLASS, pkcs11.CKO_SECRET_KEY),
 	}
 
-	if err := m.ctx.FindObjectsInit(m.session, template); err != nil {
+	if err := s.Ctx.FindObjectsInit(s.Handle, template); err != nil {
 		logger.AppLog.Errorf("FindObjectsInit failed for delete all: %v", err)
 		return err
 	}
-	defer m.ctx.FindObjectsFinal(m.session)
+	defer s.Ctx.FindObjectsFinal(s.Handle)
 
 	// Find all matching objects (up to 1000 keys)
-	handles, _, err := m.ctx.FindObjects(m.session, 1000)
+	handles, _, err := s.Ctx.FindObjects(s.Handle, 1000)
 	if err != nil {
 		logger.AppLog.Errorf("FindObjects failed for delete all: %v", err)
 		return err
@@ -114,7 +114,7 @@ func (m *Manager) DeleteAllKeys() error {
 	// Delete each key object
 	deletedCount := 0
 	for _, handle := range handles {
-		if err := m.ctx.DestroyObject(m.session, handle); err != nil {
+		if err := s.Ctx.DestroyObject(s.Handle, handle); err != nil {
 			logger.AppLog.Errorf("Failed to delete key with handle %v: %v", handle, err)
 			// Continue with other keys even if one fails
 			continue
@@ -134,11 +134,11 @@ func (m *Manager) DeleteAllKeys() error {
 
 // UpdateKey updates an existing key by deleting the old one and creating a new one with the updated value
 // This function combines delete and store operations to effectively "update" a key
-func (m *Manager) UpdateKey(label string, newKeyValue []byte, id int32, keyType string) (pkcs11.ObjectHandle, error) {
+func UpdateKey(label string, newKeyValue []byte, id int32, keyType string, s Session) (pkcs11.ObjectHandle, error) {
 	logger.AppLog.Infof("Updating key: label=%s, keyType=%s, newKeyLen=%d", label, keyType, len(newKeyValue))
 
 	// First, check if the key exists
-	existingHandle, err := m.FindKey(label, id)
+	existingHandle, err := FindKey(label, id, s)
 	if err != nil {
 		logger.AppLog.Errorf("Error searching for key to update: %v", err)
 		return 0, err
@@ -152,14 +152,14 @@ func (m *Manager) UpdateKey(label string, newKeyValue []byte, id int32, keyType 
 	logger.AppLog.Infof("Found existing key to update: handle=%v", existingHandle)
 
 	// Delete the existing key
-	if err := m.DeleteKey(label, id); err != nil {
+	if err := DeleteKey(label, id, s); err != nil {
 		logger.AppLog.Errorf("Failed to delete existing key for update: %v", err)
 		return 0, err
 	}
 
 	logger.AppLog.Infof("Existing key deleted, creating new key with updated value")
 
-	newHandle, err := m.StoreKey(label, newKeyValue, id, keyType)
+	newHandle, err := StoreKey(label, newKeyValue, id, keyType, s)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to create updated key: %v", err)
 		return 0, err
