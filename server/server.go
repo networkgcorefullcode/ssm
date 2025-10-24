@@ -131,32 +131,33 @@ func (s *SSM) Start() error {
 		return err
 	}
 
-	// Initialize PKCS11 connection pool
-	poolConfig := factory.SsmConfig.Configuration.PoolConfig
-	poolConfig.PkcsPath = factory.SsmConfig.Configuration.PkcsPath
-	poolConfig.SlotNumber = uint(factory.SsmConfig.Configuration.LotsNumber)
-	poolConfig.Pin = factory.SsmConfig.Configuration.Pin
-	poolConfig.MaxSize = factory.SsmConfig.Configuration.PoolConfig.MaxSize // Configure based on expected load
-	poolConfig.MinSize = factory.SsmConfig.Configuration.PoolConfig.MinSize // Minimum connections to maintain
+	// // Initialize PKCS11 connection pool
+	// poolConfig := pkcs11mgr.DefaultPoolConfig()
+	// poolConfig.PkcsPath = factory.SsmConfig.Configuration.PkcsPath
+	// poolConfig.SlotNumber = uint(factory.SsmConfig.Configuration.LotsNumber)
+	// poolConfig.Pin = factory.SsmConfig.Configuration.Pin
+	// poolConfig.MaxSize = factory.SsmConfig.Configuration.PoolConfig.MaxSize // Configure based on expected load
+	// poolConfig.MinSize = factory.SsmConfig.Configuration.PoolConfig.MinSize // Minimum connections to maintain
 
-	logger.AppLog.Info("Initializing PKCS11 connection pool...")
-	if err := pkcs11mgr.InitializeGlobalPool(poolConfig); err != nil {
-		logger.AppLog.Errorf("Failed to initialize PKCS11 connection pool: %v", err)
-		return err
-	}
+	// logger.AppLog.Info("Initializing PKCS11 connection pool...")
+	// if err := pkcs11mgr.InitializeGlobalPool(poolConfig); err != nil {
+	// 	logger.AppLog.Errorf("Failed to initialize PKCS11 connection pool: %v", err)
+	// 	return err
+	// }
 	logger.AppLog.Info("PKCS11 connection pool initialized successfully")
 
 	// init the pkcs manager
-	// PkcsManager, err = pkcs11mgr.New(factory.SsmConfig.Configuration.PkcsPath,
-	// 	uint(factory.SsmConfig.Configuration.LotsNumber),
-	// 	factory.SsmConfig.Configuration.Pin)
+	pkcsManager, err := pkcs11mgr.New(factory.SsmConfig.Configuration.PkcsPath,
+		uint(factory.SsmConfig.Configuration.LotsNumber),
+		factory.SsmConfig.Configuration.Pin)
+	if err != nil {
+		logger.AppLog.Errorf("Failed to initialize PKCS11 manager: %v", err)
+		return err
+	}
+
+	handlers.SetPKCS11Manager(pkcsManager)
 
 	// SsmServer.mgr = PkcsManager
-
-	// if err != nil {
-	// 	logger.AppLog.Errorf("Failed to initialize PKCS11 manager: %v", err)
-	// 	return err
-	// }
 
 	// err = PkcsManager.OpenSession()
 
@@ -177,11 +178,11 @@ func (s *SSM) Start() error {
 		handlers.HandleHealthCheck(w, r)
 	})
 
-	if factory.SsmConfig.Configuration.HandlersPoolConect {
-		CreateEndpointHandlersPool()
-	} else {
-		CreateEndpointHandlers()
-	}
+	// if factory.SsmConfig.Configuration.HandlersPoolConect {
+	// 	CreateEndpointHandlersPool()
+	// } else {
+	CreateEndpointHandlers()
+	// }
 
 	// Serve HTTP requests in a separate goroutine
 	logger.AppLog.Infof("SSM listening on unix socket %s", socketPath)
@@ -225,14 +226,14 @@ func (s *SSM) Start() error {
 		}
 	}
 
-	// Close PKCS11 connection pool
-	if pool := pkcs11mgr.GetGlobalPool(); pool != nil {
-		logger.AppLog.Info("Closing PKCS11 connection pool...")
-		pool.Close()
-	}
+	// // Close PKCS11 connection pool
+	// if pool := pkcs11mgr.GetGlobalPool(); pool != nil {
+	// 	logger.AppLog.Info("Closing PKCS11 connection pool...")
+	// 	pool.Close()
+	// }
 
 	// PkcsManager.CloseSession()
-	// PkcsManager.Finalize()
+	pkcsManager.Finalize()
 
 	logger.AppLog.Info("SSM server stopped gracefully")
 	return nil

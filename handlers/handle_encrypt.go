@@ -8,7 +8,6 @@ import (
 
 	"github.com/miekg/pkcs11"
 	constants "github.com/networkgcorefullcode/ssm/const"
-	"github.com/networkgcorefullcode/ssm/factory"
 	"github.com/networkgcorefullcode/ssm/logger"
 	"github.com/networkgcorefullcode/ssm/models"
 	"github.com/networkgcorefullcode/ssm/pkcs11mgr"
@@ -38,25 +37,14 @@ func HandleEncrypt(w http.ResponseWriter, r *http.Request) {
 
 func postEncrypt(w http.ResponseWriter, r *http.Request) {
 
-	// init the pkcs manager
-	mgr, err := pkcs11mgr.New(factory.SsmConfig.Configuration.PkcsPath,
-		uint(factory.SsmConfig.Configuration.LotsNumber),
-		factory.SsmConfig.Configuration.Pin)
+	// init the session
+	s, err := mgr.NewSession()
 	if err != nil {
-		logger.AppLog.Errorf("Failed to create PKCS11 manager: %v", err)
-		sendProblemDetails(w, "Internal Server Error", "Failed to initialize PKCS11 manager", "PKCS_INIT_ERROR", http.StatusInternalServerError, r.URL.Path)
+		logger.AppLog.Errorf("Failed to create PKCS11 session: %v", err)
+		sendProblemDetails(w, "Internal Server Error", "Failed to create PKCS11 session: "+err.Error(), "session_creation_failed", http.StatusInternalServerError, r.URL.Path)
 		return
 	}
-
-	err = mgr.OpenSession()
-	if err != nil {
-		logger.AppLog.Errorf("Failed to OpenSession PKCS11 manager: %v", err)
-		sendProblemDetails(w, "Internal Server Error", "The pkcs session have a error during stablishment", "PKCS_ERROR", http.StatusInternalServerError, r.URL.Path)
-		return
-	}
-
-	defer mgr.CloseSession()
-	defer mgr.Finalize()
+	defer mgr.CloseSession(s)
 
 	logger.AppLog.Info("Processing encrypt request")
 
@@ -76,13 +64,13 @@ func postEncrypt(w http.ResponseWriter, r *http.Request) {
 	}
 
 	logger.AppLog.Infof("Finding key by label: %s", req.KeyLabel)
-	keyHandle, err := mgr.FindKeyLabelReturnRandom(req.KeyLabel)
+	keyHandle, err := pkcs11mgr.FindKeyLabelReturnRandom(req.KeyLabel, *s)
 	if err != nil {
 		logger.AppLog.Errorf("Key not found: %s, error: %v", req.KeyLabel, err)
 		sendProblemDetails(w, "Key Not Found", "The specified key does not exist in the HSM", "KEY_NOT_FOUND", http.StatusNotFound, r.URL.Path)
 		return
 	}
-	atrr, err := mgr.GetObjectAttributes(keyHandle)
+	atrr, err := pkcs11mgr.GetObjectAttributes(keyHandle, *s)
 	if err != nil {
 		logger.AppLog.Errorf("Atributes not found: %s, error: %v", req.KeyLabel, err)
 		sendProblemDetails(w, "Atributes Not Found", "The specified key does not exist in the HSM", "KEY_NOT_FOUND", http.StatusNotFound, r.URL.Path)
@@ -108,10 +96,10 @@ func postEncrypt(w http.ResponseWriter, r *http.Request) {
 	var ciphertext []byte
 	switch req.EncryptionAlgorithm {
 	case constants.ALGORITHM_AES128_OurUsers, constants.ALGORITHM_AES256_OurUsers:
-		ciphertext, err = mgr.EncryptKey(keyHandle, iv, pt, pkcs11.CKM_AES_CBC_PAD)
+		ciphertext, err = pkcs11mgr.EncryptKey(keyHandle, iv, pt, pkcs11.CKM_AES_CBC_PAD, *s)
 		if err != nil {
 			logger.AppLog.Errorf("Encryption failed: %v", err)
-			ciphertext, err = mgr.EncryptKey(keyHandle, iv, pt, pkcs11.CKM_AES_CBC)
+			ciphertext, err = pkcs11mgr.EncryptKey(keyHandle, iv, pt, pkcs11.CKM_AES_CBC, *s)
 			if err != nil {
 				logger.AppLog.Errorf("Encryption failed: %v", err)
 				sendProblemDetails(w, "Encryption Failed", "Error during encryption process", "ENCRYPTION_ERROR", http.StatusInternalServerError, r.URL.Path)
@@ -119,10 +107,10 @@ func postEncrypt(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	case constants.ALGORITHM_DES3_OurUsers:
-		ciphertext, err = mgr.EncryptKey(keyHandle, iv, pt, pkcs11.CKM_DES3_CBC_PAD)
+		ciphertext, err = pkcs11mgr.EncryptKey(keyHandle, iv, pt, pkcs11.CKM_DES3_CBC_PAD, *s)
 		if err != nil {
 			logger.AppLog.Errorf("Encryption failed: %v", err)
-			ciphertext, err = mgr.EncryptKey(keyHandle, iv, pt, pkcs11.CKM_DES3_CBC)
+			ciphertext, err = pkcs11mgr.EncryptKey(keyHandle, iv, pt, pkcs11.CKM_DES3_CBC, *s)
 			if err != nil {
 				logger.AppLog.Errorf("Encryption failed: %v", err)
 				sendProblemDetails(w, "Encryption Failed", "Error during encryption process", "ENCRYPTION_ERROR", http.StatusInternalServerError, r.URL.Path)
@@ -130,10 +118,10 @@ func postEncrypt(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	case constants.ALGORITHM_DES_OurUsers:
-		ciphertext, err = mgr.EncryptKey(keyHandle, iv, pt, pkcs11.CKM_DES_CBC_PAD)
+		ciphertext, err = pkcs11mgr.EncryptKey(keyHandle, iv, pt, pkcs11.CKM_DES_CBC_PAD, *s)
 		if err != nil {
 			logger.AppLog.Errorf("Encryption failed: %v", err)
-			ciphertext, err = mgr.EncryptKey(keyHandle, iv, pt, pkcs11.CKM_DES_CBC)
+			ciphertext, err = pkcs11mgr.EncryptKey(keyHandle, iv, pt, pkcs11.CKM_DES_CBC, *s)
 			if err != nil {
 				logger.AppLog.Errorf("Encryption failed: %v", err)
 				sendProblemDetails(w, "Encryption Failed", "Error during encryption process", "ENCRYPTION_ERROR", http.StatusInternalServerError, r.URL.Path)

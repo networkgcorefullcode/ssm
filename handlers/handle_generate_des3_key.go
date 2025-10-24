@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	constants "github.com/networkgcorefullcode/ssm/const"
-	"github.com/networkgcorefullcode/ssm/factory"
 	"github.com/networkgcorefullcode/ssm/logger"
 	"github.com/networkgcorefullcode/ssm/models"
 	"github.com/networkgcorefullcode/ssm/pkcs11mgr"
@@ -33,25 +32,14 @@ func HandleGenerateDES3Key(w http.ResponseWriter, r *http.Request) {
 
 func postGenerateDES3Key(w http.ResponseWriter, r *http.Request) {
 	logger.AppLog.Info("Processing DES3 key generation request")
-	// init the pkcs manager
-	mgr, err := pkcs11mgr.New(factory.SsmConfig.Configuration.PkcsPath,
-		uint(factory.SsmConfig.Configuration.LotsNumber),
-		factory.SsmConfig.Configuration.Pin)
+	//// init the session
+	s, err := mgr.NewSession()
 	if err != nil {
-		logger.AppLog.Errorf("Failed to create PKCS11 manager: %v", err)
-		sendProblemDetails(w, "Internal Server Error", "Failed to initialize PKCS11 manager", "PKCS_INIT_ERROR", http.StatusInternalServerError, r.URL.Path)
+		logger.AppLog.Errorf("Failed to create PKCS11 session: %v", err)
+		sendProblemDetails(w, "Internal Server Error", "Failed to create PKCS11 session: "+err.Error(), "session_creation_failed", http.StatusInternalServerError, r.URL.Path)
 		return
 	}
-
-	err = mgr.OpenSession()
-	if err != nil {
-		logger.AppLog.Errorf("Failed to OpenSession PKCS11 manager: %v", err)
-		sendProblemDetails(w, "Internal Server Error", "The pkcs session have a error during stablishment", "PKCS_ERROR", http.StatusInternalServerError, r.URL.Path)
-		return
-	}
-
-	defer mgr.CloseSession()
-	defer mgr.Finalize()
+	defer mgr.CloseSession(s)
 
 	var req models.GenDES3KeyRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -67,7 +55,7 @@ func postGenerateDES3Key(w http.ResponseWriter, r *http.Request) {
 	}
 
 	logger.AppLog.Infof("Generating DES3 key , ID: %d", req.Id)
-	handle, err := mgr.GenerateDES3Key(constants.LABEL_ENCRYPTION_KEY_DES3, req.Id)
+	handle, err := pkcs11mgr.GenerateDES3Key(constants.LABEL_ENCRYPTION_KEY_DES3, req.Id, *s)
 	if err != nil {
 		logger.AppLog.Errorf("DES3 key generation failed: %v", err)
 		sendProblemDetails(w, "Key Generation Failed", "Error al generar la clave DES3 en el HSM", "KEY_GENERATION_ERROR", http.StatusInternalServerError, r.URL.Path)

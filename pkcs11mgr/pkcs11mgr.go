@@ -8,13 +8,19 @@ import (
 	"github.com/networkgcorefullcode/ssm/logger"
 )
 
+// Manager manages PKCS#11 context without holding a specific session
 type Manager struct {
 	ctx       *pkcs11.Ctx
 	slot      uint
-	session   pkcs11.SessionHandle
 	pin       string
 	createdAt time.Time
 	lastUsed  time.Time
+}
+
+// Session represents an independent PKCS#11 session
+type Session struct {
+	Handle pkcs11.SessionHandle
+	Ctx    *pkcs11.Ctx
 }
 
 func New(modulePath string, slot uint, pin string) (*Manager, error) {
@@ -25,44 +31,79 @@ func New(modulePath string, slot uint, pin string) (*Manager, error) {
 	if err := ctx.Initialize(); err != nil {
 		return nil, err
 	}
-	mgr := &Manager{ctx: ctx, slot: slot, pin: pin}
+
+	now := time.Now()
+	mgr := &Manager{
+		ctx:       ctx,
+		slot:      slot,
+		pin:       pin,
+		createdAt: now,
+		lastUsed:  now,
+	}
 	logger.AppLog.Infoln("PKCS#11 module initialized")
 	return mgr, nil
 }
 
-// Open a Session to operate with the SSM
-func (m *Manager) OpenSession() error {
-	// Open a session with the specified slot
-	logger.AppLog.Infoln("Opening PKCS#11 session")
-	session, err := m.ctx.OpenSession(m.slot, pkcs11.CKF_SERIAL_SESSION|pkcs11.CKF_RW_SESSION)
+// NewSession creates and returns a new independent PKCS#11 session
+func (m *Manager) NewSession() (*Session, error) {
+	logger.AppLog.Debugln("Creating new PKCS#11 session")
+
+	// Open a new session with the specified slot
+	handle, err := m.ctx.OpenSession(m.slot, pkcs11.CKF_SERIAL_SESSION|pkcs11.CKF_RW_SESSION)
 	if err != nil {
-		return err
+		logger.AppLog.Errorf("Failed to open session: %v", err)
+		return nil, err
 	}
-	m.session = session
-	if err := m.ctx.Login(m.session, pkcs11.CKU_USER, m.pin); err != nil {
-		return err
+
+	// Login to the session
+	if err := m.ctx.Login(handle, pkcs11.CKU_USER, m.pin); err != nil {
+		_ = m.ctx.CloseSession(handle)
+		logger.AppLog.Errorf("Failed to login to session: %v", err)
+		return nil, err
 	}
-	logger.AppLog.Infoln("PKCS#11 session has been opened")
-	return nil
+
+	m.lastUsed = time.Now()
+	session := &Session{
+		Handle: handle,
+		Ctx:    m.ctx,
+	}
+
+	logger.AppLog.Debugf("PKCS#11 session created: %d", handle)
+	return session, nil
 }
 
-// CloseSession logs out and closes the session
-func (m *Manager) CloseSession() {
-	logger.AppLog.Infoln("Closing PKCS#11 session")
-	if m.session != 0 {
-		_ = m.ctx.Logout(m.session)
-		_ = m.ctx.CloseSession(m.session)
-		m.session = 0
+// CloseSession closes an independent session
+func (m *Manager) CloseSession(session *Session) {
+	if session == nil || session.Handle == 0 {
+		return
 	}
-	logger.AppLog.Infoln("PKCS#11 session has been closed")
+
+	logger.AppLog.Debugf("Closing PKCS#11 session: %d", session.Handle)
+	_ = m.ctx.Logout(session.Handle)
+	_ = m.ctx.CloseSession(session.Handle)
+	session.Handle = 0
+	logger.AppLog.Debugln("PKCS#11 session closed")
+}
+
+// GetSessionHandle returns the session handle (for compatibility with existing code)
+func (s *Session) GetHandle() pkcs11.SessionHandle {
+	return s.Handle
 }
 
 // Finalize cleans up the PKCS#11 context
 func (m *Manager) Finalize() {
-	m.CloseSession()
 	if m.ctx != nil {
+		logger.AppLog.Infoln("Finalizing PKCS#11 context")
 		_ = m.ctx.Finalize()
 		m.ctx.Destroy()
 		m.ctx = nil
 	}
+}
+
+// Legacy methods for backward compatibility (DEPRECATED - use NewSession/CloseSession instead)
+
+// OpenSession creates a default session (DEPRECATED: use NewSession instead)
+func (m *Manager) OpenSession() (*Session, error) {
+	logger.AppLog.Warnln("OpenSession is deprecated, use NewSession instead")
+	return m.NewSession()
 }

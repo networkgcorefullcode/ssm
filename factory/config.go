@@ -5,7 +5,6 @@
 package factory
 
 import (
-	"github.com/networkgcorefullcode/ssm/pkcs11mgr"
 	"github.com/omec-project/util/logger"
 )
 
@@ -33,19 +32,19 @@ const (
 )
 
 type Configuration struct {
-	SsmName            string                `yaml:"ssmName,omitempty"`
-	SsmId              string                `yaml:"ssmId,omitempty"`
-	SocketPath         string                `yaml:"socketPath,omitempty"`
-	PkcsPath           string                `yaml:"pkcsPath,omitempty"`
-	Pin                string                `yaml:"pin,omitempty"`
-	LotsNumber         int                   `yaml:"lotsNumber,omitempty"`
-	BindAddr           string                `yaml:"bindAddr,omitempty"`
-	ExposeSwaggerUi    *bool                 `yaml:"exposeSwaggerUi,omitempty"`
-	IsHttps            *bool                 `yaml:"isHttps,omitempty"`
-	CertFile           string                `yaml:"certFile,omitempty"`
-	KeyFile            string                `yaml:"keyFile,omitempty"`
-	HandlersPoolConect bool                  `yaml:"handlersPoolConect,omitempty"`
-	PoolConfig         *pkcs11mgr.PoolConfig `yaml:"poolConfig,omitempty"`
+	SsmName         string `yaml:"ssmName,omitempty"`
+	SsmId           string `yaml:"ssmId,omitempty"`
+	SocketPath      string `yaml:"socketPath,omitempty"`
+	PkcsPath        string `yaml:"pkcsPath,omitempty"`
+	Pin             string `yaml:"pin,omitempty"`
+	LotsNumber      int    `yaml:"lotsNumber,omitempty"`
+	BindAddr        string `yaml:"bindAddr,omitempty"`
+	ExposeSwaggerUi *bool  `yaml:"exposeSwaggerUi,omitempty"`
+	IsHttps         *bool  `yaml:"isHttps,omitempty"`
+	CertFile        string `yaml:"certFile,omitempty"`
+	KeyFile         string `yaml:"keyFile,omitempty"`
+	// HandlersPoolConect bool   `yaml:"handlersPoolConect,omitempty"`
+	// PoolConfig         *pkcs11mgr.PoolConfig `yaml:"poolConfig,omitempty"`
 }
 
 func (c *Config) GetVersion() string {

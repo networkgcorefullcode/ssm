@@ -15,7 +15,7 @@ type ObjectAttributes struct {
 }
 
 // FindKey returns the object handle for a given label, or 0 if not found return a one key
-func (m *Manager) FindKey(label string, id int32) (pkcs11.ObjectHandle, error) {
+func FindKey(label string, id int32, s Session) (pkcs11.ObjectHandle, error) {
 	logger.AppLog.Infof("Searching for key by label: %s", label)
 	template := []*pkcs11.Attribute{
 		pkcs11.NewAttribute(pkcs11.CKA_LABEL, label),
@@ -28,42 +28,42 @@ func (m *Manager) FindKey(label string, id int32) (pkcs11.ObjectHandle, error) {
 		template = append(template, pkcs11.NewAttribute(pkcs11.CKA_ID, b))
 	}
 
-	if err := m.ctx.FindObjectsInit(m.session, template); err != nil {
+	if err := s.Ctx.FindObjectsInit(s.Handle, template); err != nil {
 		logger.AppLog.Errorf("FindObjectsInit failed: %v", err)
 		return 0, err
 	}
-	defer m.ctx.FindObjectsFinal(m.session)
+	defer s.Ctx.FindObjectsFinal(s.Handle)
 
-	handles, _, err := m.ctx.FindObjects(m.session, 1)
+	handles, _, err := s.Ctx.FindObjects(s.Handle, 1)
 	if err != nil {
 		logger.AppLog.Errorf("FindObjects failed: %v", err)
 		return 0, err
 	}
 	if len(handles) == 0 {
 		logger.AppLog.Warnf("No key found with label: %s", label)
-		return 0, errors.New("Key with the label not found")
+		return 0, errors.New("error Key With The Label Not Found")
 	}
 	logger.AppLog.Infof("Key found: handle=%v", handles[0])
 	return handles[0], nil
 }
 
 // FindKey using key label as a filter returns the object handles
-func (m *Manager) FindKeysLabel(label string) ([]pkcs11.ObjectHandle, error) {
+func FindKeysLabel(label string, s Session) ([]pkcs11.ObjectHandle, error) {
 	logger.AppLog.Infof("Searching for key by label: %s", label)
 	template := []*pkcs11.Attribute{
 		pkcs11.NewAttribute(pkcs11.CKA_LABEL, label),
 		pkcs11.NewAttribute(pkcs11.CKA_CLASS, pkcs11.CKO_SECRET_KEY),
 	}
 
-	if err := m.ctx.FindObjectsInit(m.session, template); err != nil {
+	if err := s.Ctx.FindObjectsInit(s.Handle, template); err != nil {
 		logger.AppLog.Errorf("FindObjectsInit failed: %v", err)
 		return nil, err
 	}
-	defer m.ctx.FindObjectsFinal(m.session)
+	defer s.Ctx.FindObjectsFinal(s.Handle)
 
 	var handles []pkcs11.ObjectHandle
 	for {
-		new_handles, _, err := m.ctx.FindObjects(m.session, 20) // return a []ObjectHandle the max size is 20
+		new_handles, _, err := s.Ctx.FindObjects(s.Handle, 20) // return a []ObjectHandle the max size is 20
 		if err != nil {
 			logger.AppLog.Errorf("FindObjects failed: %v", err)
 			return nil, err
@@ -71,7 +71,7 @@ func (m *Manager) FindKeysLabel(label string) ([]pkcs11.ObjectHandle, error) {
 		if len(new_handles) == 0 {
 			if len(handles) == 0 {
 				logger.AppLog.Warnf("No key found with label: %s", label)
-				return nil, errors.New("Key with the label not found")
+				return nil, errors.New("error Key With The Label Not Found")
 			}
 			logger.AppLog.Info("Key found is finished")
 			return handles, nil
@@ -82,7 +82,7 @@ func (m *Manager) FindKeysLabel(label string) ([]pkcs11.ObjectHandle, error) {
 }
 
 // FindAllKeys returns all secret keys in the HSM grouped by label
-func (m *Manager) FindAllKeys() (map[string][]pkcs11.ObjectHandle, error) {
+func FindAllKeys(s Session) (map[string][]pkcs11.ObjectHandle, error) {
 	logger.AppLog.Info("Searching for all keys in HSM")
 
 	// Search for all secret keys without label filter
@@ -90,15 +90,15 @@ func (m *Manager) FindAllKeys() (map[string][]pkcs11.ObjectHandle, error) {
 		pkcs11.NewAttribute(pkcs11.CKA_CLASS, pkcs11.CKO_SECRET_KEY),
 	}
 
-	if err := m.ctx.FindObjectsInit(m.session, template); err != nil {
+	if err := s.Ctx.FindObjectsInit(s.Handle, template); err != nil {
 		logger.AppLog.Errorf("FindObjectsInit failed: %v", err)
 		return nil, err
 	}
-	defer m.ctx.FindObjectsFinal(m.session)
+	defer s.Ctx.FindObjectsFinal(s.Handle)
 
 	var allHandles []pkcs11.ObjectHandle
 	for {
-		newHandles, _, err := m.ctx.FindObjects(m.session, 20)
+		newHandles, _, err := s.Ctx.FindObjects(s.Handle, 20)
 		if err != nil {
 			logger.AppLog.Errorf("FindObjects failed: %v", err)
 			return nil, err
@@ -106,7 +106,7 @@ func (m *Manager) FindAllKeys() (map[string][]pkcs11.ObjectHandle, error) {
 		if len(newHandles) == 0 {
 			if len(allHandles) == 0 {
 				logger.AppLog.Warnf("No key found")
-				return map[string][]pkcs11.ObjectHandle{}, errors.New("Key with the label not found")
+				return map[string][]pkcs11.ObjectHandle{}, errors.New("error Key With The Label Not Found")
 			}
 			break
 		}
@@ -118,7 +118,7 @@ func (m *Manager) FindAllKeys() (map[string][]pkcs11.ObjectHandle, error) {
 	// Group handles by label
 	keysByLabel := make(map[string][]pkcs11.ObjectHandle)
 	for _, handle := range allHandles {
-		label, err := m.GetObjectLabel(handle)
+		label, err := GetObjectLabel(handle, s)
 		if err != nil {
 			logger.AppLog.Warnf("Failed to get label for handle %d: %v", handle, err)
 			continue
@@ -131,9 +131,9 @@ func (m *Manager) FindAllKeys() (map[string][]pkcs11.ObjectHandle, error) {
 }
 
 // FindKeyLabelReturnRandom returns random object handle for a given label, or 0 if not found return a one key
-func (m *Manager) FindKeyLabelReturnRandom(label string) (pkcs11.ObjectHandle, error) {
+func FindKeyLabelReturnRandom(label string, s Session) (pkcs11.ObjectHandle, error) {
 	logger.AppLog.Infof("Searching for key by label: %s", label)
-	handles, err := m.FindKeysLabel(label)
+	handles, err := FindKeysLabel(label, s)
 	if err != nil {
 		logger.AppLog.Errorf("FindObjects failed: %v", err)
 		return 0, err
@@ -141,12 +141,12 @@ func (m *Manager) FindKeyLabelReturnRandom(label string) (pkcs11.ObjectHandle, e
 	return handles[rand.Int64N(int64(len(handles)))], err
 }
 
-func (m *Manager) GetValuesForObjects(o []pkcs11.ObjectHandle) ([]ObjectAttributes, error) {
+func GetValuesForObjects(o []pkcs11.ObjectHandle, s Session) ([]ObjectAttributes, error) {
 	logger.AppLog.Info("Get attributes for handles objects")
 
 	var result []ObjectAttributes
 	for _, handle := range o {
-		attr, err := m.GetObjectAttributes(handle)
+		attr, err := GetObjectAttributes(handle, s)
 		if err != nil {
 			logger.AppLog.Errorf("Failed to get attributes for handle %d: %v", handle, err)
 			continue
@@ -160,7 +160,7 @@ func (m *Manager) GetValuesForObjects(o []pkcs11.ObjectHandle) ([]ObjectAttribut
 }
 
 // GetObjectAttributes retrieves the CKA_ID and CKA_VALUE_LEN attributes for a given object handle
-func (m *Manager) GetObjectAttributes(handle pkcs11.ObjectHandle) (ObjectAttributes, error) {
+func GetObjectAttributes(handle pkcs11.ObjectHandle, s Session) (ObjectAttributes, error) {
 	logger.AppLog.Infof("Getting attributes for object handle: %d", handle)
 
 	// Define the attributes we want to retrieve
@@ -169,7 +169,7 @@ func (m *Manager) GetObjectAttributes(handle pkcs11.ObjectHandle) (ObjectAttribu
 	}
 
 	// Get the attribute values
-	attrs, err := m.ctx.GetAttributeValue(m.session, handle, template)
+	attrs, err := s.Ctx.GetAttributeValue(s.Handle, handle, template)
 	if err != nil {
 		logger.AppLog.Errorf("GetAttributeValue failed for handle %d: %v", handle, err)
 		return ObjectAttributes{}, err
@@ -193,12 +193,12 @@ func (m *Manager) GetObjectAttributes(handle pkcs11.ObjectHandle) (ObjectAttribu
 }
 
 // GetObjectLabel retrieves the CKA_LABEL attribute for a given object handle
-func (m *Manager) GetObjectLabel(handle pkcs11.ObjectHandle) (string, error) {
+func GetObjectLabel(handle pkcs11.ObjectHandle, s Session) (string, error) {
 	template := []*pkcs11.Attribute{
 		pkcs11.NewAttribute(pkcs11.CKA_LABEL, nil),
 	}
 
-	attrs, err := m.ctx.GetAttributeValue(m.session, handle, template)
+	attrs, err := s.Ctx.GetAttributeValue(s.Handle, handle, template)
 	if err != nil {
 		return "", err
 	}

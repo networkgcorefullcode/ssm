@@ -9,13 +9,13 @@ configuration:
   socketPath: "/var/run/socket.so"
   pkcsPath: "/usr/lib/softhsm/libsofthsm2.so"
   pin: "1234"
-  lots_number: 1121449042
+  lotsNumber: 1121449042
   bindAddr: 0.0.0.0:9000
   exposeSwaggerUi: true
-  is_https: true
+  isHttps: true
   certFile: server.crt 
   keyFile: server.key
-  handlers-pool-conect: true
+  # handlersPoolConect: true
 
 logger:
   SSM:

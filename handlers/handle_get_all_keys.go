@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/networkgcorefullcode/ssm/factory"
 	"github.com/networkgcorefullcode/ssm/logger"
 	"github.com/networkgcorefullcode/ssm/models"
 	"github.com/networkgcorefullcode/ssm/pkcs11mgr"
@@ -30,30 +29,19 @@ func HandleGetAllKeys(w http.ResponseWriter, r *http.Request) {
 
 func postGetAllKeys(w http.ResponseWriter, r *http.Request) {
 	logger.AppLog.Info("Processing get all keys request")
-	// init the pkcs manager
-	mgr, err := pkcs11mgr.New(factory.SsmConfig.Configuration.PkcsPath,
-		uint(factory.SsmConfig.Configuration.LotsNumber),
-		factory.SsmConfig.Configuration.Pin)
+	//// init the session
+	s, err := mgr.NewSession()
 	if err != nil {
-		logger.AppLog.Errorf("Failed to create PKCS11 manager: %v", err)
-		sendProblemDetails(w, "Internal Server Error", "Failed to initialize PKCS11 manager", "PKCS_INIT_ERROR", http.StatusInternalServerError, r.URL.Path)
+		logger.AppLog.Errorf("Failed to create PKCS11 session: %v", err)
+		sendProblemDetails(w, "Internal Server Error", "Failed to create PKCS11 session: "+err.Error(), "session_creation_failed", http.StatusInternalServerError, r.URL.Path)
 		return
 	}
-
-	err = mgr.OpenSession()
-	if err != nil {
-		logger.AppLog.Errorf("Failed to OpenSession PKCS11 manager: %v", err)
-		sendProblemDetails(w, "Internal Server Error", "The pkcs session have a error during stablishment", "PKCS_ERROR", http.StatusInternalServerError, r.URL.Path)
-		return
-	}
-
-	defer mgr.CloseSession()
-	defer mgr.Finalize()
+	defer mgr.CloseSession(s)
 
 	// Find all keys grouped by label
 	logger.AppLog.Info("Searching all keys in HSM")
-	keysByLabel, err := mgr.FindAllKeys()
-	if err != nil && err.Error() == "Key with the label not found" {
+	keysByLabel, err := pkcs11mgr.FindAllKeys(*s)
+	if err != nil && err.Error() == "error Key With The Label Not Found" {
 		// Prepare the response
 		// Prepare the response
 		// Prepare the response
@@ -86,7 +74,7 @@ func postGetAllKeys(w http.ResponseWriter, r *http.Request) {
 	for label, handles := range keysByLabel {
 		logger.AppLog.Infof("Processing label: %s with %d keys", label, len(handles))
 
-		objAttrs, err := mgr.GetValuesForObjects(handles)
+		objAttrs, err := pkcs11mgr.GetValuesForObjects(handles, *s)
 		if err != nil {
 			logger.AppLog.Errorf("Failed to get object attributes for label %s: %v", label, err)
 			sendProblemDetails(w, "Key Attributes Failed", "Error getting key attributes", "KEY_GET_ERROR", http.StatusInternalServerError, r.URL.Path)
