@@ -85,6 +85,7 @@ func (m *Manager) NewSession() {
 
 	logger.AppLog.Debugf("PKCS#11 session created and logged in: %d", handle)
 	currentSessions++
+	logger.AppLog.Debugf("current session pkcs11 pools: %d", currentSessions)
 	SessionPool <- session
 }
 
