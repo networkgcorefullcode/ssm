@@ -2,3 +2,5 @@ openapi-generator-cli-7.6.0.jar
 server.key
 server.crt
 go-structs-only
+ssm.exe 
+ssm
