@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/gin-gonic/gin"
 	constants "github.com/networkgcorefullcode/ssm/const"
 	"github.com/networkgcorefullcode/ssm/logger"
 	"github.com/networkgcorefullcode/ssm/models"
@@ -21,33 +22,23 @@ import (
 // @Failure 400 {object} models.ProblemDetails "Petición inválida"
 // @Failure 500 {object} models.ProblemDetails "Error interno del servidor"
 // @Router /generate-des3-key [post]
-func HandleGenerateDES3Key(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
-	case http.MethodPost:
-		postGenerateDES3Key(w, r)
-	default:
-		sendProblemDetails(w, "Method Not Allowed", "El método HTTP no está permitido para este endpoint", "METHOD_NOT_ALLOWED", http.StatusMethodNotAllowed, r.URL.Path)
-	}
-}
-
-func postGenerateDES3Key(w http.ResponseWriter, r *http.Request) {
+func HandleGenerateDES3Key(c *gin.Context) {
 	logger.AppLog.Info("Processing DES3 key generation request")
-	//// init the session
-	s := mgr.GetSession()
-	//
 
+	// init the session
+	s := mgr.GetSession()
 	defer mgr.LogoutSession(s)
 
 	var req models.GenDES3KeyRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := json.NewDecoder(c.Request.Body).Decode(&req); err != nil {
 		logger.AppLog.Errorf("Failed to decode request body: %v", err)
-		sendProblemDetails(w, "Bad Request", "El cuerpo de la petición no es válido JSON", "INVALID_JSON", http.StatusBadRequest, r.URL.Path)
+		sendProblemDetails(c, "Bad Request", "El cuerpo de la petición no es válido JSON", "INVALID_JSON", http.StatusBadRequest, c.Request.URL.Path)
 		return
 	}
 
 	if req.Id <= 0 {
 		logger.AppLog.Error("ID is required but was empty")
-		sendProblemDetails(w, "Bad Request", "El campo 'id' es requerido y no puede estar vacío", "MISSING_ID", http.StatusBadRequest, r.URL.Path)
+		sendProblemDetails(c, "Bad Request", "El campo 'id' es requerido y no puede estar vacío", "MISSING_ID", http.StatusBadRequest, c.Request.URL.Path)
 		return
 	}
 
@@ -55,7 +46,7 @@ func postGenerateDES3Key(w http.ResponseWriter, r *http.Request) {
 	handle, err := pkcs11mgr.GenerateDES3Key(constants.LABEL_ENCRYPTION_KEY_DES3, req.Id, *s)
 	if err != nil {
 		logger.AppLog.Errorf("DES3 key generation failed: %v", err)
-		sendProblemDetails(w, "Key Generation Failed", "Error al generar la clave DES3 en el HSM", "KEY_GENERATION_ERROR", http.StatusInternalServerError, r.URL.Path)
+		sendProblemDetails(c, "Key Generation Failed", "Error al generar la clave DES3 en el HSM", "KEY_GENERATION_ERROR", http.StatusInternalServerError, c.Request.URL.Path)
 		return
 	}
 
@@ -66,10 +57,5 @@ func postGenerateDES3Key(w http.ResponseWriter, r *http.Request) {
 		Id:     req.Id,
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-
-	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		logger.AppLog.Errorf("Failed to encode response: %v", err)
-	}
+	c.JSON(http.StatusCreated, resp)
 }

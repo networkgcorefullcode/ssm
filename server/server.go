@@ -20,9 +20,6 @@ type SSM struct{}
 
 var SsmServer = &SSM{}
 
-// TODO: create a proper server struct to hold server config if needed
-var main_server http.Server
-
 type (
 	// Config information.
 	Config struct {
@@ -75,9 +72,6 @@ func (ssm *SSM) Initialize(c *cli.Command) error {
 
 	factory.SsmConfig.CfgLocation = absPath
 
-	main_server = http.Server{
-		Addr: factory.SsmConfig.Configuration.BindAddr,
-	}
 	return nil
 }
 
@@ -174,22 +168,13 @@ func (s *SSM) Start() error {
 	// 	handlers.HandlePoolStats(w, r)
 	// })
 
-	// HealthCheck endpoint
-	http.HandleFunc("/health-check", func(w http.ResponseWriter, r *http.Request) {
-		logger.AppLog.Debugf("Received /health-check request")
-		handlers.HandleHealthCheck(w, r)
-	})
-
-	// if factory.SsmConfig.Configuration.HandlersPoolConect {
-	// 	CreateEndpointHandlersPool()
-	// } else {
-	CreateEndpointHandlers()
-	// }
+	// Build Gin router with all endpoints
+	router := CreateGinRouter()
 
 	// Serve HTTP requests in a separate goroutine
 	logger.AppLog.Infof("SSM listening on unix socket %s", socketPath)
 	go func() error {
-		if err := http.Serve(l, nil); err != nil {
+		if err := http.Serve(l, router); err != nil {
 			logger.AppLog.Errorf("Server error: %v", err)
 			return err
 		}
@@ -213,16 +198,18 @@ func (s *SSM) Start() error {
 			return fmt.Errorf("certFile or keyFile not set")
 		}
 		logger.AppLog.Infof("SSM listening api https %s", factory.SsmConfig.Configuration.BindAddr)
-		// Use ListenAndServeTLS to handle HTTPS connections
-		if err := http.ListenAndServeTLS(factory.SsmConfig.Configuration.BindAddr, certFile, keyFile, nil); err != nil {
+		// Use custom server with Gin router as handler
+		srv := &http.Server{Addr: factory.SsmConfig.Configuration.BindAddr, Handler: router}
+		if err := srv.ListenAndServeTLS(certFile, keyFile); err != nil {
 			logger.AppLog.Errorf("Server error: %v", err)
 			return err
 		}
 		return nil
 	} else {
 		logger.AppLog.Infof("SSM listening api http %s", factory.SsmConfig.Configuration.BindAddr)
-		// Use ListenAndServe to handle HTTP connections
-		if err := http.ListenAndServe(factory.SsmConfig.Configuration.BindAddr, nil); err != nil {
+		// Use custom server with Gin router as handler for HTTP
+		srv := &http.Server{Addr: factory.SsmConfig.Configuration.BindAddr, Handler: router}
+		if err := srv.ListenAndServe(); err != nil {
 			logger.AppLog.Errorf("Server error: %v", err)
 			return err
 		}

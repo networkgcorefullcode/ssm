@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/gin-gonic/gin"
 	"github.com/miekg/pkcs11"
 	constants "github.com/networkgcorefullcode/ssm/const"
 	"github.com/networkgcorefullcode/ssm/logger"
@@ -23,20 +24,20 @@ import (
 // @Failure 400 {object} models.ProblemDetails "Invalid request"
 // @Failure 500 {object} models.ProblemDetails "Internal server error"
 // @Router /store-key [post]
-func HandleStoreKey(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
+func HandleStoreKey(c *gin.Context) {
+	switch c.Request.Method {
 	case http.MethodPost:
-		postStoreKey(w, r)
+		postStoreKey(c)
 	case http.MethodDelete:
-		deleteStoreKey(w, r)
+		deleteStoreKey(c)
 	case http.MethodPut:
-		updateStoreKey(w, r)
+		updateStoreKey(c)
 	default:
-		sendProblemDetails(w, "Method Not Allowed", "The HTTP method is not allowed for this endpoint", "METHOD_NOT_ALLOWED", http.StatusMethodNotAllowed, r.URL.Path)
+		sendProblemDetails(c, "Method Not Allowed", "The HTTP method is not allowed for this endpoint", "METHOD_NOT_ALLOWED", http.StatusMethodNotAllowed, c.Request.URL.Path)
 	}
 }
 
-func postStoreKey(w http.ResponseWriter, r *http.Request) {
+func postStoreKey(c *gin.Context) {
 	logger.AppLog.Info("Processing store key request")
 	//// init the session
 	s := mgr.GetSession()
@@ -46,9 +47,9 @@ func postStoreKey(w http.ResponseWriter, r *http.Request) {
 
 	var req models.StoreKeyRequest
 
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := json.NewDecoder(c.Request.Body).Decode(&req); err != nil {
 		logger.AppLog.Errorf("Failed to decode request body: %v", err)
-		sendProblemDetails(w, "Bad Request", "The request body is not valid JSON", "INVALID_JSON", http.StatusBadRequest, r.URL.Path)
+		sendProblemDetails(c, "Bad Request", "The request body is not valid JSON", "INVALID_JSON", http.StatusBadRequest, c.Request.URL.Path)
 		return
 	}
 
@@ -59,7 +60,7 @@ func postStoreKey(w http.ResponseWriter, r *http.Request) {
 	key_value, err := hex.DecodeString(req.KeyValue)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to decode HEX key value: %v", err)
-		sendProblemDetails(w, "Bad Request", "The key value in HEX is not valid", "INVALID_HEX", http.StatusBadRequest, r.URL.Path)
+		sendProblemDetails(c, "Bad Request", "The key value in HEX is not valid", "INVALID_HEX", http.StatusBadRequest, c.Request.URL.Path)
 		return
 	}
 
@@ -67,7 +68,7 @@ func postStoreKey(w http.ResponseWriter, r *http.Request) {
 		req.KeyLabel != constants.LABEL_K4_KEY_DES &&
 		req.KeyLabel != constants.LABEL_K4_KEY_DES3 {
 		logger.AppLog.Errorf("Unsupported key type: %s", req.KeyLabel)
-		sendProblemDetails(w, "Bad Request", "The specified key type is not supported", "UNSUPPORTED_KEY_TYPE", http.StatusBadRequest, r.URL.Path)
+		sendProblemDetails(c, "Bad Request", "The specified key type is not supported", "UNSUPPORTED_KEY_TYPE", http.StatusBadRequest, c.Request.URL.Path)
 		return
 	}
 
@@ -75,7 +76,7 @@ func postStoreKey(w http.ResponseWriter, r *http.Request) {
 	handle, err := pkcs11mgr.StoreKey(label, key_value, id, key_type, *s)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to store key: %v", err)
-		sendProblemDetails(w, "Key Storage Failed", "Error storing key in HSM", "KEY_STORAGE_ERROR", http.StatusInternalServerError, r.URL.Path)
+		sendProblemDetails(c, "Key Storage Failed", "Error storing key in HSM", "KEY_STORAGE_ERROR", http.StatusInternalServerError, c.Request.URL.Path)
 		return
 	}
 
@@ -91,11 +92,7 @@ func postStoreKey(w http.ResponseWriter, r *http.Request) {
 	findHandle, err := pkcs11mgr.FindKey(constants.LABEL_ENCRYPTION_KEY, 0, *s)
 	if err != nil || findHandle == 0 {
 		logger.AppLog.Warnf("Encryption key not found or error: %v. Returning response without encrypted key", err)
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		if encodeErr := json.NewEncoder(w).Encode(resp); encodeErr != nil {
-			logger.AppLog.Errorf("Failed to encode response: %v", encodeErr)
-		}
+		c.JSON(http.StatusOK, resp)
 		return
 	}
 
@@ -110,15 +107,10 @@ func postStoreKey(w http.ResponseWriter, r *http.Request) {
 		resp.CipherKey = hex.EncodeToString(cipher)
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	if encodeErr := json.NewEncoder(w).Encode(resp); encodeErr != nil {
-		logger.AppLog.Errorf("Failed to encode response: %v", encodeErr)
-	}
-
+	c.JSON(http.StatusOK, resp)
 }
 
-func deleteStoreKey(w http.ResponseWriter, r *http.Request) {
+func deleteStoreKey(c *gin.Context) {
 	logger.AppLog.Info("Processing delete key request")
 	//// init the session
 	s := mgr.GetSession()
@@ -128,9 +120,9 @@ func deleteStoreKey(w http.ResponseWriter, r *http.Request) {
 
 	var req models.DeleteKeyRequest
 
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := json.NewDecoder(c.Request.Body).Decode(&req); err != nil {
 		logger.AppLog.Errorf("Failed to decode request body: %v", err)
-		sendProblemDetails(w, "Bad Request", "The request body is not valid JSON", "INVALID_JSON", http.StatusBadRequest, r.URL.Path)
+		sendProblemDetails(c, "Bad Request", "The request body is not valid JSON", "INVALID_JSON", http.StatusBadRequest, c.Request.URL.Path)
 		return
 	}
 
@@ -141,7 +133,7 @@ func deleteStoreKey(w http.ResponseWriter, r *http.Request) {
 	// Delete the key from the HSM
 	if err := pkcs11mgr.DeleteKey(label, id, *s); err != nil {
 		logger.AppLog.Errorf("Failed to delete key: %v", err)
-		sendProblemDetails(w, "Key Deletion Failed", "Error deleting key from HSM", "KEY_DELETION_ERROR", http.StatusInternalServerError, r.URL.Path)
+		sendProblemDetails(c, "Key Deletion Failed", "Error deleting key from HSM", "KEY_DELETION_ERROR", http.StatusInternalServerError, c.Request.URL.Path)
 		return
 	}
 
@@ -152,14 +144,10 @@ func deleteStoreKey(w http.ResponseWriter, r *http.Request) {
 		KeyLabel: label,
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	if encodeErr := json.NewEncoder(w).Encode(resp); encodeErr != nil {
-		logger.AppLog.Errorf("Failed to encode response: %v", encodeErr)
-	}
+	c.JSON(http.StatusOK, resp)
 }
 
-func updateStoreKey(w http.ResponseWriter, r *http.Request) {
+func updateStoreKey(c *gin.Context) {
 	logger.AppLog.Info("Processing update key request")
 	//// init the session
 	s := mgr.GetSession()
@@ -169,9 +157,9 @@ func updateStoreKey(w http.ResponseWriter, r *http.Request) {
 
 	var req models.UpdateKeyRequest
 
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := json.NewDecoder(c.Request.Body).Decode(&req); err != nil {
 		logger.AppLog.Errorf("Failed to decode request body: %v", err)
-		sendProblemDetails(w, "Bad Request", "The request body is not valid JSON", "INVALID_JSON", http.StatusBadRequest, r.URL.Path)
+		sendProblemDetails(c, "Bad Request", "The request body is not valid JSON", "INVALID_JSON", http.StatusBadRequest, c.Request.URL.Path)
 		return
 	}
 
@@ -184,7 +172,7 @@ func updateStoreKey(w http.ResponseWriter, r *http.Request) {
 	keyValue, err := hex.DecodeString(req.KeyValue)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to decode hex key value: %v", err)
-		sendProblemDetails(w, "Bad Request", "The key value in hexadecimal is not valid", "INVALID_HEX", http.StatusBadRequest, r.URL.Path)
+		sendProblemDetails(c, "Bad Request", "The key value in hexadecimal is not valid", "INVALID_HEX", http.StatusBadRequest, c.Request.URL.Path)
 		return
 	}
 
@@ -192,7 +180,7 @@ func updateStoreKey(w http.ResponseWriter, r *http.Request) {
 	handle, err := pkcs11mgr.UpdateKey(label, keyValue, req.Id, keyType, *s)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to update key: %v", err)
-		sendProblemDetails(w, "Key Update Failed", "Error updating key in HSM", "KEY_UPDATE_ERROR", http.StatusInternalServerError, r.URL.Path)
+		sendProblemDetails(c, "Key Update Failed", "Error updating key in HSM", "KEY_UPDATE_ERROR", http.StatusInternalServerError, c.Request.URL.Path)
 		return
 	}
 
@@ -210,11 +198,7 @@ func updateStoreKey(w http.ResponseWriter, r *http.Request) {
 	findHandle, err := pkcs11mgr.FindKey(constants.LABEL_ENCRYPTION_KEY, 0, *s)
 	if err != nil || findHandle == 0 {
 		logger.AppLog.Warnf("Encryption key not found or error: %v. Returning response without encrypted key", err)
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		if encodeErr := json.NewEncoder(w).Encode(resp); encodeErr != nil {
-			logger.AppLog.Errorf("Failed to encode response: %v", encodeErr)
-		}
+		c.JSON(http.StatusOK, resp)
 		return
 	}
 
@@ -229,9 +213,5 @@ func updateStoreKey(w http.ResponseWriter, r *http.Request) {
 		resp.CipherKey = hex.EncodeToString(cipher)
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	if encodeErr := json.NewEncoder(w).Encode(resp); encodeErr != nil {
-		logger.AppLog.Errorf("Failed to encode response: %v", encodeErr)
-	}
+	c.JSON(http.StatusOK, resp)
 }

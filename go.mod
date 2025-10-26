@@ -3,6 +3,7 @@ module github.com/networkgcorefullcode/ssm
 go 1.24.4
 
 require (
+	github.com/gin-gonic/gin v1.11.0
 	github.com/miekg/pkcs11 v1.1.1
 	github.com/omec-project/util v1.5.4
 	github.com/stretchr/testify v1.11.1
@@ -21,7 +22,6 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.10 // indirect
 	github.com/gin-contrib/sse v1.1.0 // indirect
-	github.com/gin-gonic/gin v1.11.0 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
 	github.com/go-openapi/jsonreference v0.20.0 // indirect
 	github.com/go-openapi/spec v0.20.6 // indirect

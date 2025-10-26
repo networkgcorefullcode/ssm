@@ -1,62 +1,82 @@
 package server
 
 import (
-	"net/http"
-
+	"github.com/gin-gonic/gin"
 	"github.com/networkgcorefullcode/ssm/handlers"
 	"github.com/networkgcorefullcode/ssm/logger"
 )
 
-func CreateEndpointHandlers() {
+// CreateGinRouter sets up routes using Gin and wraps existing net/http handlers for compatibility.
+func CreateGinRouter() *gin.Engine {
+	// Use ReleaseMode unless verbose debugging is required; Gin still logs via its middleware.
+	// Mode can be adjusted by env GIN_MODE if needed.
+	r := gin.New()
+	r.Use(gin.Recovery())
+	r.Use(gin.Logger())
 
-	// Set up HTTP handlers
+	// HealthCheck endpoint (GET recommended)
+	r.GET("/health-check", func(c *gin.Context) {
+		logger.AppLog.Debugf("Received /health-check request")
+		handlers.HandleHealthCheck(c)
+	})
+
 	// Encrypt endpoints POST
-	http.HandleFunc("/encrypt", func(w http.ResponseWriter, r *http.Request) {
+	r.POST("/encrypt", func(c *gin.Context) {
 		logger.AppLog.Debugf("Received /encrypt request")
-		handlers.HandleEncrypt(w, r)
+		handlers.HandleEncrypt(c)
 	})
 
 	// Decrypt endpoints POST
-	http.HandleFunc("/decrypt", func(w http.ResponseWriter, r *http.Request) {
+	r.POST("/decrypt", func(c *gin.Context) {
 		logger.AppLog.Debugf("Received /decrypt request")
-		handlers.HandleDecrypt(w, r)
+		handlers.HandleDecrypt(c)
 	})
 
 	// Store Key endpoints POST
-	http.HandleFunc("/store-key", func(w http.ResponseWriter, r *http.Request) {
+	r.POST("/store-key", func(c *gin.Context) {
 		logger.AppLog.Debugf("Received /store-key request")
-		handlers.HandleStoreKey(w, r)
+		handlers.HandleStoreKey(c)
+	})
+	r.PUT("/store-key", func(c *gin.Context) {
+		logger.AppLog.Debugf("Received /store-key request")
+		handlers.HandleStoreKey(c)
+	})
+	r.DELETE("/store-key", func(c *gin.Context) {
+		logger.AppLog.Debugf("Received /store-key request")
+		handlers.HandleStoreKey(c)
 	})
 
 	// Generate Key endpoints POST
-	http.HandleFunc("/generate-aes-key", func(w http.ResponseWriter, r *http.Request) {
+	r.POST("/generate-aes-key", func(c *gin.Context) {
 		logger.AppLog.Debugf("Received /generate-aes-key request")
-		handlers.HandleGenerateAESKey(w, r)
+		handlers.HandleGenerateAESKey(c)
 	})
 
-	http.HandleFunc("/generate-des3-key", func(w http.ResponseWriter, r *http.Request) {
+	r.POST("/generate-des3-key", func(c *gin.Context) {
 		logger.AppLog.Debugf("Received /generate-des3-key request")
-		handlers.HandleGenerateDES3Key(w, r)
+		handlers.HandleGenerateDES3Key(c)
 	})
 
-	http.HandleFunc("/generate-des-key", func(w http.ResponseWriter, r *http.Request) {
+	r.POST("/generate-des-key", func(c *gin.Context) {
 		logger.AppLog.Debugf("Received /generate-des-key request")
-		handlers.HandleGenerateDESKey(w, r)
+		handlers.HandleGenerateDESKey(c)
 	})
 
-	// Syncronization handlers
-	http.HandleFunc("/get-data-keys", func(w http.ResponseWriter, r *http.Request) {
+	// Synchronization handlers
+	r.POST("/get-data-keys", func(c *gin.Context) {
 		logger.AppLog.Debugf("Received /get-data-keys request")
-		handlers.HandleGetDataKeys(w, r)
+		handlers.HandleGetDataKeys(c)
 	})
 
-	http.HandleFunc("/get-key", func(w http.ResponseWriter, r *http.Request) {
+	r.POST("/get-key", func(c *gin.Context) {
 		logger.AppLog.Debugf("Received /get-keys request")
-		handlers.HandleGetDataKey(w, r)
+		handlers.HandleGetDataKey(c)
 	})
 
-	http.HandleFunc("/get-all-keys", func(w http.ResponseWriter, r *http.Request) {
+	r.POST("/get-all-keys", func(c *gin.Context) {
 		logger.AppLog.Debugf("Received /get-all-keys request")
-		handlers.HandleGetAllKeys(w, r)
+		handlers.HandleGetAllKeys(c)
 	})
+
+	return r
 }

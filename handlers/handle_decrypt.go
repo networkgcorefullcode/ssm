@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/gin-gonic/gin"
 	"github.com/miekg/pkcs11"
 	constants "github.com/networkgcorefullcode/ssm/const"
 	"github.com/networkgcorefullcode/ssm/logger"
@@ -25,19 +26,10 @@ import (
 // @Failure      405      {object}  models.ProblemDetails  "HTTP method not allowed"
 // @Failure      500      {object}  models.ProblemDetails  "Internal server error"
 // @Router       /decrypt [post]
-func HandleDecrypt(w http.ResponseWriter, r *http.Request) {
-	logger.AppLog.Debugf("Received decrypt request from %s", r.RemoteAddr)
+func HandleDecrypt(c *gin.Context) {
+	logger.AppLog.Debugf("Received decrypt request from %s", c.ClientIP())
 
-	switch r.Method {
-	case http.MethodPost:
-		postDecrypt(w, r)
-	default:
-		sendProblemDetails(w, "Method Not Allowed", "Only POST method is allowed", "method_not_allowed", http.StatusMethodNotAllowed, r.URL.Path)
-	}
-}
-
-func postDecrypt(w http.ResponseWriter, r *http.Request) {
-	logger.AppLog.Debugf("Processing decrypt request for %s", r.URL.Path)
+	logger.AppLog.Debugf("Processing decrypt request for %s", c.Request.URL.Path)
 	// init the session
 	s := mgr.GetSession()
 	//
@@ -45,9 +37,9 @@ func postDecrypt(w http.ResponseWriter, r *http.Request) {
 	defer mgr.LogoutSession(s)
 
 	var req models.DecryptRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := json.NewDecoder(c.Request.Body).Decode(&req); err != nil {
 		logger.AppLog.Errorf("Failed to decode request body: %v", err)
-		sendProblemDetails(w, "Invalid JSON", "Failed to parse request body: "+err.Error(), "bad_json", http.StatusBadRequest, r.URL.Path)
+		sendProblemDetails(c, "Invalid JSON", "Failed to parse request body: "+err.Error(), "bad_json", http.StatusBadRequest, c.Request.URL.Path)
 		return
 	}
 
@@ -56,13 +48,13 @@ func postDecrypt(w http.ResponseWriter, r *http.Request) {
 	// Validate required fields
 	if req.KeyLabel == "" {
 		logger.AppLog.Error("Key label is required but was empty")
-		sendProblemDetails(w, "Validation Error", "Key label is required", "validation_failed", http.StatusBadRequest, r.URL.Path)
+		sendProblemDetails(c, "Validation Error", "Key label is required", "validation_failed", http.StatusBadRequest, c.Request.URL.Path)
 		return
 	}
 
 	if req.Cipher == "" {
 		logger.AppLog.Error("Ciphertext is required but was empty")
-		sendProblemDetails(w, "Validation Error", "Ciphertext is required", "validation_failed", http.StatusBadRequest, r.URL.Path)
+		sendProblemDetails(c, "Validation Error", "Ciphertext is required", "validation_failed", http.StatusBadRequest, c.Request.URL.Path)
 		return
 	}
 
@@ -70,7 +62,7 @@ func postDecrypt(w http.ResponseWriter, r *http.Request) {
 	cipher, err := hex.DecodeString(req.Cipher)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to decode ciphertext hex: %v", err)
-		sendProblemDetails(w, "Invalid hex", "Failed to decode ciphertext: "+err.Error(), "bad_hex", http.StatusBadRequest, r.URL.Path)
+		sendProblemDetails(c, "Invalid hex", "Failed to decode ciphertext: "+err.Error(), "bad_hex", http.StatusBadRequest, c.Request.URL.Path)
 		return
 	}
 
@@ -91,7 +83,7 @@ func postDecrypt(w http.ResponseWriter, r *http.Request) {
 	keyHandle, err := pkcs11mgr.FindKey(req.KeyLabel, req.Id, *s)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to find key by label '%s': %v", req.KeyLabel, err)
-		sendProblemDetails(w, "Key Search Failed", "Failed to search for key: "+err.Error(), "key_search_failed", http.StatusInternalServerError, r.URL.Path)
+		sendProblemDetails(c, "Key Search Failed", "Failed to search for key: "+err.Error(), "key_search_failed", http.StatusInternalServerError, c.Request.URL.Path)
 		return
 	}
 
@@ -135,25 +127,25 @@ func postDecrypt(w http.ResponseWriter, r *http.Request) {
 		// }
 	default:
 		logger.AppLog.Errorf("Unsupported decryption algorithm: %d", req.EncryptionAlgorithm)
-		sendProblemDetails(w, "Bad Request", "Unsupported decryption algorithm", "UNSUPPORTED_ALGORITHM", http.StatusBadRequest, r.URL.Path)
+		sendProblemDetails(c, "Bad Request", "Unsupported decryption algorithm", "UNSUPPORTED_ALGORITHM", http.StatusBadRequest, c.Request.URL.Path)
 		return
 	}
 
 	if err != nil {
 		logger.AppLog.Errorf("Decryption failed: %v", err)
-		sendProblemDetails(w, "Decryption Failed", "Failed to decrypt data: "+err.Error(), "decryption_failed", http.StatusInternalServerError, r.URL.Path)
+		sendProblemDetails(c, "Decryption Failed", "Failed to decrypt data: "+err.Error(), "decryption_failed", http.StatusInternalServerError, c.Request.URL.Path)
 		return
 	}
 	if len(plaintext) == 0 {
 		logger.AppLog.Error("Decryption resulted in empty plaintext")
-		sendProblemDetails(w, "Decryption Failed", "Decryption resulted in empty plaintext", "empty_plaintext", http.StatusInternalServerError, r.URL.Path)
+		sendProblemDetails(c, "Decryption Failed", "Decryption resulted in empty plaintext", "empty_plaintext", http.StatusInternalServerError, c.Request.URL.Path)
 		return
 	}
 
 	logger.AppLog.Infof("Decryption successful for key '%s', plaintext length: %d bytes", req.KeyLabel, len(plaintext))
 
 	// Prepare response
-	w.Header().Set("Content-Type", "application/json")
+	c.Header("Content-Type", "application/json")
 	resp := models.DecryptResponse{
 		Plain: hex.EncodeToString(plaintext),
 	}
@@ -162,11 +154,7 @@ func postDecrypt(w http.ResponseWriter, r *http.Request) {
 	safe.Zero(plaintext)
 	logger.AppLog.Debug("Plaintext memory zeroed for security")
 
-	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		logger.AppLog.Errorf("Failed to encode response: %v", err)
-		sendProblemDetails(w, "Response Encoding Failed", "Failed to encode response: "+err.Error(), "encoding_failed", http.StatusInternalServerError, r.URL.Path)
-		return
-	}
+	c.JSON(http.StatusOK, resp)
 
 	logger.AppLog.Debug("Decryption response sent successfully")
 }
