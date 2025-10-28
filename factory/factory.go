@@ -51,10 +51,9 @@ func InitConfigFactory(f string) error {
 		SsmConfig.Configuration.MaxSessions = 10
 		logger.CfgLog.Infof("maxSessions not set in configuration file. Using default value: %d", SsmConfig.Configuration.MaxSessions)
 	}
-	// if SsmConfig.Configuration.PoolConfig == nil {
-	// 	SsmConfig.Configuration.PoolConfig = pkcs11mgr.DefaultPoolConfig()
-	// 	logger.CfgLog.Infoln("pkcs11 poolConfig not set in configuration file. Using default values")
-	// }
+
+	// Check CORS configs and set default if not present
+	initializeCORSConfig()
 
 	return err
 }

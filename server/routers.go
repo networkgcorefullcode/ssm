@@ -2,8 +2,10 @@ package server
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/networkgcorefullcode/ssm/factory"
 	"github.com/networkgcorefullcode/ssm/handlers"
 	"github.com/networkgcorefullcode/ssm/logger"
+	"github.com/networkgcorefullcode/ssm/server/middleware"
 )
 
 // CreateGinRouter sets up routes using Gin and wraps existing net/http handlers for compatibility.
@@ -11,8 +13,18 @@ func CreateGinRouter() *gin.Engine {
 	// Use ReleaseMode unless verbose debugging is required; Gin still logs via its middleware.
 	// Mode can be adjusted by env GIN_MODE if needed.
 	r := gin.New()
-	r.Use(gin.Recovery())
-	r.Use(gin.Logger())
+	r.Use(gin.Recovery()) // recover from panics and write 500
+	r.Use(gin.Logger())   // basic logging middleware
+
+	// middlewares for security, logging, tracing, etc.
+	if factory.SsmConfig.Configuration.IsSecure {
+		logger.AppLog.Info("Configuring secure middlewares")
+		r.Use(middleware.AuditRequest)
+		middleware.ConfigureCORS(r) // configure CORS if needed
+		// r.Use(middleware.ValidateRequest)     // validate request schema, headers, etc.
+		r.Use(middleware.SecureRequest)         // secure middleware for headers, rate limiting, etc.
+		r.Use(middleware.AuthenticateRequest()) // authentication middleware
+	}
 
 	// HealthCheck endpoint (GET recommended)
 	r.GET("/health-check", func(c *gin.Context) {
