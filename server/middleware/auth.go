@@ -42,7 +42,7 @@ func AuthenticateRequest() gin.HandlerFunc {
 
 		// Recalculate the expected signature
 		data := c.Request.Method + ":" + c.Request.URL.Path + ":" + timestamp
-		mac := hmac.New(sha256.New, []byte(secret))
+		mac := hmac.New(sha256.New, secret)
 		mac.Write([]byte(data))
 		expectedSig := hex.EncodeToString(mac.Sum(nil))
 
@@ -54,4 +54,8 @@ func AuthenticateRequest() gin.HandlerFunc {
 		// If all is well, proceed to the handler
 		c.Next()
 	}
+}
+
+func getServiceSecret(serviceID string) ([]byte, error) {
+
 }

@@ -121,7 +121,7 @@ func logAuditEntry(entry AuditLog) {
 		return
 	}
 
-	database.InsertData(database.Client, factory.SsmConfig.Configuration.Mongodb.DBName, database.CollAuditLogs, entry)
+	go database.InsertData(database.Client, factory.SsmConfig.Configuration.Mongodb.DBName, database.CollAuditLogs, entry)
 }
 
 func signAuditLog(logData any, session *pkcs11.SessionHandle, mgr *pkcs11.Ctx, privKey pkcs11.ObjectHandle) (string, error) {
