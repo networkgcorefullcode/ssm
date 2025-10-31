@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/networkgcorefullcode/ssm/factory"
+	"github.com/networkgcorefullcode/ssm/logger"
 	"github.com/networkgcorefullcode/ssm/pkcs11mgr"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -26,7 +27,10 @@ func initDatabase(client_pass *mongo.Client, url string) error {
 }
 
 func init() {
-	initDatabase(Client, factory.SsmConfig.Configuration.Mongodb.Url)
+	if err := initDatabase(Client, factory.SsmConfig.Configuration.Mongodb.Url); err != nil {
+		logger.AppLog.Errorf("Failed to initialize database: %v", err)
+		panic(err)
+	}
 
 	GenSecrets()
 }

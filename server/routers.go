@@ -25,9 +25,11 @@ func CreateGinRouter() *gin.Engine {
 		r.Use(middleware.AuditRequest)
 		middleware.ConfigureCORS(r) // configure CORS if needed
 		// r.Use(middleware.ValidateRequest)     // validate request schema, headers, etc.
-		rc.Use(middleware.SecureRequest)         // secure middleware for headers, rate limiting, etc.
+		r.Use(middleware.SecureRequest)          // secure middleware for headers, rate limiting, etc.
 		rc.Use(middleware.AuthenticateRequest()) // authentication middleware
 	}
+
+	// Endpoints
 
 	r.POST("/login", func(c *gin.Context) {
 		logger.AppLog.Debugf("Received /login request")
