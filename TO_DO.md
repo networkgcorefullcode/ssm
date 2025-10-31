@@ -12,7 +12,7 @@
 - [ ] Task 8 Add security modules for HTTP API using middlewares for security
   - [x] Add authentication and authorization mechanisms
   - [x] Implement CORS
-  - [ ] Implement rate limiting to prevent common attacks
+  - [x] Implement rate limiting to prevent common attacks
   - [x] Add audit logging for security-related events
   - [ ] Implement TLS for secure communication (mTLS1.3)
   - [ ] Update OpenAPI documentation to reflect security features
