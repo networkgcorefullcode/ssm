@@ -16,6 +16,9 @@ func CreateGinRouter() *gin.Engine {
 	r.Use(gin.Recovery()) // recover from panics and write 500
 	r.Use(gin.Logger())   // basic logging middleware
 
+	// Initialize rate limiter with configuration
+	middleware.InitRateLimiter(factory.SsmConfig.GetRateLimit())
+
 	// create router crypto group
 	rc := r.Group("/crypto")
 

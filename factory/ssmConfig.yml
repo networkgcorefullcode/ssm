@@ -17,6 +17,13 @@ configuration:
   keyFile: server.key
   maxSessions: 5
   # handlersPoolConect: true
+  
+  # Rate Limiting Configuration
+  rateLimit:
+    enabled: true              # Enable/disable rate limiting
+    requestsPerMin: 60         # Maximum requests per minute per IP
+    burstSize: 10              # Allow burst of additional requests
+    cleanupInterval: 15        # Cleanup inactive clients every 15 minutes
 
 logger:
   SSM:

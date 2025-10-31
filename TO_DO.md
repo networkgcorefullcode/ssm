@@ -10,9 +10,11 @@
 - [x] Task 7 Implement syncronization to aether core using the webconsole component
 - [x] Task 7.1 Implement new api for syncronization functions
 - [ ] Task 8 Add security modules for HTTP API using middlewares for security
-  - [ ] Add authentication and authorization mechanisms
-  - [ ] Implement rate limiting and input validation to prevent common attacks
-  - [ ] Add audit logging for security-related events
-  - [ ] The pool session: move this logic in a middleware for each request
+  - [x] Add authentication and authorization mechanisms
+  - [x] Implement CORS
+  - [ ] Implement rate limiting to prevent common attacks
+  - [x] Add audit logging for security-related events
   - [ ] Implement TLS for secure communication (mTLS1.3)
   - [ ] Update OpenAPI documentation to reflect security features
+  - [ ] Write tests to verify the effectiveness of security measures
+  - [ ] Test all security features and fix any vulnerabilities found
