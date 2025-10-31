@@ -1,0 +1,22 @@
+example:
+  handle: 1001
+  id: 1
+  size_bits: 256
+properties:
+  handle:
+    description: HSM key handle
+    example: 1001
+    type: integer
+  id:
+    description: Key identifier
+    example: 1
+    type: integer
+  size_bits:
+    description: Size of the key in bits
+    example: 256
+    type: integer
+required:
+- handle
+- id
+- size_bits
+type: object

@@ -1,0 +1,30 @@
+description: Detalles de error según RFC 7807
+example:
+  instance: /generate-aes-key
+  detail: Label is required
+  title: Validation Error
+  error: validation_failed
+  status: 400
+properties:
+  title:
+    description: Short title of the problem
+    example: Validation Error
+    type: string
+  detail:
+    description: Detailed description of the problem
+    example: Label is required
+    type: string
+  status:
+    description: HTTP status code
+    example: 400
+    type: integer
+  error:
+    description: Internal error code
+    example: validation_failed
+    type: string
+  instance:
+    description: URI identifying the specific occurrence
+    example: /generate-aes-key
+    format: uri
+    type: string
+type: object

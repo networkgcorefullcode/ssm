@@ -47,7 +47,7 @@ var ActionMap map[string]string = map[string]string{
 	"POST /crypto/get-data-keys":     "GET_KEYS",
 	"POST /crypto/get-all-keys":      "GET_ALL_KEYS",
 	"POST /crypto/health-check":      "HEALTH_CHECK",
-	"POST login":                     "USER_LOGIN",
+	"POST /login":                    "USER_LOGIN",
 }
 
 func AuditRequest(c *gin.Context) {

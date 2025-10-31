@@ -16,14 +16,58 @@ configuration:
   certFile: server.crt 
   keyFile: server.key
   maxSessions: 5
+  isSecure: true             # Enable security middlewares (CORS, rate limiting, authentication)
   # handlersPoolConect: true
   
-  # Rate Limiting Configuration
+  # Rate Limiting Configuration - Controls API request throttling per client IP
   rateLimit:
-    enabled: true              # Enable/disable rate limiting
-    requestsPerMin: 60         # Maximum requests per minute per IP
-    burstSize: 10              # Allow burst of additional requests
-    cleanupInterval: 15        # Cleanup inactive clients every 15 minutes
+    enabled: true              # Enable/disable rate limiting functionality
+    requestsPerMin: 60         # Maximum number of requests allowed per minute per IP address
+    burstSize: 10              # Allow temporary burst of additional requests beyond the limit
+    cleanupInterval: 15        # Interval in minutes to cleanup inactive client tracking data
+
+  # Cross-Origin Resource Sharing (CORS) Configuration - Controls browser access from different domains
+  cors:
+    allowAllOrigins: false     # Allow requests from any origin (overrides allowOrigins if true)
+    allowOrigins:              # List of specific origins allowed to access the API
+      - "https://localhost:3000"
+      - "https://app.example.com"
+    allowMethods:              # HTTP methods permitted in cross-origin requests
+      - "GET"
+      - "POST" 
+      - "PUT"
+      - "PATCH"
+      - "DELETE"
+      - "HEAD"
+      - "OPTIONS"
+    allowPrivateNetwork: false # Enable Private Network Access for local network requests
+    allowHeaders:              # Headers that can be used in actual requests
+      - "Origin"
+      - "Content-Length"
+      - "Content-Type"
+      - "Authorization"
+      - "X-Requested-With"
+    allowCredentials: true     # Allow cookies and HTTP authentication in cross-origin requests
+    exposeHeaders:             # Headers exposed to the browser in responses
+      - "Content-Length"
+      - "X-RateLimit-Limit"
+      - "X-RateLimit-Remaining" 
+      - "X-RateLimit-Reset"
+    maxAge: 43200              # Cache time for preflight requests in seconds (12 hours)
+    allowWildcard: false       # Enable wildcard matching in origins (e.g., https://*.example.com)
+    allowBrowserExtensions: false  # Allow browser extension schemes (chrome-extension://, etc.)
+    customSchemas: []          # Additional URI schemes to allow (e.g., ["tauri://"])
+    allowWebSockets: false     # Allow WebSocket origins (ws:// and wss://)
+    allowFiles: false          # Allow file:// origins (security risk - use cautiously)
+    optionsResponseStatusCode: 204  # HTTP status code returned for OPTIONS preflight requests
+
+  # MongoDB Database Configuration
+  mongodb:
+    name: "ssm_db"           # Database connection name identifier
+    url: "mongodb://localhost:27017"  # MongoDB connection string
+    dbName: "secure_storage"   # Name of the database to use
+
+  
 
 logger:
   SSM:

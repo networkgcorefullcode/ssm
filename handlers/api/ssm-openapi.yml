@@ -13,8 +13,8 @@ info:
     - HSM/SoftHSM integration
 
     ## Authentication
-    The API works through Unix Domain Sockets for enhanced security.
-    Also supports HTTPS with TLS certificates.
+    The API supports JWT Bearer tokens and API keys for authentication.
+    Obtain a JWT token using the `/login` endpoint.
 
     ## Data Formats
     - All binary data (plaintext, ciphertext, IV) should be in Base64/Hex
@@ -34,14 +34,54 @@ servers:
 - description: Local HTTPS Server
   url: https://localhost:9001
 tags:
+- description: Authentication operations
+  name: Authentication
 - description: Cryptographic key management operations
   name: Key Management
 - description: Encryption and decryption operations
   name: Encryption
 - description: Health monitoring endpoints
   name: Health
+
+security:
+  - bearerAuth: []
+  - apiKeyAuth: []
+
 paths:
-  /generate-aes-key:
+  /login:
+    post:
+      description: |
+        Authenticate user and obtain JWT access token for API access.
+      operationId: userLogin
+      tags:
+      - Authentication
+      security: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+          description: Login successful
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+          description: Invalid credentials
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+      summary: User authentication
+
+  /crypto/generate-aes-key:
     post:
       description: |
         Generates a new symmetric AES key in the HSM with the specified size.
@@ -68,73 +108,22 @@ paths:
         "201":
           content:
             application/json:
-              examples:
-                success:
-                  summary: Successful response
-                  value:
-                    handle: 123456789
-                    id: 2
-                    bits: 256
               schema:
                 $ref: '#/components/schemas/GenAESKeyResponse'
           description: Key generated successfully
         "400":
-          content:
-            application/json:
-              examples:
-                validation:
-                  summary: Validation Error
-                  value:
-                    title: Validation Error
-                    detail: Label is required
-                    status: 400
-                    error: validation_failed
-                badJson:
-                  summary: Invalid JSON
-                  value:
-                    title: Invalid JSON
-                    detail: Failed to parse request body
-                    status: 400
-                    error: bad_json
-              schema:
-                $ref: '#/components/schemas/ProblemDetails'
-          description: Invalid request
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
         "405":
-          content:
-            application/json:
-              example:
-                title: Method Not Allowed
-                detail: Only POST method is allowed
-                status: 405
-                error: method_not_allowed
-              schema:
-                $ref: '#/components/schemas/ProblemDetails'
-          description: HTTP method not allowed
+          $ref: '#/components/responses/MethodNotAllowed'
         "500":
-          content:
-            application/json:
-              examples:
-                hsm_error:
-                  summary: HSM Error
-                  value:
-                    title: Key Generation Failed
-                    detail: "Failed to generate AES key: pkcs11 session invalid"
-                    status: 500
-                    error: hsm_error
-                general:
-                  summary: General Error
-                  value:
-                    title: Internal Server Error
-                    detail: An unexpected error occurred
-                    status: 500
-                    error: internal_error
-              schema:
-                $ref: '#/components/schemas/ProblemDetails'
-          description: Internal server error
+          $ref: '#/components/responses/InternalServerError'
       summary: Generate new AES key
       tags:
       - Key Management
-  /generate-des-key:
+
+  /crypto/generate-des-key:
     post:
       description: |
         Generates a new DES key in the HSM.
@@ -143,11 +132,6 @@ paths:
       requestBody:
         content:
           application/json:
-            examples:
-              simple:
-                summary: DES Key
-                value:
-                  id: 1
             schema:
               $ref: '#/components/schemas/GenDESKeyRequest'
         required: true
@@ -159,21 +143,16 @@ paths:
                 $ref: '#/components/schemas/GenDESKeyResponse'
           description: DES key generated successfully
         "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetails'
-          description: Invalid request
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
         "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetails'
-          description: Internal server error
+          $ref: '#/components/responses/InternalServerError'
       summary: Generate new DES key
       tags:
       - Key Management
-  /generate-des3-key:
+
+  /crypto/generate-des3-key:
     post:
       description: |
         Generates a new DES3 key in the HSM.
@@ -182,11 +161,6 @@ paths:
       requestBody:
         content:
           application/json:
-            examples:
-              simple:
-                summary: DES3 Key
-                value:
-                  id: 1
             schema:
               $ref: '#/components/schemas/GenDES3KeyRequest'
         required: true
@@ -198,21 +172,16 @@ paths:
                 $ref: '#/components/schemas/GenDES3KeyResponse'
           description: DES3 key generated successfully
         "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetails'
-          description: Invalid request
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
         "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetails'
-          description: Internal server error
+          $ref: '#/components/responses/InternalServerError'
       summary: Generate new DES3 key
       tags:
       - Key Management
-  /encrypt:
+
+  /crypto/encrypt:
     post:
       description: |
         Encrypts data using an AES, DES, or DES3 key stored in the HSM.
@@ -221,13 +190,6 @@ paths:
       requestBody:
         content:
           application/json:
-            examples:
-              simple:
-                summary: Simple encryption
-                value:
-                  key_label: MySecretKey
-                  plain: 48656c6c6f20576f726c6421
-                  encryption_algorithm: 1
             schema:
               $ref: '#/components/schemas/EncryptRequest'
         required: true
@@ -235,75 +197,22 @@ paths:
         "200":
           content:
             application/json:
-              examples:
-                success:
-                  summary: Successful encryption
-                  value:
-                    cipher: 123456789abecd1231231231514abcdef
-                    iv: 123456789abecd
-                    ok: true
-                    time_created: 2024-10-03T10:15:30Z
-                    time_updated: 2024-10-03T10:15:30Z
               schema:
                 $ref: '#/components/schemas/EncryptResponse'
           description: Data encrypted successfully
         "400":
-          content:
-            application/json:
-              examples:
-                validation:
-                  summary: Validation error
-                  value:
-                    title: Validation Error
-                    detail: Label is required
-                    status: 400
-                    error: validation_failed
-                badJson:
-                  summary: Invalid JSON
-                  value:
-                    title: Invalid JSON
-                    detail: Failed to parse request body
-                    status: 400
-                    error: bad_json
-              schema:
-                $ref: '#/components/schemas/ProblemDetails'
-          description: Invalid request
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
         "404":
-          content:
-            application/json:
-              example:
-                title: Key Not Found
-                detail: Key with label 'NonExistentKey' not found
-                status: 404
-                error: key_not_found
-              schema:
-                $ref: '#/components/schemas/ProblemDetails'
-          description: Key not found
+          $ref: '#/components/responses/KeyNotFound'
         "500":
-          content:
-            application/json:
-              examples:
-                hsm_error:
-                  summary: HSM error
-                  value:
-                    title: Key Generation Failed
-                    detail: "Failed to generate AES key: pkcs11 session invalid"
-                    status: 500
-                    error: hsm_error
-                general:
-                  summary: General error
-                  value:
-                    title: Internal Server Error
-                    detail: An unexpected error occurred
-                    status: 500
-                    error: internal_error
-              schema:
-                $ref: '#/components/schemas/ProblemDetails'
-          description: Internal server error
+          $ref: '#/components/responses/InternalServerError'
       summary: Encrypt data
       tags:
       - Encryption
-  /decrypt:
+
+  /crypto/decrypt:
     post:
       description: |
         Decrypts data using an AES key stored in the HSM.
@@ -312,15 +221,6 @@ paths:
       requestBody:
         content:
           application/json:
-            examples:
-              simple:
-                summary: Simple decryption
-                value:
-                  key_label: MySecretKey
-                  cipher: YWJjZGVmZ2hpams...
-                  iv: MTIzNDU2Nzg5MEFCQ0RFRg==
-                  encryption_algorithm: 1
-                  id: 2
             schema:
               $ref: '#/components/schemas/DecryptRequest'
         required: true
@@ -328,116 +228,22 @@ paths:
         "200":
           content:
             application/json:
-              examples:
-                success:
-                  summary: Successful decryption
-                  value:
-                    plain: SGVsbG8gV29ybGQh
               schema:
                 $ref: '#/components/schemas/DecryptResponse'
           description: Data decrypted successfully
         "400":
-          content:
-            application/json:
-              examples:
-                validation:
-                  summary: Validation error
-                  value:
-                    title: Validation Error
-                    detail: Label is required
-                    status: 400
-                    error: validation_failed
-                badJson:
-                  summary: Invalid JSON
-                  value:
-                    title: Invalid JSON
-                    detail: Failed to parse request body
-                    status: 400
-                    error: bad_json
-              schema:
-                $ref: '#/components/schemas/ProblemDetails'
-          description: Invalid request
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
         "404":
-          content:
-            application/json:
-              example:
-                title: Key Not Found
-                detail: Key with label 'NonExistentKey' not found
-                status: 404
-                error: key_not_found
-              schema:
-                $ref: '#/components/schemas/ProblemDetails'
-          description: Key not found
+          $ref: '#/components/responses/KeyNotFound'
         "500":
-          content:
-            application/json:
-              examples:
-                hsm_error:
-                  summary: HSM error
-                  value:
-                    title: Key Generation Failed
-                    detail: "Failed to generate AES key: pkcs11 session invalid"
-                    status: 500
-                    error: hsm_error
-                general:
-                  summary: General error
-                  value:
-                    title: Internal Server Error
-                    detail: An unexpected error occurred
-                    status: 500
-                    error: internal_error
-              schema:
-                $ref: '#/components/schemas/ProblemDetails'
-          description: Internal server error
+          $ref: '#/components/responses/InternalServerError'
       summary: Decrypt data
       tags:
       - Encryption
-  /store-key:
-    delete:
-      description: |
-        Deletes a cryptographic key from the HSM.
-        The key is identified by its label and optional ID.
-      operationId: deleteKey
-      requestBody:
-        content:
-          application/json:
-            examples:
-              simple:
-                summary: Delete key
-                value:
-                  key_label: ImportedKey
-                  id: 1
-            schema:
-              $ref: '#/components/schemas/DeleteKeyRequest'
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DeleteKeyResponse'
-          description: Key deleted successfully
-        "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetails'
-          description: Invalid request
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetails'
-          description: Key not found
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetails'
-          description: Internal server error
-      summary: Delete key
-      tags:
-      - Key Management
+
+  /crypto/store-key:
     post:
       description: |
         Stores an existing cryptographic key in the HSM.
@@ -446,14 +252,6 @@ paths:
       requestBody:
         content:
           application/json:
-            examples:
-              simple:
-                summary: Store key
-                value:
-                  key_label: ImportedKey
-                  id: 3
-                  key_value: YmFzZTY0X2VuY29kZWRfa2V5
-                  key_type: AES
             schema:
               $ref: '#/components/schemas/StoreKeyRequest'
         required: true
@@ -461,57 +259,15 @@ paths:
         "201":
           content:
             application/json:
-              examples:
-                success:
-                  summary: Key stored
-                  value:
-                    handle: 987654321
-                    cipher_key: encrypted_key_value
               schema:
                 $ref: '#/components/schemas/StoreKeyResponse'
           description: Key stored successfully
         "400":
-          content:
-            application/json:
-              examples:
-                validation:
-                  summary: Validation error
-                  value:
-                    title: Validation Error
-                    detail: Label is required
-                    status: 400
-                    error: validation_failed
-                badJson:
-                  summary: Invalid JSON
-                  value:
-                    title: Invalid JSON
-                    detail: Failed to parse request body
-                    status: 400
-                    error: bad_json
-              schema:
-                $ref: '#/components/schemas/ProblemDetails'
-          description: Invalid request
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
         "500":
-          content:
-            application/json:
-              examples:
-                hsm_error:
-                  summary: HSM error
-                  value:
-                    title: Key Generation Failed
-                    detail: "Failed to generate AES key: pkcs11 session invalid"
-                    status: 500
-                    error: hsm_error
-                general:
-                  summary: General error
-                  value:
-                    title: Internal Server Error
-                    detail: An unexpected error occurred
-                    status: 500
-                    error: internal_error
-              schema:
-                $ref: '#/components/schemas/ProblemDetails'
-          description: Internal server error
+          $ref: '#/components/responses/InternalServerError'
       summary: Store existing key
       tags:
       - Key Management
@@ -523,14 +279,6 @@ paths:
       requestBody:
         content:
           application/json:
-            examples:
-              simple:
-                summary: Update key example
-                value:
-                  key_label: ImportedKey
-                  id: 1
-                  key_value: bmV3X2tleV92YWx1ZQ==
-                  key_type: AES
             schema:
               $ref: '#/components/schemas/UpdateKeyRequest'
         required: true
@@ -542,27 +290,47 @@ paths:
                 $ref: '#/components/schemas/UpdateKeyResponse'
           description: Key updated successfully
         "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetails'
-          description: Invalid request
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
         "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetails'
-          description: Key not found
+          $ref: '#/components/responses/KeyNotFound'
         "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetails'
-          description: Internal server error
+          $ref: '#/components/responses/InternalServerError'
       summary: Update key
       tags:
       - Key Management
-  /get-key:
+    delete:
+      description: |
+        Deletes a cryptographic key from the HSM.
+        The key is identified by its label and optional ID.
+      operationId: deleteKey
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteKeyRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteKeyResponse'
+          description: Key deleted successfully
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "404":
+          $ref: '#/components/responses/KeyNotFound'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+      summary: Delete key
+      tags:
+      - Key Management
+
+  /crypto/get-data-key:
     post:
       description: |
         Retrieves information about a single key from the HSM by its label and ID.
@@ -571,12 +339,6 @@ paths:
       requestBody:
         content:
           application/json:
-            examples:
-              simple:
-                summary: Get key by label
-                value:
-                  key_label: my-aes-key
-                  id: 1
             schema:
               $ref: '#/components/schemas/GetKeyRequest'
         required: true
@@ -584,74 +346,22 @@ paths:
         "200":
           content:
             application/json:
-              examples:
-                success:
-                  summary: Key retrieved successfully
-                  value:
-                    key_info:
-                      handle: 1001
-                      id: 1
-                      size_bits: 256
               schema:
                 $ref: '#/components/schemas/GetKeyResponse'
           description: Key information retrieved successfully
         "400":
-          content:
-            application/json:
-              examples:
-                validation:
-                  summary: Validation error
-                  value:
-                    title: Validation Error
-                    detail: key_label is required
-                    status: 400
-                    error: validation_failed
-                badJson:
-                  summary: Invalid JSON
-                  value:
-                    title: Invalid JSON
-                    detail: Failed to parse request body
-                    status: 400
-                    error: bad_json
-              schema:
-                $ref: '#/components/schemas/ProblemDetails'
-          description: Invalid request
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
         "404":
-          content:
-            application/json:
-              example:
-                title: Key Not Found
-                detail: Key with label 'my-aes-key' not found
-                status: 404
-                error: key_not_found
-              schema:
-                $ref: '#/components/schemas/ProblemDetails'
-          description: Key not found
+          $ref: '#/components/responses/KeyNotFound'
         "500":
-          content:
-            application/json:
-              examples:
-                hsm_error:
-                  summary: HSM error
-                  value:
-                    title: Key Retrieval Failed
-                    detail: "Failed to retrieve key: pkcs11 session invalid"
-                    status: 500
-                    error: hsm_error
-                general:
-                  summary: General error
-                  value:
-                    title: Internal Server Error
-                    detail: An unexpected error occurred
-                    status: 500
-                    error: internal_error
-              schema:
-                $ref: '#/components/schemas/ProblemDetails'
-          description: Internal server error
+          $ref: '#/components/responses/InternalServerError'
       summary: Get single key information
       tags:
       - Key Management
-  /get-data-keys:
+
+  /crypto/get-data-keys:
     post:
       description: |
         Retrieves information about all keys from the HSM that match the specified label.
@@ -660,11 +370,6 @@ paths:
       requestBody:
         content:
           application/json:
-            examples:
-              simple:
-                summary: Get keys by label
-                value:
-                  key_label: my-aes-key
             schema:
               $ref: '#/components/schemas/GetDataKeysRequest'
         required: true
@@ -672,36 +377,20 @@ paths:
         "200":
           content:
             application/json:
-              examples:
-                success:
-                  summary: Keys retrieved successfully
-                  value:
-                    keys:
-                      - handle: 1001
-                        id: 1
-                        size_bits: 256
-                      - handle: 1002
-                        id: 2
-                        size_bits: 256
               schema:
                 $ref: '#/components/schemas/GetDataKeysResponse'
           description: Keys retrieved successfully
         "400":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetails'
-          description: Invalid request
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
         "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetails'
-          description: Internal server error
+          $ref: '#/components/responses/InternalServerError'
       summary: Get multiple keys by label
       tags:
       - Key Management
-  /get-all-keys:
+
+  /crypto/get-all-keys:
     post:
       description: |
         Retrieves information about all keys stored in the HSM.
@@ -711,73 +400,28 @@ paths:
         "200":
           content:
             application/json:
-              examples:
-                success:
-                  summary: All keys retrieved
-                  value:
-                    keys_by_label:
-                      my-aes-key:
-                        - handle: 1001
-                          id: 1
-                          size_bits: 256
-                        - handle: 1002
-                          id: 2
-                          size_bits: 256
-                      my-des3-key:
-                        - handle: 2001
-                          id: 10
-                          size_bits: 192
-                    total_keys: 3
-                    total_labels: 2
               schema:
                 $ref: '#/components/schemas/GetAllKeysResponse'
           description: All keys retrieved successfully
+        "401":
+          $ref: '#/components/responses/Unauthorized'
         "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ProblemDetails'
-          description: Internal server error
+          $ref: '#/components/responses/InternalServerError'
       summary: Get all keys from HSM
       tags:
       - Key Management
-  /health-check:
+
+  /crypto/health-check:
     post:
       description: |
         Health Check info to send periodical request to the SSM
         if don't get a response the SSM is down
-      operationId: health-check-post
+      operationId: healthCheckPost
+      security: []
       responses:
         "200":
           content:
             application/json:
-              examples:
-                success:
-                  summary: Service is healthy
-                  value:
-                    status: OK
-                    message: Service is healthy
-              schema:
-                $ref: '#/components/schemas/HealthCheckResponse'
-          description: Service is healthy
-      summary: Health check endpoint
-      tags:
-      - Health
-    get:
-      description: |
-        Health Check info to send periodical request to the SSM
-        if don't get a response the SSM is down
-      operationId: health-check-get
-      responses:
-        "200":
-          content:
-            application/json:
-              examples:
-                success:
-                  summary: Service is healthy
-                  value:
-                    status: OK
-                    message: Service is healthy
               schema:
                 $ref: '#/components/schemas/HealthCheckResponse'
           description: Service is healthy
@@ -786,631 +430,96 @@ paths:
       - Health
 
 components:
-  examples:
-    Base64Examples:
-      description: |
-        Examples of common data encoded in Base64:
-        - "Hello World!" → "SGVsbG8gV29ybGQh"
-        - "Secret Message" → "U2VjcmV0IE1lc3NhZ2U="
-        - "Test data 123" → "VGVzdCBkYXRhIDEyMw=="
-      summary: Base64 data examples
-    HexadecimalExamples:
-      description: |
-        Examples of common data encoded in hexadecimal:
-        - "Hello World!" → "48656c6c6f20576f726c6421"
-        - "Secret Message" → "536563726574204d657373616765"
-        - "Test data 123" → "54657374206461746120313233"
-      summary: Hexadecimal data examples
+  securitySchemes:
+    $ref: 'components/security/auth.yml'
+  
+  schemas:
+    # Request schemas
+    GenAESKeyRequest:
+      $ref: 'components/schemas/requests/GenAESKeyRequest.yml'
+    GenDESKeyRequest:
+      $ref: 'components/schemas/requests/GenDESKeyRequest.yml'
+    GenDES3KeyRequest:
+      $ref: 'components/schemas/requests/GenDES3KeyRequest.yml'
+    EncryptRequest:
+      $ref: 'components/schemas/requests/EncryptRequest.yml'
+    DecryptRequest:
+      $ref: 'components/schemas/requests/DecryptRequest.yml'
+    StoreKeyRequest:
+      $ref: 'components/schemas/requests/StoreKeyRequest.yml'
+    UpdateKeyRequest:
+      $ref: 'components/schemas/requests/UpdateKeyRequest.yml'
+    DeleteKeyRequest:
+      $ref: 'components/schemas/requests/DeleteKeyRequest.yml'
+    GetKeyRequest:
+      $ref: 'components/schemas/requests/GetKeyRequest.yml'
+    GetDataKeysRequest:
+      $ref: 'components/schemas/requests/GetDataKeysRequest.yml'
+    LoginRequest:
+      $ref: 'components/schemas/requests/LoginRequest.yml'
+    
+    # Response schemas
+    GenAESKeyResponse:
+      $ref: 'components/schemas/responses/GenAESKeyResponse.yml'
+    GenDESKeyResponse:
+      $ref: 'components/schemas/responses/GenDESKeyResponse.yml'
+    GenDES3KeyResponse:
+      $ref: 'components/schemas/responses/GenDES3KeyResponse.yml'
+    EncryptResponse:
+      $ref: 'components/schemas/responses/EncryptResponse.yml'
+    DecryptResponse:
+      $ref: 'components/schemas/responses/DecryptResponse.yml'
+    StoreKeyResponse:
+      $ref: 'components/schemas/responses/StoreKeyResponse.yml'
+    UpdateKeyResponse:
+      $ref: 'components/schemas/responses/UpdateKeyResponse.yml'
+    DeleteKeyResponse:
+      $ref: 'components/schemas/responses/DeleteKeyResponse.yml'
+    GetKeyResponse:
+      $ref: 'components/schemas/responses/GetKeyResponse.yml'
+    GetDataKeysResponse:
+      $ref: 'components/schemas/responses/GetDataKeysResponse.yml'
+    GetAllKeysResponse:
+      $ref: 'components/schemas/responses/GetAllKeysResponse.yml'
+    HealthCheckResponse:
+      $ref: 'components/schemas/responses/HealthCheckResponse.yml'
+    LoginResponse:
+      $ref: 'components/schemas/responses/LoginResponse.yml'
+    
+    # Common schemas
+    ProblemDetails:
+      $ref: 'components/schemas/common/ProblemDetails.yml'
+    DataKeyInfo:
+      $ref: 'components/schemas/common/DataKeyInfo.yml'
+
   responses:
     BadRequest:
       content:
         application/json:
-          examples:
-            validation:
-              summary: Validation error
-              value:
-                title: Validation Error
-                detail: Label is required
-                status: 400
-                error: validation_failed
-            badJson:
-              summary: Invalid JSON
-              value:
-                title: Invalid JSON
-                detail: Failed to parse request body
-                status: 400
-                error: bad_json
           schema:
             $ref: '#/components/schemas/ProblemDetails'
-      description: Solicitud inválida
+      description: Invalid request
+    Unauthorized:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+      description: Authentication required
     KeyNotFound:
       content:
         application/json:
-          example:
-            title: Key Not Found
-            detail: Key with label 'NonExistentKey' not found
-            status: 404
-            error: key_not_found
           schema:
             $ref: '#/components/schemas/ProblemDetails'
-      description: Clave no encontrada
+      description: Key not found
     MethodNotAllowed:
       content:
         application/json:
-          example:
-            title: Method Not Allowed
-            detail: Only POST method is allowed
-            status: 405
-            error: method_not_allowed
           schema:
             $ref: '#/components/schemas/ProblemDetails'
-      description: Método HTTP no permitido
+      description: HTTP method not allowed
     InternalServerError:
       content:
         application/json:
-          examples:
-            hsm_error:
-              summary: HSM error
-              value:
-                title: Key Generation Failed
-                detail: "Failed to generate AES key: pkcs11 session invalid"
-                status: 500
-                error: hsm_error
-            general:
-              summary: General error
-              value:
-                title: Internal Server Error
-                detail: An unexpected error occurred
-                status: 500
-                error: internal_error
           schema:
             $ref: '#/components/schemas/ProblemDetails'
       description: Internal server error
-    ServiceUnavailable:
-      content:
-        application/json:
-          example:
-            title: Service Unavailable
-            detail: HSM connection lost
-            status: 503
-            error: service_unavailable
-          schema:
-            $ref: '#/components/schemas/ProblemDetails'
-      description: Servicio no disponible
-  schemas:
-    GenAESKeyRequest:
-      example:
-        id: key001
-        bits: 256
-      properties:
-        id:
-          description: Unique key identifier
-          type: integer
-        bits:
-          description: Key size in bits
-          enum:
-          - 128
-          - 192
-          - 256
-          example: 256
-          type: integer
-      required:
-      - bits
-      - id
-      type: object
-    GenAESKeyResponse:
-      example:
-        bits: 256
-        handle: 123456789
-        id: 2
-      properties:
-        handle:
-          description: HSM key handle
-          example: 123456789
-          format: uint
-          type: integer
-        id:
-          description: Generated key identifier
-          example: 2
-          type: integer
-        bits:
-          description: Size of the generated key in bits
-          example: 256
-          type: integer
-      type: object
-    EncryptRequest:
-      example:
-        key_label: MySecretKey
-        plain: 48656c6c6f20576f726c6421
-      properties:
-        key_label:
-          description: Label of the key to encrypt
-          example: MySecretKey
-          minLength: 1
-          type: string
-        plain:
-          description: Data to encrypt encoded in hexadecimal
-          example: !!binary |-
-            NDg2NTZjNmM2ZjIwNTc2ZjcyNmM2NDIx
-          format: byte
-          type: string
-        encryption_algorithm:
-          description: "Encryption algorithm to use (1: AES, 2: AES, 3: DES, 4: DES3)"
-          enum:
-          - 1
-          - 2
-          - 3
-          - 4
-          example: 1
-          type: integer
-      required:
-      - encryption_algorithm
-      - key_label
-      - plain
-      type: object
-    EncryptResponse:
-      example:
-        cipher: 48656c6c6f20576f726c6421
-        iv: c6f205
-        ok: true
-        time_created: 2024-10-03T10:15:30Z
-        time_updated: 2024-10-03T10:15:30Z
-      properties:
-        cipher:
-          description: Encrypted data in hexadecimal
-          example: !!binary |-
-            NDg2NTZjNmM2ZjIwNTc2ZjcyNmM2NDIx
-          format: byte
-          type: string
-        iv:
-          description: Initialization vector in hexadecimal
-          example: !!binary |-
-            NTZjNmM2ZjI=
-          format: byte
-          type: string
-        id: 
-          description: Id key that used to encrypt plan data
-          example: !!binary |-
-            NTZjNmM2ZjI=
-          format: byte
-          type: integer
-        ok:
-          description: Indicates if the operation was successful
-          example: true
-          type: boolean
-        time_created:
-          description: Creation timestamp in RFC3339
-          example: 2024-10-03T10:15:30Z
-          format: date-time
-          type: string
-        time_updated:
-          description: Update timestamp in RFC3339
-          example: 2024-10-03T10:15:30Z
-          format: date-time
-          type: string
-      type: object
-    DecryptRequest:
-      example:
-        key_label: MySecretKey
-        cipher: YWJjZGVmZ2hpams...
-        iv: MTIzNDU2Nzg5MEFCQ0RFRg==
-        encryption_algorithm: 1
-        id: 2345
-      properties:
-        key_label:
-          description: Label of the key to decrypt
-          example: MySecretKey
-          minLength: 1
-          type: string
-        cipher:
-          description: Encrypted data in Base64
-          example: !!binary |-
-            NjU2YzZjNmYyMDU3NmY3MjZjNjQyMQ==
-          format: byte
-          type: string
-        iv:
-          description: Initialization vector in Base64 (same used for encryption)
-          example: !!binary |-
-            NmYyMDU3NmY=
-          format: byte
-          type: string
-        id:
-          description: Optional ID for tracking
-          example: 12345
-          type: integer
-        encryption_algorithm:
-          description: "Encryption algorithm to use (1: AES, 2: AES, 3: DES, 4: DES3)"
-          enum:
-          - 1
-          - 2
-          - 3
-          - 4
-          example: 1
-          type: integer
-      required:
-      - cipher
-      - encryption_algorithm
-      - id
-      - iv
-      - key_label
-      type: object
-    DecryptResponse:
-      example:
-        plain: 123afabe213be2
-      properties:
-        plain:
-          description: Decrypted data in Base64
-          example: !!binary |-
-            MTIzYWZhYmUyMTNiZTI=
-          format: byte
-          type: string
-      type: object
-    StoreKeyRequest:
-      example:
-        key_label: ImportedKey
-        id: 2
-        key_value: abcde1231312
-        key_type: AES
-      properties:
-        key_label:
-          description: Label for the stored key
-          example: ImportedKey
-          minLength: 1
-          type: string
-        id:
-          description: Unique identifier
-          example: 2
-          type: integer
-        key_value:
-          description: Key value in Base64
-          example: !!binary |-
-            YWJjZGUxMjMxMzEy
-          format: byte
-          type: string
-        key_type:
-          description: Type of cryptographic key
-          enum:
-          - AES
-          - DES
-          - DES3
-          example: AES
-          type: string
-      required:
-      - id
-      - key_label
-      - key_type
-      - key_value
-      type: object
-    StoreKeyResponse:
-      example:
-        handle: 987654321
-        cipher_key: encrypted_key_value
-      properties:
-        handle:
-          description: Handle of the stored key
-          example: 987654321
-          format: uint
-          type: integer
-        cipher_key:
-          description: Stored encrypted key
-          example: encrypted_key_value
-          type: string
-      type: object
-    ProblemDetails:
-      description: Detalles de error según RFC 7807
-      example:
-        instance: /generate-aes-key
-        detail: Label is required
-        title: Validation Error
-        error: validation_failed
-        status: 400
-      properties:
-        title:
-          description: Short title of the problem
-          example: Validation Error
-          type: string
-        detail:
-          description: Detailed description of the problem
-          example: Label is required
-          type: string
-        status:
-          description: HTTP status code
-          example: 400
-          type: integer
-        error:
-          description: Internal error code
-          example: validation_failed
-          type: string
-        instance:
-          description: URI identifying the specific occurrence
-          example: /generate-aes-key
-          format: uri
-          type: string
-      type: object
-    GenDESKeyRequest:
-      example:
-        id: 1
-      properties:
-        id:
-          description: Unique key identifier
-          example: 1
-          type: integer
-      required:
-      - id
-      type: object
-    GenDESKeyResponse:
-      example:
-        handle: 123456789
-        id: 2
-      properties:
-        handle:
-          description: HSM key handle
-          example: 123456789
-          type: integer
-        id:
-          description: Key identifier
-          example: 3
-          type: integer
-      type: object
-    GenDES3KeyRequest:
-      example:
-        id: 1
-      properties:
-        id:
-          description: Unique key identifier
-          example: 1
-          type: integer
-      required:
-      - id
-      type: object
-    GenDES3KeyResponse:
-      example:
-        handle: 123456789
-        id: 1
-      properties:
-        handle:
-          description: HSM key handle
-          example: 123456789
-          type: integer
-        id:
-          description: Key identifier
-          example: 1
-          type: integer
-      type: object
-    DeleteKeyRequest:
-      example:
-        key_label: ImportedKey
-        id: 1
-      properties:
-        key_label:
-          description: Label of the key to delete
-          example: ImportedKey
-          maxLength: 256
-          minLength: 1
-          type: string
-        id:
-          description: Key identifier (optional)
-          example: 1
-          maxLength: 64
-          type: integer
-      required:
-      - id
-      - key_label
-      type: object
-    DeleteKeyResponse:
-      example:
-        message: Key deleted successfully
-        key_label: ImportedKey
-      properties:
-        message:
-          description: Confirmation message
-          example: Key deleted successfully
-          type: string
-        key_label:
-          description: Label of the deleted key
-          example: ImportedKey
-          type: string
-      required:
-      - key_label
-      - message
-      type: object
-    UpdateKeyRequest:
-      example:
-        key_label: ImportedKey
-        id: 2
-        key_value: 1213afabe213be2
-        key_type: AES
-      properties:
-        key_label:
-          description: Label of the key to update
-          example: ImportedKey
-          maxLength: 256
-          minLength: 1
-          type: string
-        id:
-          description: Key identifier
-          example: 2
-          type: integer
-        key_value:
-          description: New key value in hexadecimal format
-          example: bmV3X2tleV92YWx1ZQ==
-          type: string
-        key_type:
-          description: Type of cryptographic key
-          enum:
-          - AES
-          - DES
-          - DES3
-          example: AES
-          type: string
-      required:
-      - id
-      - key_label
-      - key_type
-      - key_value
-      type: object
-    UpdateKeyResponse:
-      example:
-        message: Key updated successfully
-        handle: 987654321
-        key_label: ImportedKey
-        cipher_key: encrypted_key_value
-      properties:
-        message:
-          description: Confirmation message
-          example: Key updated successfully
-          type: string
-        handle:
-          description: New HSM key handle
-          example: 987654321
-          type: integer
-        key_label:
-          description: Label of the updated key
-          example: ImportedKey
-          type: string
-        cipher_key:
-          description: Encrypted key value (optional)
-          example: encrypted_key_value
-          type: string
-      required:
-      - handle
-      - key_label
-      - message
-      type: object
-    HealthCheckResponse:
-      example:
-        status: OK
-        message: Status is ok
-      properties:
-        status:
-          description: Health status
-          example: OK
-          type: string
-        message:
-          description: Additional information
-          example: Status is ok
-          type: string
-      required:
-      - status
-      - message
-      type: object
-    GetKeyRequest:
-      example:
-        key_label: my-aes-key
-        id: 1
-      properties:
-        key_label:
-          description: Label of the key to retrieve
-          example: my-aes-key
-          minLength: 1
-          type: string
-        id:
-          description: Key identifier
-          example: 1
-          type: integer
-      required:
-      - key_label
-      - id
-      type: object
-    GetKeyResponse:
-      example:
-        key_info:
-          handle: 1001
-          id: 1
-          size_bits: 256
-      properties:
-        key_info:
-          $ref: '#/components/schemas/DataKeyInfo'
-      required:
-      - key_info
-      type: object
-    GetDataKeysRequest:
-      example:
-        key_label: my-aes-key
-      properties:
-        key_label:
-          description: Label of the keys to retrieve
-          example: my-aes-key
-          minLength: 1
-          type: string
-      required:
-      - key_label
-      type: object
-    GetDataKeysResponse:
-      example:
-        keys:
-          - handle: 1001
-            id: 1
-            size_bits: 256
-          - handle: 1002
-            id: 2
-            size_bits: 256
-      properties:
-        keys:
-          description: Array of key information
-          items:
-            $ref: '#/components/schemas/DataKeyInfo'
-          type: array
-      required:
-      - keys
-      type: object
-    GetAllKeysResponse:
-      example:
-        keys_by_label:
-          my-aes-key:
-            - handle: 1001
-              id: 1
-              size_bits: 256
-            - handle: 1002
-              id: 2
-              size_bits: 256
-          my-des3-key:
-            - handle: 2001
-              id: 10
-              size_bits: 192
-        total_keys: 3
-        total_labels: 2
-      properties:
-        keys_by_label:
-          description: Map of label to array of key information
-          type: object
-          additionalProperties:
-            type: array
-            items:
-              $ref: '#/components/schemas/DataKeyInfo'
-        total_keys:
-          description: Total number of keys found
-          example: 3
-          type: integer
-        total_labels:
-          description: Total number of unique labels
-          example: 2
-          type: integer
-      required:
-      - keys_by_label
-      - total_keys
-      - total_labels
-      type: object
-    DataKeyInfo:
-      example:
-        handle: 1001
-        id: 1
-        size_bits: 256
-      properties:
-        handle:
-          description: HSM key handle
-          example: 1001
-          type: integer
-        id:
-          description: Key identifier
-          example: 1
-          type: integer
-        size_bits:
-          description: Size of the key in bits
-          example: 256
-          type: integer
-      required:
-      - handle
-      - id
-      - size_bits
-      type: object

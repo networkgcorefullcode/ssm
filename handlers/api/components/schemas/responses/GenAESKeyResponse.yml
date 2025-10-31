@@ -1,0 +1,19 @@
+example:
+  bits: 256
+  handle: 123456789
+  id: 2
+properties:
+  handle:
+    description: HSM key handle
+    example: 123456789
+    format: uint
+    type: integer
+  id:
+    description: Generated key identifier
+    example: 2
+    type: integer
+  bits:
+    description: Size of the generated key in bits
+    example: 256
+    type: integer
+type: object

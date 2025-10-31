@@ -1,0 +1,10 @@
+example:
+  plain: 123afabe213be2
+properties:
+  plain:
+    description: Decrypted data in Base64
+    example: !!binary |-
+      MTIzYWZhYmUyMTNiZTI=
+    format: byte
+    type: string
+type: object

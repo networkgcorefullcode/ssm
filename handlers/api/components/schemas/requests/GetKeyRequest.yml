@@ -1,0 +1,17 @@
+example:
+  key_label: my-aes-key
+  id: 1
+properties:
+  key_label:
+    description: Label of the key to retrieve
+    example: my-aes-key
+    minLength: 1
+    type: string
+  id:
+    description: Key identifier
+    example: 1
+    type: integer
+required:
+- key_label
+- id
+type: object

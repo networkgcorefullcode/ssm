@@ -1,0 +1,11 @@
+bearerAuth:
+  type: http
+  scheme: bearer
+  bearerFormat: JWT
+  description: JWT token obtained from /login endpoint
+
+apiKeyAuth:
+  type: apiKey
+  in: header
+  name: X-API-Key
+  description: API key for service-to-service authentication

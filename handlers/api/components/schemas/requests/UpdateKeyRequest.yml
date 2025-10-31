@@ -1,0 +1,34 @@
+example:
+  key_label: ImportedKey
+  id: 2
+  key_value: 1213afabe213be2
+  key_type: AES
+properties:
+  key_label:
+    description: Label of the key to update
+    example: ImportedKey
+    maxLength: 256
+    minLength: 1
+    type: string
+  id:
+    description: Key identifier
+    example: 2
+    type: integer
+  key_value:
+    description: New key value in hexadecimal format
+    example: bmV3X2tleV92YWx1ZQ==
+    type: string
+  key_type:
+    description: Type of cryptographic key
+    enum:
+    - AES
+    - DES
+    - DES3
+    example: AES
+    type: string
+required:
+- id
+- key_label
+- key_type
+- key_value
+type: object

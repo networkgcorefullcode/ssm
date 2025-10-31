@@ -1,0 +1,16 @@
+example:
+  message: Key deleted successfully
+  key_label: ImportedKey
+properties:
+  message:
+    description: Confirmation message
+    example: Key deleted successfully
+    type: string
+  key_label:
+    description: Label of the deleted key
+    example: ImportedKey
+    type: string
+required:
+- key_label
+- message
+type: object

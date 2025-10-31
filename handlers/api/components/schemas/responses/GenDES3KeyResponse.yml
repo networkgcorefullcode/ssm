@@ -1,0 +1,13 @@
+example:
+  handle: 123456789
+  id: 1
+properties:
+  handle:
+    description: HSM key handle
+    example: 123456789
+    type: integer
+  id:
+    description: Key identifier
+    example: 1
+    type: integer
+type: object

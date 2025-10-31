@@ -1,0 +1,35 @@
+example:
+  key_label: ImportedKey
+  id: 2
+  key_value: abcde1231312
+  key_type: AES
+properties:
+  key_label:
+    description: Label for the stored key
+    example: ImportedKey
+    minLength: 1
+    type: string
+  id:
+    description: Unique identifier
+    example: 2
+    type: integer
+  key_value:
+    description: Key value in Base64
+    example: !!binary |-
+      YWJjZGUxMjMxMzEy
+    format: byte
+    type: string
+  key_type:
+    description: Type of cryptographic key
+    enum:
+    - AES
+    - DES
+    - DES3
+    example: AES
+    type: string
+required:
+- id
+- key_label
+- key_type
+- key_value
+type: object

@@ -1,0 +1,36 @@
+example:
+  keys_by_label:
+    my-aes-key:
+      - handle: 1001
+        id: 1
+        size_bits: 256
+      - handle: 1002
+        id: 2
+        size_bits: 256
+    my-des3-key:
+      - handle: 2001
+        id: 10
+        size_bits: 192
+  total_keys: 3
+  total_labels: 2
+properties:
+  keys_by_label:
+    description: Map of label to array of key information
+    type: object
+    additionalProperties:
+      type: array
+      items:
+        $ref: '../common/DataKeyInfo.yml'
+  total_keys:
+    description: Total number of keys found
+    example: 3
+    type: integer
+  total_labels:
+    description: Total number of unique labels
+    example: 2
+    type: integer
+required:
+- keys_by_label
+- total_keys
+- total_labels
+type: object

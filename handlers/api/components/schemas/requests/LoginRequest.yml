@@ -1,0 +1,18 @@
+example:
+  username: admin
+  password: secret123
+properties:
+  username:
+    description: Username for authentication
+    example: admin
+    minLength: 1
+    type: string
+  password:
+    description: Password for authentication
+    example: secret123
+    minLength: 1
+    type: string
+required:
+- username
+- password
+type: object
