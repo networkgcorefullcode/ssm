@@ -1,61 +1,38 @@
 package middleware
 
 import (
-	"crypto/hmac"
-	"crypto/sha256"
-	"encoding/hex"
 	"net/http"
-	"strconv"
-	"time"
+	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/networkgcorefullcode/ssm/pkcs11mgr"
 )
-
-var secretStore map[string]string = map[string]string{
-	"udm":        "",
-	"webconsole": "",
-}
 
 func AuthenticateRequest() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		serviceID := c.GetHeader("X-Service-Id")
-		timestamp := c.GetHeader("X-Timestamp")
-		signature := c.GetHeader("X-Signature")
+		jwtToken := c.GetHeader("Authorization")
 
-		if serviceID == "" || timestamp == "" || signature == "" {
+		if jwtToken == "" {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "missing auth headers"})
 			return
 		}
 
-		secret, err := getServiceSecret(serviceID) // get the secret from database MongoDB
+		tokenString := strings.Replace(jwtToken, "Bearer ", "", 1)
+
+		session := mgr.GetSession()
+		defer mgr.LogoutSession(session)
+
+		// verify JWT token here
+		jwtPayload, err := pkcs11mgr.VerifyJWT(session, tokenString)
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unknown service"})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid or expired token"})
 			return
 		}
 
-		// Verify that the timestamp is not out of range (prevents replays)
-		ts, err := strconv.ParseInt(timestamp, 10, 64)
-		if err != nil || time.Since(time.Unix(ts, 0)) > 2*time.Minute {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid or expired timestamp"})
-			return
-		}
-
-		// Recalculate the expected signature
-		data := c.Request.Method + ":" + c.Request.URL.Path + ":" + timestamp
-		mac := hmac.New(sha256.New, secret)
-		mac.Write([]byte(data))
-		expectedSig := hex.EncodeToString(mac.Sum(nil))
-
-		if !hmac.Equal([]byte(expectedSig), []byte(signature)) {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid signature"})
-			return
-		}
+		// Set the payload in context for further handlers
+		c.Set("jwt-payload", jwtPayload)
 
 		// If all is well, proceed to the handler
 		c.Next()
 	}
-}
-
-func getServiceSecret(serviceID string) ([]byte, error) {
-
 }

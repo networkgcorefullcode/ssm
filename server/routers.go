@@ -16,76 +16,84 @@ func CreateGinRouter() *gin.Engine {
 	r.Use(gin.Recovery()) // recover from panics and write 500
 	r.Use(gin.Logger())   // basic logging middleware
 
+	// create router crypto group
+	rc := r.Group("/crypto")
+
 	// middlewares for security, logging, tracing, etc.
 	if factory.SsmConfig.Configuration.IsSecure {
 		logger.AppLog.Info("Configuring secure middlewares")
 		r.Use(middleware.AuditRequest)
 		middleware.ConfigureCORS(r) // configure CORS if needed
 		// r.Use(middleware.ValidateRequest)     // validate request schema, headers, etc.
-		r.Use(middleware.SecureRequest)         // secure middleware for headers, rate limiting, etc.
-		r.Use(middleware.AuthenticateRequest()) // authentication middleware
+		rc.Use(middleware.SecureRequest)         // secure middleware for headers, rate limiting, etc.
+		rc.Use(middleware.AuthenticateRequest()) // authentication middleware
 	}
 
+	r.POST("/login", func(c *gin.Context) {
+		logger.AppLog.Debugf("Received /login request")
+		handlers.HandleLogin(c)
+	})
+
 	// HealthCheck endpoint (GET recommended)
-	r.GET("/health-check", func(c *gin.Context) {
+	rc.GET("/health-check", func(c *gin.Context) {
 		logger.AppLog.Debugf("Received /health-check request")
 		handlers.HandleHealthCheck(c)
 	})
 
 	// Encrypt endpoints POST
-	r.POST("/encrypt", func(c *gin.Context) {
+	rc.POST("/encrypt", func(c *gin.Context) {
 		logger.AppLog.Debugf("Received /encrypt request")
 		handlers.HandleEncrypt(c)
 	})
 
 	// Decrypt endpoints POST
-	r.POST("/decrypt", func(c *gin.Context) {
+	rc.POST("/decrypt", func(c *gin.Context) {
 		logger.AppLog.Debugf("Received /decrypt request")
 		handlers.HandleDecrypt(c)
 	})
 
 	// Store Key endpoints POST
-	r.POST("/store-key", func(c *gin.Context) {
+	rc.POST("/store-key", func(c *gin.Context) {
 		logger.AppLog.Debugf("Received /store-key request")
 		handlers.HandleStoreKey(c)
 	})
-	r.PUT("/store-key", func(c *gin.Context) {
+	rc.PUT("/store-key", func(c *gin.Context) {
 		logger.AppLog.Debugf("Received /store-key request")
 		handlers.HandleStoreKey(c)
 	})
-	r.DELETE("/store-key", func(c *gin.Context) {
+	rc.DELETE("/store-key", func(c *gin.Context) {
 		logger.AppLog.Debugf("Received /store-key request")
 		handlers.HandleStoreKey(c)
 	})
 
 	// Generate Key endpoints POST
-	r.POST("/generate-aes-key", func(c *gin.Context) {
+	rc.POST("/generate-aes-key", func(c *gin.Context) {
 		logger.AppLog.Debugf("Received /generate-aes-key request")
 		handlers.HandleGenerateAESKey(c)
 	})
 
-	r.POST("/generate-des3-key", func(c *gin.Context) {
+	rc.POST("/generate-des3-key", func(c *gin.Context) {
 		logger.AppLog.Debugf("Received /generate-des3-key request")
 		handlers.HandleGenerateDES3Key(c)
 	})
 
-	r.POST("/generate-des-key", func(c *gin.Context) {
+	rc.POST("/generate-des-key", func(c *gin.Context) {
 		logger.AppLog.Debugf("Received /generate-des-key request")
 		handlers.HandleGenerateDESKey(c)
 	})
 
 	// Synchronization handlers
-	r.POST("/get-data-keys", func(c *gin.Context) {
+	rc.POST("/get-data-keys", func(c *gin.Context) {
 		logger.AppLog.Debugf("Received /get-data-keys request")
 		handlers.HandleGetDataKeys(c)
 	})
 
-	r.POST("/get-key", func(c *gin.Context) {
+	rc.POST("/get-key", func(c *gin.Context) {
 		logger.AppLog.Debugf("Received /get-keys request")
 		handlers.HandleGetDataKey(c)
 	})
 
-	r.POST("/get-all-keys", func(c *gin.Context) {
+	rc.POST("/get-all-keys", func(c *gin.Context) {
 		logger.AppLog.Debugf("Received /get-all-keys request")
 		handlers.HandleGetAllKeys(c)
 	})

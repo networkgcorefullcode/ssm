@@ -5,7 +5,7 @@ go 1.24.4
 require (
 	github.com/gin-contrib/cors v1.7.6
 	github.com/gin-gonic/gin v1.11.0
-	github.com/google/uuid v1.6.0
+	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/miekg/pkcs11 v1.1.1
 	github.com/omec-project/util v1.5.4
 	github.com/stretchr/testify v1.11.1

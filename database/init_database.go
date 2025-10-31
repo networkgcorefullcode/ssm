@@ -27,6 +27,8 @@ func initDatabase(client_pass *mongo.Client, url string) error {
 
 func init() {
 	initDatabase(Client, factory.SsmConfig.Configuration.Mongodb.Url)
+
+	GenSecrets()
 }
 
 func SetPKCS11Manager(mgr *pkcs11mgr.Manager) {

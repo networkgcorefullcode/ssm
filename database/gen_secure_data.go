@@ -2,20 +2,32 @@ package database
 
 import (
 	"crypto/rand"
-	"encoding/base64"
+	"encoding/hex"
+	"fmt"
 	"math/big"
+	"os"
 	"sync"
 
+	"github.com/miekg/pkcs11"
+	constants "github.com/networkgcorefullcode/ssm/const"
 	"github.com/networkgcorefullcode/ssm/factory"
+	"github.com/networkgcorefullcode/ssm/logger"
+	"github.com/networkgcorefullcode/ssm/pkcs11mgr"
+	"github.com/networkgcorefullcode/ssm/safe"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
-// in this package we define functions to generate secure data and store this
-// data in the database using best practices.
-var SecretStore map[string]string
+type UserSecret struct {
+	PasswordSecret EncryptedSecret `bson:"encrypted_data"`
+	ServiceID      string          `bson:"service_id"`
+}
 
-type Secret struct {
-	Secret    string `bson:"encrypted_data"`
-	ServiceID string `bson:"service_id"`
+type EncryptedSecret struct {
+	EncryptedData       string `bson:"encrypted_data"`
+	IV                  string `bson:"iv"`
+	Id                  int32  `bson:"id"`
+	KeyLabel            string `bson:"key_label"`
+	EncryptionAlgorithm uint   `bson:"encryption_algorithm"`
 }
 
 type dbContext struct {
@@ -27,70 +39,93 @@ var DbContext dbContext = dbContext{
 }
 
 func GenSecrets() error {
-	passwordUDM := generateSecurePassword(16)
-	passwordWebconsole := generateSecurePassword(16)
-
-	if SecretStore == nil {
-		SecretStore = make(map[string]string)
+	if err := genSecret("udm"); err != nil {
+		return err
 	}
-
-	// encrypt this secrets before storing in DB
-
-	// secretUDM, err := encryptSecret(passwordUDM)
-	// if err != nil {
-	// 	return err
-	// }
-	// secretWebconsole, err := encryptSecret(passwordWebconsole)
-	// if err != nil {
-	// 	return err
-	// }
-
-	secretUDM := Secret{
-		Secret:    passwordUDM,
-		ServiceID: "udm",
+	if err := genSecret("webconsole"); err != nil {
+		return err
 	}
-	secretWebconsole := Secret{
-		Secret:    passwordWebconsole,
-		ServiceID: "webconsole",
-	}
-
-	go InsertData(Client, factory.SsmConfig.Configuration.Mongodb.DBName, CollSecret, secretUDM)
-	go InsertData(Client, factory.SsmConfig.Configuration.Mongodb.DBName, CollSecret, secretWebconsole)
 
 	return nil
 }
 
-// func encryptSecret(secret string) (EncryptedSecret, error) {
-// 	password, err := base64.StdEncoding.DecodeString(secret)
-// 	if err != nil {
-// 		return EncryptedSecret{}, err
-// 	}
-// 	session := mgrpkcs11.GetSession()
-// 	keyHandle, err := pkcs11mgr.FindKeyLabelReturnRandom(constants.LABEL_ENCRYPTION_KEY_INTERNAL_AES256, *session)
-// 	if err != nil {
-// 		return EncryptedSecret{}, err
-// 	}
-// 	iv := make([]byte, 16)
-// 	if err := safe.RandRead(iv); err != nil {
-// 		logger.AppLog.Errorf("Failed to generate IV: %v", err)
-// 		return EncryptedSecret{}, err
-// 	}
-// 	encrypted, err := pkcs11mgr.EncryptKey(keyHandle, iv, password, pkcs11.CKM_AES_CBC_PAD, *session)
-// 	if err != nil {
-// 		return EncryptedSecret{}, err
-// 	}
-// 	attrs, err := pkcs11mgr.GetObjectAttributes(keyHandle, *session)
-// 	if err != nil {
-// 		return EncryptedSecret{}, err
-// 	}
-// 	mgrpkcs11.LogoutSession(session)
-// 	return EncryptedSecret{
-// 		EncryptedData: base64.StdEncoding.EncodeToString(encrypted),
-// 		IV:            base64.StdEncoding.EncodeToString(iv),
-// 		Id:            attrs.Id,
-// 		KeyLabel:      constants.LABEL_ENCRYPTION_KEY_INTERNAL_AES256,
-// 	}, nil
-// }
+func genSecret(serviceID string) error {
+
+	filter := bson.M{"service_id": serviceID}
+	_, err := FindOneData(Client, factory.SsmConfig.Configuration.Mongodb.DBName, CollSecret, filter)
+	if err != nil {
+		logger.AppLog.Errorf("User not found: %v", err)
+		return err
+	}
+
+	password := generateSecurePassword(16)
+
+	// encrypt this secrets before storing in DB
+	secret, err := encryptSecret(password)
+	if err != nil {
+		return err
+	}
+
+	userSecret := UserSecret{
+		PasswordSecret: secret,
+		ServiceID:      serviceID,
+	}
+
+	if _, err = InsertData(Client, factory.SsmConfig.Configuration.Mongodb.DBName, CollSecret, userSecret); err != nil {
+		return err
+	}
+
+	file, err := os.OpenFile("/tmp/user_secret/user_secrets.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		logger.AppLog.Errorf("Failed to create user_secrets.txt file: %v", err)
+		return err
+	}
+	defer file.Close()
+
+	envContent := fmt.Sprintf(`user_%s = "%s"
+	password_secret_%s = "%s"
+
+	`, serviceID, serviceID, serviceID, password)
+
+	_, err = file.WriteString(envContent)
+	if err != nil {
+		logger.AppLog.Errorf("Failed to write to user_secrets.txt file: %v", err)
+	}
+
+	return nil
+}
+
+func encryptSecret(secret string) (EncryptedSecret, error) {
+	password, err := hex.DecodeString(secret)
+	if err != nil {
+		return EncryptedSecret{}, err
+	}
+	session := mgrpkcs11.GetSession()
+	keyHandle, err := pkcs11mgr.FindKeyLabelReturnRandom(constants.LABEL_ENCRYPTION_KEY_INTERNAL_AES256, *session)
+	if err != nil {
+		return EncryptedSecret{}, err
+	}
+	iv := make([]byte, 16)
+	if err := safe.RandRead(iv); err != nil {
+		logger.AppLog.Errorf("Failed to generate IV: %v", err)
+		return EncryptedSecret{}, err
+	}
+	encrypted, err := pkcs11mgr.EncryptKey(keyHandle, iv, password, pkcs11.CKM_AES_CBC_PAD, *session)
+	if err != nil {
+		return EncryptedSecret{}, err
+	}
+	attrs, err := pkcs11mgr.GetObjectAttributes(keyHandle, *session)
+	if err != nil {
+		return EncryptedSecret{}, err
+	}
+	mgrpkcs11.LogoutSession(session)
+	return EncryptedSecret{
+		EncryptedData: hex.EncodeToString(encrypted),
+		IV:            hex.EncodeToString(iv),
+		Id:            attrs.Id,
+		KeyLabel:      constants.LABEL_ENCRYPTION_KEY_INTERNAL_AES256,
+	}, nil
+}
 
 func generateSecurePassword(length int) string {
 	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*"
@@ -101,5 +136,5 @@ func generateSecurePassword(length int) string {
 		password[i] = charset[randomIndex.Int64()]
 	}
 
-	return base64.StdEncoding.EncodeToString(password)
+	return hex.EncodeToString(password)
 }
