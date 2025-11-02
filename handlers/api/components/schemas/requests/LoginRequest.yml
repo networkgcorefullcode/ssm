@@ -1,5 +1,5 @@
 example:
-  username: admin
+  service_id: admin
   password: secret123
 properties:
   service_id:
