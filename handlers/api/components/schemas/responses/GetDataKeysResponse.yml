@@ -10,7 +10,7 @@ properties:
   keys:
     description: Array of key information
     items:
-      $ref: '../common/DataKeyInfo.yml'
+      $ref: '#/components/schemas/DataKeyInfo'
     type: array
 required:
 - keys

@@ -13,5 +13,5 @@ package models
 
 // GetKeyResponse
 type GetKeyResponse struct {
-	KeyInfo GetKeyResponseKeyInfo `json:"key_info"`
+	KeyInfo DataKeyInfo `json:"key_info"`
 }

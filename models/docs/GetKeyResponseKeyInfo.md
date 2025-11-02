@@ -1,4 +1,4 @@
-# GetKeyResponseKeyInfo
+# DataKeyInfo
 
 ## Properties
 
@@ -10,79 +10,79 @@ Name | Type | Description | Notes
 
 ## Methods
 
-### NewGetKeyResponseKeyInfo
+### NewDataKeyInfo
 
-`func NewGetKeyResponseKeyInfo(handle int32, id int32, sizeBits int32, ) *GetKeyResponseKeyInfo`
+`func NewDataKeyInfo(handle int32, id int32, sizeBits int32, ) *DataKeyInfo`
 
-NewGetKeyResponseKeyInfo instantiates a new GetKeyResponseKeyInfo object
+NewDataKeyInfo instantiates a new DataKeyInfo object
 This constructor will assign default values to properties that have it defined,
 and makes sure properties required by API are set, but the set of arguments
 will change when the set of required properties is changed
 
-### NewGetKeyResponseKeyInfoWithDefaults
+### NewDataKeyInfoWithDefaults
 
-`func NewGetKeyResponseKeyInfoWithDefaults() *GetKeyResponseKeyInfo`
+`func NewDataKeyInfoWithDefaults() *DataKeyInfo`
 
-NewGetKeyResponseKeyInfoWithDefaults instantiates a new GetKeyResponseKeyInfo object
+NewDataKeyInfoWithDefaults instantiates a new DataKeyInfo object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
 
 ### GetHandle
 
-`func (o *GetKeyResponseKeyInfo) GetHandle() int32`
+`func (o *DataKeyInfo) GetHandle() int32`
 
 GetHandle returns the Handle field if non-nil, zero value otherwise.
 
 ### GetHandleOk
 
-`func (o *GetKeyResponseKeyInfo) GetHandleOk() (*int32, bool)`
+`func (o *DataKeyInfo) GetHandleOk() (*int32, bool)`
 
 GetHandleOk returns a tuple with the Handle field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetHandle
 
-`func (o *GetKeyResponseKeyInfo) SetHandle(v int32)`
+`func (o *DataKeyInfo) SetHandle(v int32)`
 
 SetHandle sets Handle field to given value.
 
 
 ### GetId
 
-`func (o *GetKeyResponseKeyInfo) GetId() int32`
+`func (o *DataKeyInfo) GetId() int32`
 
 GetId returns the Id field if non-nil, zero value otherwise.
 
 ### GetIdOk
 
-`func (o *GetKeyResponseKeyInfo) GetIdOk() (*int32, bool)`
+`func (o *DataKeyInfo) GetIdOk() (*int32, bool)`
 
 GetIdOk returns a tuple with the Id field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetId
 
-`func (o *GetKeyResponseKeyInfo) SetId(v int32)`
+`func (o *DataKeyInfo) SetId(v int32)`
 
 SetId sets Id field to given value.
 
 
 ### GetSizeBits
 
-`func (o *GetKeyResponseKeyInfo) GetSizeBits() int32`
+`func (o *DataKeyInfo) GetSizeBits() int32`
 
 GetSizeBits returns the SizeBits field if non-nil, zero value otherwise.
 
 ### GetSizeBitsOk
 
-`func (o *GetKeyResponseKeyInfo) GetSizeBitsOk() (*int32, bool)`
+`func (o *DataKeyInfo) GetSizeBitsOk() (*int32, bool)`
 
 GetSizeBitsOk returns a tuple with the SizeBits field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetSizeBits
 
-`func (o *GetKeyResponseKeyInfo) SetSizeBits(v int32)`
+`func (o *DataKeyInfo) SetSizeBits(v int32)`
 
 SetSizeBits sets SizeBits field to given value.
 

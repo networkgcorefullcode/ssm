@@ -5,7 +5,7 @@ example:
     size_bits: 256
 properties:
   key_info:
-    $ref: '../common/DataKeyInfo.yml'
+    $ref: '#/components/schemas/DataKeyInfo'
 required:
 - key_info
 type: object

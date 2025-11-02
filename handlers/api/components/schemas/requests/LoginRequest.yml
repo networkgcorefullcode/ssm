@@ -2,8 +2,8 @@ example:
   username: admin
   password: secret123
 properties:
-  username:
-    description: Username for authentication
+  service_id:
+    description: service_id for authentication
     example: admin
     minLength: 1
     type: string

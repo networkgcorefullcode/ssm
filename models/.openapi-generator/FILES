@@ -29,7 +29,7 @@ docs/GetDataKeysRequest.md
 docs/GetDataKeysResponse.md
 docs/GetKeyRequest.md
 docs/GetKeyResponse.md
-docs/GetKeyResponseKeyInfo.md
+docs/DataKeyInfo.md
 docs/HealthAPI.md
 docs/HealthCheckResponse.md
 docs/KeyManagementAPI.md

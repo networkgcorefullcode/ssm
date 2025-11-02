@@ -4,13 +4,13 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Keys** | [**[]GetKeyResponseKeyInfo**](GetKeyResponseKeyInfo.md) | Array of key information | 
+**Keys** | [**[]DataKeyInfo**](DataKeyInfo.md) | Array of key information | 
 
 ## Methods
 
 ### NewGetDataKeysResponse
 
-`func NewGetDataKeysResponse(keys []GetKeyResponseKeyInfo, ) *GetDataKeysResponse`
+`func NewGetDataKeysResponse(keys []DataKeyInfo, ) *GetDataKeysResponse`
 
 NewGetDataKeysResponse instantiates a new GetDataKeysResponse object
 This constructor will assign default values to properties that have it defined,
@@ -27,20 +27,20 @@ but it doesn't guarantee that properties required by API are set
 
 ### GetKeys
 
-`func (o *GetDataKeysResponse) GetKeys() []GetKeyResponseKeyInfo`
+`func (o *GetDataKeysResponse) GetKeys() []DataKeyInfo`
 
 GetKeys returns the Keys field if non-nil, zero value otherwise.
 
 ### GetKeysOk
 
-`func (o *GetDataKeysResponse) GetKeysOk() (*[]GetKeyResponseKeyInfo, bool)`
+`func (o *GetDataKeysResponse) GetKeysOk() (*[]DataKeyInfo, bool)`
 
 GetKeysOk returns a tuple with the Keys field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetKeys
 
-`func (o *GetDataKeysResponse) SetKeys(v []GetKeyResponseKeyInfo)`
+`func (o *GetDataKeysResponse) SetKeys(v []DataKeyInfo)`
 
 SetKeys sets Keys field to given value.
 

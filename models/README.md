@@ -129,7 +129,7 @@ Class | Method | HTTP request | Description
  - [GetDataKeysResponse](docs/GetDataKeysResponse.md)
  - [GetKeyRequest](docs/GetKeyRequest.md)
  - [GetKeyResponse](docs/GetKeyResponse.md)
- - [GetKeyResponseKeyInfo](docs/GetKeyResponseKeyInfo.md)
+ - [DataKeyInfo](docs/DataKeyInfo.md)
  - [HealthCheckResponse](docs/HealthCheckResponse.md)
  - [LoginRequest](docs/LoginRequest.md)
  - [LoginResponse](docs/LoginResponse.md)
