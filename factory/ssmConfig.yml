@@ -17,7 +17,11 @@ configuration:
   keyFile: server.key
   maxSessions: 5
   isSecure: true             # Enable security middlewares (CORS, rate limiting, authentication)
-  # handlersPoolConect: true
+  # MongoDB Database Configuration
+  mongodb:
+    name: "ssm_db"           # Database connection name identifier
+    url: "mongodb://localhost:27017"  # MongoDB connection string
+    dbName: "secure_storage"   # Name of the database to use
   
   # Rate Limiting Configuration - Controls API request throttling per client IP
   rateLimit:
@@ -60,14 +64,6 @@ configuration:
     allowWebSockets: false     # Allow WebSocket origins (ws:// and wss://)
     allowFiles: false          # Allow file:// origins (security risk - use cautiously)
     optionsResponseStatusCode: 204  # HTTP status code returned for OPTIONS preflight requests
-
-  # MongoDB Database Configuration
-  mongodb:
-    name: "ssm_db"           # Database connection name identifier
-    url: "mongodb://localhost:27017"  # MongoDB connection string
-    dbName: "secure_storage"   # Name of the database to use
-
-  
 
 logger:
   SSM:

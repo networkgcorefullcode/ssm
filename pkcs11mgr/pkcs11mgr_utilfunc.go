@@ -5,6 +5,7 @@ import (
 	"math/rand/v2"
 
 	"github.com/miekg/pkcs11"
+	constants "github.com/networkgcorefullcode/ssm/const"
 	"github.com/networkgcorefullcode/ssm/logger"
 	"github.com/networkgcorefullcode/ssm/utils"
 )
@@ -41,7 +42,7 @@ func FindKey(label string, id int32, s Session) (pkcs11.ObjectHandle, error) {
 	}
 	if len(handles) == 0 {
 		logger.AppLog.Warnf("No key found with label: %s", label)
-		return 0, errors.New("error Key With The Label Not Found")
+		return 0, errors.New(constants.ERROR_STRING_KEY_NOT_FOUND)
 	}
 	logger.AppLog.Infof("Key found: handle=%v", handles[0])
 	return handles[0], nil
@@ -71,7 +72,7 @@ func FindKeysLabel(label string, s Session) ([]pkcs11.ObjectHandle, error) {
 		if len(new_handles) == 0 {
 			if len(handles) == 0 {
 				logger.AppLog.Warnf("No key found with label: %s", label)
-				return nil, errors.New("error Key With The Label Not Found")
+				return nil, errors.New(constants.ERROR_STRING_KEY_NOT_FOUND)
 			}
 			logger.AppLog.Info("Key found is finished")
 			return handles, nil
@@ -106,7 +107,7 @@ func FindAllKeys(s Session) (map[string][]pkcs11.ObjectHandle, error) {
 		if len(newHandles) == 0 {
 			if len(allHandles) == 0 {
 				logger.AppLog.Warnf("No key found")
-				return map[string][]pkcs11.ObjectHandle{}, errors.New("error Key With The Label Not Found")
+				return map[string][]pkcs11.ObjectHandle{}, errors.New(constants.ERROR_STRING_KEY_NOT_FOUND)
 			}
 			break
 		}
@@ -208,4 +209,28 @@ func GetObjectLabel(handle pkcs11.ObjectHandle, s Session) (string, error) {
 	}
 
 	return "", nil
+}
+
+// ReturnLastIDForLabel get a label and return the last id used plus one
+func ReturnLastIDForLabel(label string, s Session) (int32, error) {
+	keys, err := FindKeysLabel(label, s)
+	if err != nil && err.Error() == constants.ERROR_STRING_KEY_NOT_FOUND {
+		return 1, nil
+	}
+	if err != nil {
+		return 0, err
+	}
+
+	var maxID int32
+	for _, key := range keys {
+		attr, err := GetObjectAttributes(key, s)
+		if err != nil {
+			return 0, err
+		}
+		if attr.Id > maxID {
+			maxID = attr.Id
+		}
+	}
+
+	return maxID + 1, nil
 }

@@ -26,7 +26,7 @@ func initDatabase(client_pass *mongo.Client, url string) error {
 	return nil
 }
 
-func init() {
+func InitDB() {
 	if err := initDatabase(Client, factory.SsmConfig.Configuration.Mongodb.Url); err != nil {
 		logger.AppLog.Errorf("Failed to initialize database: %v", err)
 		panic(err)

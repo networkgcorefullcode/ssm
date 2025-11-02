@@ -1,6 +1,8 @@
 package pkcs11mgr
 
 import (
+	"errors"
+
 	constants "github.com/networkgcorefullcode/ssm/const"
 
 	"github.com/miekg/pkcs11"
@@ -21,58 +23,81 @@ func GetAuditPublicKey() pkcs11.ObjectHandle {
 
 // InitAuditKey initializes the audit private key by finding it in the HSM
 func InitAuditKey(s *Session) error {
-	template := []*pkcs11.Attribute{
-		pkcs11.NewAttribute(pkcs11.CKA_CLASS, pkcs11.CKO_PRIVATE_KEY),
-		pkcs11.NewAttribute(pkcs11.CKA_LABEL, constants.AuditKeyLabel),
-		pkcs11.NewAttribute(pkcs11.CKA_SIGN, true),
-	}
-
-	if err := s.Ctx.FindObjectsInit(s.Handle, template); err != nil {
-		logger.AppLog.Errorf("Failed to initialize audit key search: %v", err)
-		return err
-	}
-	defer s.Ctx.FindObjectsFinal(s.Handle)
-
-	obj, _, err := s.Ctx.FindObjects(s.Handle, 1)
+	// Try to find the private key using the utility function
+	privateKeyHandle, err := findPrivateKeyByLabel(constants.AuditKeyLabel, *s)
 	if err != nil {
-		logger.AppLog.Errorf("Failed to find audit private key: %v", err)
-		return err
-	}
-
-	if len(obj) == 0 {
 		logger.AppLog.Warn("Audit private key not found, will generate new key pair")
 		return generateAuditKeyPair(s)
 	}
 
-	auditPrivateKey = obj[0]
+	auditPrivateKey = privateKeyHandle
 
-	// Load the corresponding public key
-	pubTemplate := []*pkcs11.Attribute{
-		pkcs11.NewAttribute(pkcs11.CKA_CLASS, pkcs11.CKO_PUBLIC_KEY),
-		pkcs11.NewAttribute(pkcs11.CKA_LABEL, constants.AuditKeyLabel),
-		pkcs11.NewAttribute(pkcs11.CKA_VERIFY, true),
-	}
-
-	if err := s.Ctx.FindObjectsInit(s.Handle, pubTemplate); err != nil {
-		logger.AppLog.Errorf("Failed to initialize audit public key search: %v", err)
-		return err
-	}
-	defer s.Ctx.FindObjectsFinal(s.Handle)
-
-	pubObj, _, err := s.Ctx.FindObjects(s.Handle, 1)
+	// Try to find the corresponding public key
+	publicKeyHandle, err := findPublicKeyByLabel(constants.AuditKeyLabel, *s)
 	if err != nil {
-		logger.AppLog.Errorf("Failed to find audit public key: %v", err)
-		return err
-	}
-
-	if len(pubObj) > 0 {
-		auditPublicKey = pubObj[0]
-		logger.AppLog.Info("Audit key pair loaded successfully")
-	} else {
 		logger.AppLog.Warn("Audit public key not found")
+	} else {
+		auditPublicKey = publicKeyHandle
+		logger.AppLog.Info("Audit key pair loaded successfully")
 	}
 
 	return nil
+}
+
+// findPrivateKeyByLabel finds a private key by its label
+func findPrivateKeyByLabel(label string, s Session) (pkcs11.ObjectHandle, error) {
+	logger.AppLog.Infof("Searching for private key by label: %s", label)
+	template := []*pkcs11.Attribute{
+		pkcs11.NewAttribute(pkcs11.CKA_CLASS, pkcs11.CKO_PRIVATE_KEY),
+		pkcs11.NewAttribute(pkcs11.CKA_LABEL, label),
+		pkcs11.NewAttribute(pkcs11.CKA_SIGN, true),
+	}
+
+	if err := s.Ctx.FindObjectsInit(s.Handle, template); err != nil {
+		logger.AppLog.Errorf("FindObjectsInit failed: %v", err)
+		return 0, err
+	}
+	defer s.Ctx.FindObjectsFinal(s.Handle)
+
+	handles, _, err := s.Ctx.FindObjects(s.Handle, 1)
+	if err != nil {
+		logger.AppLog.Errorf("FindObjects failed: %v", err)
+		return 0, err
+	}
+	if len(handles) == 0 {
+		logger.AppLog.Warnf("No private key found with label: %s", label)
+		return 0, errors.New("error Private Key With The Label Not Found")
+	}
+	logger.AppLog.Infof("Private key found: handle=%v", handles[0])
+	return handles[0], nil
+}
+
+// findPublicKeyByLabel finds a public key by its label
+func findPublicKeyByLabel(label string, s Session) (pkcs11.ObjectHandle, error) {
+	logger.AppLog.Infof("Searching for public key by label: %s", label)
+	template := []*pkcs11.Attribute{
+		pkcs11.NewAttribute(pkcs11.CKA_CLASS, pkcs11.CKO_PUBLIC_KEY),
+		pkcs11.NewAttribute(pkcs11.CKA_LABEL, label),
+		pkcs11.NewAttribute(pkcs11.CKA_VERIFY, true),
+	}
+
+	if err := s.Ctx.FindObjectsInit(s.Handle, template); err != nil {
+		logger.AppLog.Errorf("FindObjectsInit failed: %v", err)
+		return 0, err
+	}
+	defer s.Ctx.FindObjectsFinal(s.Handle)
+
+	handles, _, err := s.Ctx.FindObjects(s.Handle, 1)
+	if err != nil {
+		logger.AppLog.Errorf("FindObjects failed: %v", err)
+		return 0, err
+	}
+	if len(handles) == 0 {
+		logger.AppLog.Warnf("No public key found with label: %s", label)
+		return 0, errors.New("error Public Key With The Label Not Found")
+	}
+	logger.AppLog.Infof("Public key found: handle=%v", handles[0])
+	return handles[0], nil
 }
 
 // generateAuditKeyPair generates a new RSA key pair for audit signing

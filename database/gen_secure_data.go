@@ -53,9 +53,9 @@ func genSecret(serviceID string) error {
 
 	filter := bson.M{"service_id": serviceID}
 	_, err := FindOneData(Client, factory.SsmConfig.Configuration.Mongodb.DBName, CollSecret, filter)
-	if err != nil {
-		logger.AppLog.Errorf("User not found: %v", err)
-		return err
+	if err == nil {
+		logger.AppLog.Errorf("User found: %v", err)
+		return nil
 	}
 
 	password := generateSecurePassword(16)
@@ -71,11 +71,14 @@ func genSecret(serviceID string) error {
 		ServiceID:      serviceID,
 	}
 
-	if _, err = InsertData(Client, factory.SsmConfig.Configuration.Mongodb.DBName, CollSecret, userSecret); err != nil {
+	// Create the directory if it doesn't exist
+	secretDir := "/tmp/user-secret-ssm"
+	if err := os.MkdirAll(secretDir, 0755); err != nil {
+		logger.AppLog.Errorf("Failed to create directory %s: %v", secretDir, err)
 		return err
 	}
 
-	file, err := os.OpenFile("/tmp/user_secret/user_secrets.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	file, err := os.OpenFile("/tmp/user-secret-ssm/user_secrets.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to create user_secrets.txt file: %v", err)
 		return err
@@ -90,6 +93,10 @@ func genSecret(serviceID string) error {
 	_, err = file.WriteString(envContent)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to write to user_secrets.txt file: %v", err)
+	}
+
+	if _, err = InsertData(Client, factory.SsmConfig.Configuration.Mongodb.DBName, CollSecret, userSecret); err != nil {
+		return err
 	}
 
 	return nil

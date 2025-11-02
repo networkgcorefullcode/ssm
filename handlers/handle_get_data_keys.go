@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	constants "github.com/networkgcorefullcode/ssm/const"
 	"github.com/networkgcorefullcode/ssm/logger"
 	"github.com/networkgcorefullcode/ssm/models"
 	"github.com/networkgcorefullcode/ssm/pkcs11mgr"
@@ -38,7 +39,7 @@ func HandleGetDataKeys(c *gin.Context) {
 
 	logger.AppLog.Infof("Searching key in HSM - using the Label: %s", label)
 	handles, err := pkcs11mgr.FindKeysLabel(label, *s)
-	if err != nil && err.Error() == "error Key With The Label Not Found" {
+	if err != nil && err.Error() == constants.ERROR_STRING_KEY_NOT_FOUND {
 		resp := models.GetDataKeysResponse{
 			Keys: make([]models.DataKeyInfo, 0),
 		}

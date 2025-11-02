@@ -144,6 +144,11 @@ func (s *SSM) Start() error {
 	pkcs11mgr.SetPKCS11Manager(pkcsManager)
 	database.SetPKCS11Manager(pkcsManager)
 
+	// Initialize PKCS11 functions and constants
+	pkcs11mgr.InitPKCS11()
+	// Initialize the database functions
+	database.InitDB()
+
 	// Build Gin router with all endpoints
 	router := CreateGinRouter()
 

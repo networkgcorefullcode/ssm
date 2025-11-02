@@ -5,3 +5,4 @@ go-structs-only
 ssm.exe 
 ssm
 vendor
+.vscode

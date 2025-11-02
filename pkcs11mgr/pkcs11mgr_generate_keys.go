@@ -24,6 +24,15 @@ func GenerateAESKey(label string, id int32, bits int, s Session) (pkcs11.ObjectH
 		pkcs11.NewAttribute(pkcs11.CKA_SENSITIVE, true),
 		pkcs11.NewAttribute(pkcs11.CKA_EXTRACTABLE, false),
 	}
+	if id == 0 {
+		logger.AppLog.Info("The id is zero, return the last id + 1")
+		var err error
+		id, err = ReturnLastIDForLabel(label, s)
+		if err != nil {
+			logger.AppLog.Errorf("Error detect %s", err)
+			return 0, err
+		}
+	}
 
 	// Check if key already exists before creating it
 	existingHandle, err := FindKey(label, id, s)
@@ -60,7 +69,15 @@ func GenerateDESKey(label string, id int32, s Session) (pkcs11.ObjectHandle, err
 		pkcs11.NewAttribute(pkcs11.CKA_SENSITIVE, true),
 		pkcs11.NewAttribute(pkcs11.CKA_EXTRACTABLE, false),
 	}
-
+	if id == 0 {
+		logger.AppLog.Info("The id is zero, return rhe last id + 1")
+		var err error
+		id, err = ReturnLastIDForLabel(label, s)
+		if err != nil {
+			logger.AppLog.Errorf("Error detect %s", err)
+			return 0, err
+		}
+	}
 	// Check if key already exists before creating it
 	existingHandle, err := FindKey(label, id, s)
 	if err == nil && existingHandle != 0 {
@@ -96,7 +113,15 @@ func GenerateDES3Key(label string, id int32, s Session) (pkcs11.ObjectHandle, er
 		pkcs11.NewAttribute(pkcs11.CKA_SENSITIVE, true),
 		pkcs11.NewAttribute(pkcs11.CKA_EXTRACTABLE, false),
 	}
-
+	if id == 0 {
+		logger.AppLog.Info("The id is zero, return rhe last id + 1")
+		var err error
+		id, err = ReturnLastIDForLabel(label, s)
+		if err != nil {
+			logger.AppLog.Errorf("Error detect %s", err)
+			return 0, err
+		}
+	}
 	// Check if key already exists before creating it
 	existingHandle, err := FindKey(label, id, s)
 	if err == nil && existingHandle != 0 {
