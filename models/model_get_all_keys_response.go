@@ -14,7 +14,7 @@ package models
 // GetAllKeysResponse
 type GetAllKeysResponse struct {
 	// Map of label to array of key information
-	KeysByLabel map[string][]GetKeyResponseKeyInfo `json:"keys_by_label"`
+	KeysByLabel map[string][]DataKeyInfo `json:"keys_by_label"`
 	// Total number of keys found
 	TotalKeys int32 `json:"total_keys"`
 	// Total number of unique labels

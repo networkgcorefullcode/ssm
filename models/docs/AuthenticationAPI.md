@@ -25,11 +25,11 @@ import (
 	"context"
 	"fmt"
 	"os"
-	openapiclient "openapiclient github.com/networkgcorefullcode/ssm/models"
+	openapiclient "github.com/networkgcorefullcode/ssm/models"
 )
 
 func main() {
-	loginRequest := *openapiclient.NewLoginRequest("admin", "secret123") // LoginRequest | 
+	loginRequest := *openapiclient.NewLoginRequest("secret123") // LoginRequest | 
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)

@@ -25,7 +25,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	openapiclient "openapiclient github.com/networkgcorefullcode/ssm/models"
+	openapiclient "github.com/networkgcorefullcode/ssm/models"
 )
 
 func main() {

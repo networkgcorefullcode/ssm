@@ -20,7 +20,7 @@ properties:
     additionalProperties:
       type: array
       items:
-        $ref: '#/components/schemas/DataKeyInfo'
+        $ref: '../common/DataKeyInfo.yml'
   total_keys:
     description: Total number of keys found
     example: 3

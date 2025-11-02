@@ -14,5 +14,5 @@ package models
 // GetDataKeysResponse
 type GetDataKeysResponse struct {
 	// Array of key information
-	Keys []GetKeyResponseKeyInfo `json:"keys"`
+	Keys []DataKeyInfo `json:"keys"`
 }

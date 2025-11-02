@@ -437,6 +437,11 @@ components:
       $ref: 'components/security/auth.yml#/apiKeyAuth'
   
   schemas:
+    # Common schemas
+    ProblemDetails:
+      $ref: 'components/schemas/common/ProblemDetails.yml'
+    # DataKeyInfo:
+    #   $ref: 'components/schemas/common/DataKeyInfo.yml'
     # Request schemas
     GenAESKeyRequest:
       $ref: 'components/schemas/requests/GenAESKeyRequest.yml'
@@ -489,11 +494,6 @@ components:
     LoginResponse:
       $ref: 'components/schemas/responses/LoginResponse.yml'
     
-    # Common schemas
-    ProblemDetails:
-      $ref: 'components/schemas/common/ProblemDetails.yml'
-    DataKeyInfo:
-      $ref: 'components/schemas/common/DataKeyInfo.yml'
 
   responses:
     BadRequest:

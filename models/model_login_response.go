@@ -14,9 +14,7 @@ package models
 // LoginResponse
 type LoginResponse struct {
 	// JWT access token
-	AccessToken string `json:"access_token"`
+	Token string `json:"token"`
 	// Token type
-	TokenType string `json:"token_type"`
-	// Token expiration time in seconds
-	ExpiresIn int32 `json:"expires_in"`
+	Message string `json:"message"`
 }

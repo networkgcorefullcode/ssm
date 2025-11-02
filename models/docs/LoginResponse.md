@@ -4,15 +4,14 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**AccessToken** | **string** | JWT access token | 
-**TokenType** | **string** | Token type | 
-**ExpiresIn** | **int32** | Token expiration time in seconds | 
+**Token** | **string** | JWT access token | 
+**Message** | Pointer to **string** | Token type | [optional] 
 
 ## Methods
 
 ### NewLoginResponse
 
-`func NewLoginResponse(accessToken string, tokenType string, expiresIn int32, ) *LoginResponse`
+`func NewLoginResponse(token string, ) *LoginResponse`
 
 NewLoginResponse instantiates a new LoginResponse object
 This constructor will assign default values to properties that have it defined,
@@ -27,65 +26,50 @@ NewLoginResponseWithDefaults instantiates a new LoginResponse object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
 
-### GetAccessToken
+### GetToken
 
-`func (o *LoginResponse) GetAccessToken() string`
+`func (o *LoginResponse) GetToken() string`
 
-GetAccessToken returns the AccessToken field if non-nil, zero value otherwise.
+GetToken returns the Token field if non-nil, zero value otherwise.
 
-### GetAccessTokenOk
+### GetTokenOk
 
-`func (o *LoginResponse) GetAccessTokenOk() (*string, bool)`
+`func (o *LoginResponse) GetTokenOk() (*string, bool)`
 
-GetAccessTokenOk returns a tuple with the AccessToken field if it's non-nil, zero value otherwise
+GetTokenOk returns a tuple with the Token field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetAccessToken
+### SetToken
 
-`func (o *LoginResponse) SetAccessToken(v string)`
+`func (o *LoginResponse) SetToken(v string)`
 
-SetAccessToken sets AccessToken field to given value.
+SetToken sets Token field to given value.
 
 
-### GetTokenType
+### GetMessage
 
-`func (o *LoginResponse) GetTokenType() string`
+`func (o *LoginResponse) GetMessage() string`
 
-GetTokenType returns the TokenType field if non-nil, zero value otherwise.
+GetMessage returns the Message field if non-nil, zero value otherwise.
 
-### GetTokenTypeOk
+### GetMessageOk
 
-`func (o *LoginResponse) GetTokenTypeOk() (*string, bool)`
+`func (o *LoginResponse) GetMessageOk() (*string, bool)`
 
-GetTokenTypeOk returns a tuple with the TokenType field if it's non-nil, zero value otherwise
+GetMessageOk returns a tuple with the Message field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetTokenType
+### SetMessage
 
-`func (o *LoginResponse) SetTokenType(v string)`
+`func (o *LoginResponse) SetMessage(v string)`
 
-SetTokenType sets TokenType field to given value.
+SetMessage sets Message field to given value.
 
+### HasMessage
 
-### GetExpiresIn
+`func (o *LoginResponse) HasMessage() bool`
 
-`func (o *LoginResponse) GetExpiresIn() int32`
-
-GetExpiresIn returns the ExpiresIn field if non-nil, zero value otherwise.
-
-### GetExpiresInOk
-
-`func (o *LoginResponse) GetExpiresInOk() (*int32, bool)`
-
-GetExpiresInOk returns a tuple with the ExpiresIn field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetExpiresIn
-
-`func (o *LoginResponse) SetExpiresIn(v int32)`
-
-SetExpiresIn sets ExpiresIn field to given value.
-
+HasMessage returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

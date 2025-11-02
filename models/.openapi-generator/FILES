@@ -29,7 +29,6 @@ docs/GetDataKeysRequest.md
 docs/GetDataKeysResponse.md
 docs/GetKeyRequest.md
 docs/GetKeyResponse.md
-docs/DataKeyInfo.md
 docs/HealthAPI.md
 docs/HealthCheckResponse.md
 docs/KeyManagementAPI.md
@@ -61,7 +60,6 @@ model_get_data_keys_request.go
 model_get_data_keys_response.go
 model_get_key_request.go
 model_get_key_response.go
-model_get_key_response_key_info.go
 model_health_check_response.go
 model_login_request.go
 model_login_response.go

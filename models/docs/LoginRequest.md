@@ -4,14 +4,14 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Username** | **string** | Username for authentication | 
+**ServiceId** | Pointer to **string** | service_id for authentication | [optional] 
 **Password** | **string** | Password for authentication | 
 
 ## Methods
 
 ### NewLoginRequest
 
-`func NewLoginRequest(username string, password string, ) *LoginRequest`
+`func NewLoginRequest(password string, ) *LoginRequest`
 
 NewLoginRequest instantiates a new LoginRequest object
 This constructor will assign default values to properties that have it defined,
@@ -26,25 +26,30 @@ NewLoginRequestWithDefaults instantiates a new LoginRequest object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
 
-### GetUsername
+### GetServiceId
 
-`func (o *LoginRequest) GetUsername() string`
+`func (o *LoginRequest) GetServiceId() string`
 
-GetUsername returns the Username field if non-nil, zero value otherwise.
+GetServiceId returns the ServiceId field if non-nil, zero value otherwise.
 
-### GetUsernameOk
+### GetServiceIdOk
 
-`func (o *LoginRequest) GetUsernameOk() (*string, bool)`
+`func (o *LoginRequest) GetServiceIdOk() (*string, bool)`
 
-GetUsernameOk returns a tuple with the Username field if it's non-nil, zero value otherwise
+GetServiceIdOk returns a tuple with the ServiceId field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetUsername
+### SetServiceId
 
-`func (o *LoginRequest) SetUsername(v string)`
+`func (o *LoginRequest) SetServiceId(v string)`
 
-SetUsername sets Username field to given value.
+SetServiceId sets ServiceId field to given value.
 
+### HasServiceId
+
+`func (o *LoginRequest) HasServiceId() bool`
+
+HasServiceId returns a boolean if a field has been set.
 
 ### GetPassword
 

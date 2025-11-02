@@ -13,8 +13,8 @@ package models
 
 // LoginRequest
 type LoginRequest struct {
-	// Username for authentication
-	Username string `json:"username"`
+	// service_id for authentication
+	ServiceId string `json:"service_id"`
 	// Password for authentication
 	Password string `json:"password"`
 }

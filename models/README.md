@@ -38,7 +38,7 @@ go get golang.org/x/net/context
 Put the package under your project folder and add the following in import:
 
 ```go
-import models "openapiclient github.com/networkgcorefullcode/ssm/models"
+import models "github.com/GIT_USER_ID/GIT_REPO_ID"
 ```
 
 To use a proxy, set the environment variable `HTTP_PROXY`:
@@ -129,7 +129,6 @@ Class | Method | HTTP request | Description
  - [GetDataKeysResponse](docs/GetDataKeysResponse.md)
  - [GetKeyRequest](docs/GetKeyRequest.md)
  - [GetKeyResponse](docs/GetKeyResponse.md)
- - [DataKeyInfo](docs/DataKeyInfo.md)
  - [HealthCheckResponse](docs/HealthCheckResponse.md)
  - [LoginRequest](docs/LoginRequest.md)
  - [LoginResponse](docs/LoginResponse.md)

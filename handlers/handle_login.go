@@ -29,7 +29,7 @@ func HandleLogin(c *gin.Context) {
 	client := database.Client
 
 	// Query user from MongoDB
-	filter := bson.M{"service_id": loginReq.ServiceID}
+	filter := bson.M{"service_id": loginReq.ServiceId}
 	userData, err := database.FindOneData(client, factory.SsmConfig.Configuration.Mongodb.DBName, database.CollSecret, filter)
 	if err != nil {
 		logger.AppLog.Errorf("User not found: %v", err)
@@ -90,7 +90,7 @@ func HandleLogin(c *gin.Context) {
 
 	// Compare passwords
 	if string(decryptedPassword) != loginReq.Password {
-		logger.AppLog.Warnf("Password mismatch for user: %s", loginReq.ServiceID)
+		logger.AppLog.Warnf("Password mismatch for user: %s", loginReq.ServiceId)
 		sendProblemDetails(c, "Unauthorized", "Invalid service ID or password", "invalid_credentials", http.StatusUnauthorized, c.Request.URL.Path)
 		return
 	}
