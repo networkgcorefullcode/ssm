@@ -1,6 +1,8 @@
 package pkcs11mgr
 
 import (
+	"time"
+
 	constants "github.com/networkgcorefullcode/ssm/const"
 	"github.com/networkgcorefullcode/ssm/logger"
 )
@@ -17,6 +19,13 @@ func InitPKCS11() {
 
 	if err := InitAuditKey(session); err != nil {
 		logger.AppLog.Errorf("Failed to initialize audit key: %v", err)
+		return
+	}
+
+	time.Sleep(time.Second * 2)
+
+	if err := InitJWTKey(session); err != nil {
+		logger.AppLog.Errorf("Failed to initialize jwt key: %v", err)
 		return
 	}
 

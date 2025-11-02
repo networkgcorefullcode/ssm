@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/hex"
-	"encoding/json"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -37,18 +36,10 @@ func HandleLogin(c *gin.Context) {
 		return
 	}
 
-	// Parse user data
+	// Decodify using bson
 	user := database.UserSecret{}
-
-	// Convert userData to JSON and then unmarshal to user struct
-	jsonData, err := json.Marshal(userData)
-	if err != nil {
-		logger.AppLog.Errorf("Failed to marshal user data: %v", err)
-		sendProblemDetails(c, "Internal Server Error", "User data processing error", "internal_error", http.StatusInternalServerError, c.Request.URL.Path)
-		return
-	}
-
-	if err := json.Unmarshal(jsonData, &user); err != nil {
+	bsonBytes, _ := bson.Marshal(userData)
+	if err := bson.Unmarshal(bsonBytes, &user); err != nil {
 		logger.AppLog.Errorf("Failed to unmarshal user data: %v", err)
 		sendProblemDetails(c, "Internal Server Error", "User data processing error", "internal_error", http.StatusInternalServerError, c.Request.URL.Path)
 		return
@@ -89,7 +80,7 @@ func HandleLogin(c *gin.Context) {
 	}
 
 	// Compare passwords
-	if string(decryptedPassword) != loginReq.Password {
+	if hex.EncodeToString(decryptedPassword) != loginReq.Password {
 		logger.AppLog.Warnf("Password mismatch for user: %s", loginReq.ServiceId)
 		sendProblemDetails(c, "Unauthorized", "Invalid service ID or password", "invalid_credentials", http.StatusUnauthorized, c.Request.URL.Path)
 		return

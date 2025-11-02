@@ -13,23 +13,24 @@ func CreateGinRouter() *gin.Engine {
 	// Use ReleaseMode unless verbose debugging is required; Gin still logs via its middleware.
 	// Mode can be adjusted by env GIN_MODE if needed.
 	r := gin.New()
-	r.Use(gin.Recovery()) // recover from panics and write 500
-	r.Use(gin.Logger())   // basic logging middleware
+	r.Use(gin.Recovery())
+	r.Use(gin.Logger())
 
-	// Initialize rate limiter with configuration
+	// Initialize rate limiter
 	middleware.InitRateLimiter(factory.SsmConfig.GetRateLimit())
 
-	// create router crypto group
-	rc := r.Group("/crypto")
-
-	// middlewares for security, logging, tracing, etc.
+	// Aplicar TODOS los middlewares globales PRIMERO
 	if factory.SsmConfig.Configuration.IsSecure {
 		logger.AppLog.Info("Configuring secure middlewares")
-		r.Use(middleware.AuditRequest)
-		middleware.ConfigureCORS(r) // configure CORS if needed
-		// r.Use(middleware.ValidateRequest)     // validate request schema, headers, etc.
-		r.Use(middleware.SecureRequest)          // secure middleware for headers, rate limiting, etc.
-		rc.Use(middleware.AuthenticateRequest()) // authentication middleware
+		r.Use(middleware.AuditRequest) // Ahora aplica a TODAS las rutas
+		middleware.ConfigureCORS(r)
+		r.Use(middleware.SecureRequest)
+	}
+
+	// CREAR grupos DESPUÉS de aplicar middlewares globales
+	rc := r.Group("/crypto")
+	if factory.SsmConfig.Configuration.IsSecure {
+		rc.Use(middleware.AuthenticateRequest()) // Middleware solo para /crypto
 	}
 
 	// Endpoints

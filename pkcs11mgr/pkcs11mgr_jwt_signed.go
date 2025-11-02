@@ -44,55 +44,22 @@ func GetJWTPublicKey() pkcs11.ObjectHandle {
 
 // InitJWTKey initializes the JWT signing key by finding it in the HSM
 func InitJWTKey(s *Session) error {
-	template := []*pkcs11.Attribute{
-		pkcs11.NewAttribute(pkcs11.CKA_CLASS, pkcs11.CKO_PRIVATE_KEY),
-		pkcs11.NewAttribute(pkcs11.CKA_LABEL, constants.JWTKeyLabel),
-		pkcs11.NewAttribute(pkcs11.CKA_SIGN, true),
-	}
-
-	if err := s.Ctx.FindObjectsInit(s.Handle, template); err != nil {
-		logger.AppLog.Errorf("Failed to initialize JWT key search: %v", err)
-		return err
-	}
-	defer s.Ctx.FindObjectsFinal(s.Handle)
-
-	obj, _, err := s.Ctx.FindObjects(s.Handle, 1)
+	// Try to find the private key using the shared utility within the package
+	privateKeyHandle, err := findPrivateKeyByLabel(constants.JWTKeyLabel, *s)
 	if err != nil {
-		logger.AppLog.Errorf("Failed to find JWT private key: %v", err)
-		return err
-	}
-
-	if len(obj) == 0 {
 		logger.AppLog.Warn("JWT private key not found, will generate new key pair")
 		return generateJWTKeyPair(s)
 	}
 
-	jwtPrivateKey = obj[0]
+	jwtPrivateKey = privateKeyHandle
 
-	// Load the corresponding public key
-	pubTemplate := []*pkcs11.Attribute{
-		pkcs11.NewAttribute(pkcs11.CKA_CLASS, pkcs11.CKO_PUBLIC_KEY),
-		pkcs11.NewAttribute(pkcs11.CKA_LABEL, constants.JWTKeyLabel),
-		pkcs11.NewAttribute(pkcs11.CKA_VERIFY, true),
-	}
-
-	if err := s.Ctx.FindObjectsInit(s.Handle, pubTemplate); err != nil {
-		logger.AppLog.Errorf("Failed to initialize JWT public key search: %v", err)
-		return err
-	}
-	defer s.Ctx.FindObjectsFinal(s.Handle)
-
-	pubObj, _, err := s.Ctx.FindObjects(s.Handle, 1)
+	// Try to find the corresponding public key
+	publicKeyHandle, err := findPublicKeyByLabel(constants.JWTKeyLabel, *s)
 	if err != nil {
-		logger.AppLog.Errorf("Failed to find JWT public key: %v", err)
-		return err
-	}
-
-	if len(pubObj) > 0 {
-		jwtPublicKey = pubObj[0]
-		logger.AppLog.Info("JWT key pair loaded successfully")
-	} else {
 		logger.AppLog.Warn("JWT public key not found")
+	} else {
+		jwtPublicKey = publicKeyHandle
+		logger.AppLog.Info("JWT key pair loaded successfully")
 	}
 
 	return nil

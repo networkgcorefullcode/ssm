@@ -12,6 +12,15 @@ import (
 func GenerateAESKey(label string, id int32, bits int, s Session) (pkcs11.ObjectHandle, error) {
 	logger.AppLog.Infof("Generating AES key: label=%s, bits=%d", label, bits)
 	mech := pkcs11.NewMechanism(pkcs11.CKM_AES_KEY_GEN, nil)
+	if id == 0 {
+		logger.AppLog.Info("The id is zero, return the last id + 1")
+		var err error
+		id, err = ReturnLastIDForLabel(label, s)
+		if err != nil {
+			logger.AppLog.Errorf("Error detect %s", err)
+			return 0, err
+		}
+	}
 	template := []*pkcs11.Attribute{
 		pkcs11.NewAttribute(pkcs11.CKA_LABEL, label),
 		pkcs11.NewAttribute(pkcs11.CKA_ID, utils.Int32ToByte(id)),
@@ -23,15 +32,6 @@ func GenerateAESKey(label string, id int32, bits int, s Session) (pkcs11.ObjectH
 		pkcs11.NewAttribute(pkcs11.CKA_TOKEN, true), // store persistently in token
 		pkcs11.NewAttribute(pkcs11.CKA_SENSITIVE, true),
 		pkcs11.NewAttribute(pkcs11.CKA_EXTRACTABLE, false),
-	}
-	if id == 0 {
-		logger.AppLog.Info("The id is zero, return the last id + 1")
-		var err error
-		id, err = ReturnLastIDForLabel(label, s)
-		if err != nil {
-			logger.AppLog.Errorf("Error detect %s", err)
-			return 0, err
-		}
 	}
 
 	// Check if key already exists before creating it
@@ -55,6 +55,15 @@ func GenerateDESKey(label string, id int32, s Session) (pkcs11.ObjectHandle, err
 	logger.AppLog.Infof("Generating DES key: label=%s", label)
 
 	mech := pkcs11.NewMechanism(pkcs11.CKM_DES_KEY_GEN, nil)
+	if id == 0 {
+		logger.AppLog.Info("The id is zero, return the last id + 1")
+		var err error
+		id, err = ReturnLastIDForLabel(label, s)
+		if err != nil {
+			logger.AppLog.Errorf("Error detect %s", err)
+			return 0, err
+		}
+	}
 	template := []*pkcs11.Attribute{
 		pkcs11.NewAttribute(pkcs11.CKA_LABEL, label),
 		pkcs11.NewAttribute(pkcs11.CKA_ID, utils.Int32ToByte(id)),
@@ -68,15 +77,6 @@ func GenerateDESKey(label string, id int32, s Session) (pkcs11.ObjectHandle, err
 		pkcs11.NewAttribute(pkcs11.CKA_PRIVATE, true),
 		pkcs11.NewAttribute(pkcs11.CKA_SENSITIVE, true),
 		pkcs11.NewAttribute(pkcs11.CKA_EXTRACTABLE, false),
-	}
-	if id == 0 {
-		logger.AppLog.Info("The id is zero, return rhe last id + 1")
-		var err error
-		id, err = ReturnLastIDForLabel(label, s)
-		if err != nil {
-			logger.AppLog.Errorf("Error detect %s", err)
-			return 0, err
-		}
 	}
 	// Check if key already exists before creating it
 	existingHandle, err := FindKey(label, id, s)
@@ -99,6 +99,15 @@ func GenerateDES3Key(label string, id int32, s Session) (pkcs11.ObjectHandle, er
 	logger.AppLog.Infof("Generating DES3 key: label=%s", label)
 
 	mech := pkcs11.NewMechanism(pkcs11.CKM_DES3_KEY_GEN, nil)
+	if id == 0 {
+		logger.AppLog.Info("The id is zero, return rhe last id + 1")
+		var err error
+		id, err = ReturnLastIDForLabel(label, s)
+		if err != nil {
+			logger.AppLog.Errorf("Error detect %s", err)
+			return 0, err
+		}
+	}
 	template := []*pkcs11.Attribute{
 		pkcs11.NewAttribute(pkcs11.CKA_LABEL, label),
 		pkcs11.NewAttribute(pkcs11.CKA_ID, utils.Int32ToByte(id)),
@@ -112,15 +121,6 @@ func GenerateDES3Key(label string, id int32, s Session) (pkcs11.ObjectHandle, er
 		pkcs11.NewAttribute(pkcs11.CKA_PRIVATE, true),
 		pkcs11.NewAttribute(pkcs11.CKA_SENSITIVE, true),
 		pkcs11.NewAttribute(pkcs11.CKA_EXTRACTABLE, false),
-	}
-	if id == 0 {
-		logger.AppLog.Info("The id is zero, return rhe last id + 1")
-		var err error
-		id, err = ReturnLastIDForLabel(label, s)
-		if err != nil {
-			logger.AppLog.Errorf("Error detect %s", err)
-			return 0, err
-		}
 	}
 	// Check if key already exists before creating it
 	existingHandle, err := FindKey(label, id, s)

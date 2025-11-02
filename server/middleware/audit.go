@@ -114,6 +114,7 @@ func logAuditEntry(entry AuditLog) {
 
 	// getting pkcs11 manager and session from SsmServer
 	session := mgr.GetSession()
+	defer mgr.LogoutSession(session)
 	auditPrivateKey := pkcs11mgr.GetAuditPrivateKey()
 
 	var err error
