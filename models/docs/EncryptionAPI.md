@@ -4,8 +4,8 @@ All URIs are relative to *http://localhost*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**DecryptData**](EncryptionAPI.md#DecryptData) | **Post** /decrypt | Decrypt data
-[**EncryptData**](EncryptionAPI.md#EncryptData) | **Post** /encrypt | Encrypt data
+[**DecryptData**](EncryptionAPI.md#DecryptData) | **Post** /crypto/decrypt | Decrypt data
+[**EncryptData**](EncryptionAPI.md#EncryptData) | **Post** /crypto/encrypt | Encrypt data
 
 
 
@@ -26,11 +26,11 @@ import (
 	"context"
 	"fmt"
 	"os"
-	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+	openapiclient "openapiclient github.com/networkgcorefullcode/ssm/models"
 )
 
 func main() {
-	decryptRequest := *openapiclient.NewDecryptRequest("MySecretKey", string([B@6e1b9411), string([B@21d1b321), int32(12345), int32(1)) // DecryptRequest | 
+	decryptRequest := *openapiclient.NewDecryptRequest("MySecretKey", string(123), string(123), int32(12345), int32(1)) // DecryptRequest | 
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -63,7 +63,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[apiKeyAuth](../README.md#apiKeyAuth), [bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
@@ -92,11 +92,11 @@ import (
 	"context"
 	"fmt"
 	"os"
-	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+	openapiclient "openapiclient github.com/networkgcorefullcode/ssm/models"
 )
 
 func main() {
-	encryptRequest := *openapiclient.NewEncryptRequest("MySecretKey", string([B@117bcfdc), int32(1)) // EncryptRequest | 
+	encryptRequest := *openapiclient.NewEncryptRequest("MySecretKey", string(123), int32(1)) // EncryptRequest | 
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -129,7 +129,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[apiKeyAuth](../README.md#apiKeyAuth), [bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
