@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/gin-gonic/gin"
 	"github.com/networkgcorefullcode/ssm/database"
 	"github.com/networkgcorefullcode/ssm/factory"
 	"github.com/networkgcorefullcode/ssm/handlers"
@@ -114,6 +115,10 @@ func (ausf *SSM) FilterCli(c *cli.Command) (args []string) {
 }
 
 func (s *SSM) Start() error {
+	if factory.SsmConfig.Configuration.IsSecure {
+		logger.AppLog.Info("Running in Gin Release Mode")
+		gin.SetMode(gin.ReleaseMode)
+	}
 	// remove old socket
 	socketPath := factory.SsmConfig.Configuration.SocketPath
 

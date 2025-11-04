@@ -28,3 +28,7 @@ rm -rf go-structs-only
 
 go mod tidy
 ```
+
+```bash
+sudo env GODEBUG=tls13=1,tlsdebug=1 go run ./ssm.go --cfg factory/ssmConfig.yml
+```

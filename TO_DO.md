@@ -13,7 +13,7 @@
   - [x] Implement CORS
   - [x] Implement rate limiting to prevent common attacks
   - [x] Add audit logging for security-related events
-  - [ ] Implement TLS for secure communication (mTLS1.3)
+  - [x] Implement TLS for secure communication (mTLS1.3)
   - [x] Update OpenAPI documentation to reflect security features
   - [ ] Write tests to verify the effectiveness of security measures
   - [ ] Test all security features and fix any vulnerabilities found
