@@ -44,7 +44,7 @@ func AuthenticateRequest() gin.HandlerFunc {
 			return
 		}
 
-		if action != constants.ACTION_DECRYPT_DATA && jwtPayload.Sub == constants.USER_UDM {
+		if action != constants.ACTION_DECRYPT_DATA && action != constants.ACTION_HEALTH_CHECK && jwtPayload.Sub == constants.USER_UDM {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid operation for the user"})
 			return
 		}

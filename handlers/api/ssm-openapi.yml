@@ -330,7 +330,7 @@ paths:
       tags:
       - Key Management
 
-  /crypto/get-data-key:
+  /crypto/get-key:
     post:
       description: |
         Retrieves information about a single key from the HSM by its label and ID.
@@ -412,11 +412,11 @@ paths:
       - Key Management
 
   /crypto/health-check:
-    post:
+    get:
       description: |
         Health Check info to send periodical request to the SSM
         if don't get a response the SSM is down
-      operationId: healthCheckPost
+      operationId: healthCheckGet
       security: []
       responses:
         "200":

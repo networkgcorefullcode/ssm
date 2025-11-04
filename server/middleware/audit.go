@@ -44,10 +44,10 @@ var ActionMap map[string]string = map[string]string{
 	"POST /crypto/store-key":         constants.ACTION_STORE_KEY,
 	"PUT /crypto/store-key":          constants.ACTION_UPDATE_KEY,
 	"DELETE /crypto/store-key":       constants.ACTION_DELETE_KEY,
-	"POST /crypto/get-data-key":      constants.ACTION_GET_KEY,
+	"POST /crypto/get-key":           constants.ACTION_GET_KEY,
 	"POST /crypto/get-data-keys":     constants.ACTION_GET_KEYS,
 	"POST /crypto/get-all-keys":      constants.ACTION_GET_ALL_KEYS,
-	"POST /crypto/health-check":      constants.ACTION_HEALTH_CHECK,
+	"GET /crypto/health-check":       constants.ACTION_HEALTH_CHECK,
 	"POST /login":                    constants.ACTION_USER_LOGIN,
 }
 

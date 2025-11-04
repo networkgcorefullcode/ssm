@@ -36,14 +36,14 @@ func HandleGenerateDES3Key(c *gin.Context) {
 		return
 	}
 
-	if req.Id <= 0 {
+	if req.Id < 0 {
 		logger.AppLog.Error("ID is required but was empty")
 		sendProblemDetails(c, "Bad Request", "El campo 'id' es requerido y no puede estar vacío", "MISSING_ID", http.StatusBadRequest, c.Request.URL.Path)
 		return
 	}
 
 	logger.AppLog.Infof("Generating DES3 key , ID: %d", req.Id)
-	handle, err := pkcs11mgr.GenerateDES3Key(constants.LABEL_ENCRYPTION_KEY_DES3, req.Id, *s)
+	handle, id, err := pkcs11mgr.GenerateDES3Key(constants.LABEL_ENCRYPTION_KEY_DES3, req.Id, *s)
 	if err != nil {
 		logger.AppLog.Errorf("DES3 key generation failed: %v", err)
 		sendProblemDetails(c, "Key Generation Failed", "Error al generar la clave DES3 en el HSM", "KEY_GENERATION_ERROR", http.StatusInternalServerError, c.Request.URL.Path)
@@ -54,7 +54,7 @@ func HandleGenerateDES3Key(c *gin.Context) {
 
 	resp := models.GenDES3KeyResponse{
 		Handle: int32(handle),
-		Id:     req.Id,
+		Id:     id,
 	}
 
 	c.JSON(http.StatusCreated, resp)

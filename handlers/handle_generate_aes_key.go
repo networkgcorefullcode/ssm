@@ -36,7 +36,7 @@ func HandleGenerateAESKey(c *gin.Context) {
 		return
 	}
 
-	if req.Id <= 0 {
+	if req.Id < 0 {
 		logger.AppLog.Error("ID is required but was empty")
 		sendProblemDetails(c, "Bad Request", "El campo 'id' es requerido y no puede estar vacío", "MISSING_ID", http.StatusBadRequest, c.Request.URL.Path)
 		return
@@ -57,7 +57,7 @@ func HandleGenerateAESKey(c *gin.Context) {
 		label = constants.LABEL_ENCRYPTION_KEY_AES256
 	}
 
-	handle, err := pkcs11mgr.GenerateAESKey(label, req.Id, int(req.Bits), *s)
+	handle, id, err := pkcs11mgr.GenerateAESKey(label, req.Id, int(req.Bits), *s)
 	if err != nil {
 		logger.AppLog.Errorf("AES key generation failed: %v", err)
 		sendProblemDetails(c, "Key Generation Failed", "Error al generar la clave AES en el HSM", "KEY_GENERATION_ERROR", http.StatusInternalServerError, c.Request.URL.Path)
@@ -68,7 +68,7 @@ func HandleGenerateAESKey(c *gin.Context) {
 
 	resp := models.GenAESKeyResponse{
 		Handle: int32(handle),
-		Id:     req.Id,
+		Id:     id,
 		Bits:   req.Bits,
 	}
 

@@ -35,14 +35,14 @@ func HandleGenerateDESKey(c *gin.Context) {
 		sendProblemDetails(c, "Bad Request", "El cuerpo de la petición no es válido JSON", "INVALID_JSON", http.StatusBadRequest, c.Request.URL.Path)
 		return
 	}
-	if req.Id <= 0 {
+	if req.Id < 0 {
 		logger.AppLog.Error("ID is required but was empty")
 		sendProblemDetails(c, "Bad Request", "El campo 'id' es requerido y no puede estar vacío", "MISSING_ID", http.StatusBadRequest, c.Request.URL.Path)
 		return
 	}
 
 	logger.AppLog.Infof("Generating DES key - ID: %d", req.Id)
-	handle, err := pkcs11mgr.GenerateDESKey(constants.LABEL_ENCRYPTION_KEY_DES, req.Id, *s)
+	handle, id, err := pkcs11mgr.GenerateDESKey(constants.LABEL_ENCRYPTION_KEY_DES, req.Id, *s)
 	if err != nil {
 		logger.AppLog.Errorf("DES key generation failed: %v", err)
 		sendProblemDetails(c, "Key Generation Failed", "Error al generar la clave DES en el HSM", "KEY_GENERATION_ERROR", http.StatusInternalServerError, c.Request.URL.Path)
@@ -53,7 +53,7 @@ func HandleGenerateDESKey(c *gin.Context) {
 
 	resp := models.GenDESKeyResponse{
 		Handle: int32(handle),
-		Id:     req.Id,
+		Id:     id,
 	}
 
 	c.JSON(http.StatusCreated, resp)

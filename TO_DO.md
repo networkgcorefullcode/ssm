@@ -18,10 +18,18 @@
   - [x] Update OpenAPI documentation to reflect security features
   - [ ] Write tests to verify the effectiveness of security measures
   - [ ] Test all security features and fix any vulnerabilities found
+- [ ] Task 9 Implement memory hardening techniques
+- [ ] Task 10 Implement SIEM integration for audit logs
+- [ ] Task 11 Performance testing and optimization, add benchmarks
+- [ ] Task 12 Add function to save data in a secure way using AES256-GCM
+- [ ] Task 12 Add a option to reset the user data for the login
+- [ ] Task 13 Add a new function to save the ssm data in other softHSMv2 instance securely
+- [ ] Task 14 Final review and documentation update
 
 ## Requirements
 
 ### Criterios Técnicos
+
 •Migración completa de AES128-ECB a AES-256-GCM
 Se pueden trabajar con los siguientes algoritmos: DES, DES3, AES128 y AES256 tanto ECB como CBC. Por defecto para nuestros usuarios o nuevos subscriptores de nuestra red se utilizará el algoritmo AES256_CBC_PAD. Queda por implementar AES256_GCM y probar su implementación en el softHSMv2. Se le da soporte a otros algoritmos para usuarios legacy.
 

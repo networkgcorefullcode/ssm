@@ -31,7 +31,7 @@ func InitPKCS11() {
 
 	_, err := FindKey(constants.LABEL_ENCRYPTION_KEY_INTERNAL_AES256, 0, *session)
 	if err != nil && err.Error() == constants.ERROR_STRING_KEY_NOT_FOUND {
-		_, err = GenerateAESKey(constants.LABEL_ENCRYPTION_KEY_INTERNAL_AES256, 0, 256, *session)
+		_, _, err = GenerateAESKey(constants.LABEL_ENCRYPTION_KEY_INTERNAL_AES256, 0, 256, *session)
 		if err != nil {
 			logger.AppLog.Errorf("Failed to generate AES key: %v", err)
 			return

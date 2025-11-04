@@ -54,7 +54,7 @@ func genSecret(serviceID string) error {
 	filter := bson.M{"service_id": serviceID}
 	_, err := FindOneData(Client, factory.SsmConfig.Configuration.Mongodb.DBName, CollSecret, filter)
 	if err == nil {
-		logger.AppLog.Errorf("User found: %v", err)
+		logger.AppLog.Infof("User found: %v", err)
 		return nil
 	}
 

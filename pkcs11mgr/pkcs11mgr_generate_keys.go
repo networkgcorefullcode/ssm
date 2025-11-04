@@ -9,7 +9,7 @@ import (
 )
 
 // GenerateAESKey creates an AES key object inside SoftHSM and returns its object handle (as uint)
-func GenerateAESKey(label string, id int32, bits int, s Session) (pkcs11.ObjectHandle, error) {
+func GenerateAESKey(label string, id int32, bits int, s Session) (pkcs11.ObjectHandle, int32, error) {
 	logger.AppLog.Infof("Generating AES key: label=%s, bits=%d", label, bits)
 	mech := pkcs11.NewMechanism(pkcs11.CKM_AES_KEY_GEN, nil)
 	if id == 0 {
@@ -18,7 +18,7 @@ func GenerateAESKey(label string, id int32, bits int, s Session) (pkcs11.ObjectH
 		id, err = ReturnLastIDForLabel(label, s)
 		if err != nil {
 			logger.AppLog.Errorf("Error detect %s", err)
-			return 0, err
+			return 0, 0, err
 		}
 	}
 	template := []*pkcs11.Attribute{
@@ -38,20 +38,20 @@ func GenerateAESKey(label string, id int32, bits int, s Session) (pkcs11.ObjectH
 	existingHandle, err := FindKey(label, id, s)
 	if err == nil && existingHandle != 0 {
 		logger.AppLog.Infof("Key with label '%s' already exists, returning existing handle: %v", label, existingHandle)
-		return existingHandle, errors.New("the key is in the SSM")
+		return existingHandle, id, errors.New("the key is in the SSM")
 	}
 
 	handle, err := s.Ctx.GenerateKey(s.Handle, []*pkcs11.Mechanism{mech}, template)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to generate AES key: %v", err)
-		return 0, err
+		return 0, 0, err
 	}
 	logger.AppLog.Infof("AES key generated successfully: handle=%v", handle)
-	return handle, nil
+	return handle, id, nil
 }
 
 // GenerateDESKey creates an DES key object inside SoftHSM and returns its object handle (as uint)
-func GenerateDESKey(label string, id int32, s Session) (pkcs11.ObjectHandle, error) {
+func GenerateDESKey(label string, id int32, s Session) (pkcs11.ObjectHandle, int32, error) {
 	logger.AppLog.Infof("Generating DES key: label=%s", label)
 
 	mech := pkcs11.NewMechanism(pkcs11.CKM_DES_KEY_GEN, nil)
@@ -61,7 +61,7 @@ func GenerateDESKey(label string, id int32, s Session) (pkcs11.ObjectHandle, err
 		id, err = ReturnLastIDForLabel(label, s)
 		if err != nil {
 			logger.AppLog.Errorf("Error detect %s", err)
-			return 0, err
+			return 0, 0, err
 		}
 	}
 	template := []*pkcs11.Attribute{
@@ -82,30 +82,30 @@ func GenerateDESKey(label string, id int32, s Session) (pkcs11.ObjectHandle, err
 	existingHandle, err := FindKey(label, id, s)
 	if err == nil && existingHandle != 0 {
 		logger.AppLog.Infof("Key with label '%s' already exists, returning existing handle: %v", label, existingHandle)
-		return existingHandle, errors.New("the key is in the SSM")
+		return existingHandle, id, errors.New("the key is in the SSM")
 	}
 
 	handle, err := s.Ctx.GenerateKey(s.Handle, []*pkcs11.Mechanism{mech}, template)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to generate DES key: %v", err)
-		return 0, err
+		return 0, 0, err
 	}
 	logger.AppLog.Infof("DES key generated successfully: handle=%v", handle)
-	return handle, nil
+	return handle, id, nil
 }
 
 // GenerateDES3Key creates an DES3 key object inside SoftHSM and returns its object handle (as uint)
-func GenerateDES3Key(label string, id int32, s Session) (pkcs11.ObjectHandle, error) {
+func GenerateDES3Key(label string, id int32, s Session) (pkcs11.ObjectHandle, int32, error) {
 	logger.AppLog.Infof("Generating DES3 key: label=%s", label)
 
 	mech := pkcs11.NewMechanism(pkcs11.CKM_DES3_KEY_GEN, nil)
 	if id == 0 {
-		logger.AppLog.Info("The id is zero, return rhe last id + 1")
+		logger.AppLog.Info("The id is zero, return the last id + 1")
 		var err error
 		id, err = ReturnLastIDForLabel(label, s)
 		if err != nil {
 			logger.AppLog.Errorf("Error detect %s", err)
-			return 0, err
+			return 0, 0, err
 		}
 	}
 	template := []*pkcs11.Attribute{
@@ -126,14 +126,14 @@ func GenerateDES3Key(label string, id int32, s Session) (pkcs11.ObjectHandle, er
 	existingHandle, err := FindKey(label, id, s)
 	if err == nil && existingHandle != 0 {
 		logger.AppLog.Infof("Key with label '%s' already exists, returning existing handle: %v", label, existingHandle)
-		return existingHandle, errors.New("the key is in the SSM")
+		return existingHandle, id, errors.New("the key is in the SSM")
 	}
 
 	handle, err := s.Ctx.GenerateKey(s.Handle, []*pkcs11.Mechanism{mech}, template)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to generate DES3 key: %v", err)
-		return 0, err
+		return 0, 0, err
 	}
 	logger.AppLog.Infof("DES3 key generated successfully: handle=%v", handle)
-	return handle, nil
+	return handle, id, nil
 }

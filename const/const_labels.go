@@ -33,26 +33,30 @@ var LabelAlgorithmMap = map[string]int{
 }
 
 const (
-	LABEL_ENCRYPTION_KEY                 = "SSM_ENC_KEY"
-	LABEL_K4_KEY_AES                     = "K4_AES"
-	LABEL_K4_KEY_DES                     = "K4_DES"
-	LABEL_K4_KEY_DES3                    = "K4_DES3"
-	LABEL_ENCRYPTION_KEY_AES256          = "KEY_ENCRYPTION_AES256"
-	LABEL_ENCRYPTION_KEY_AES128          = "KEY_ENCRYPTION_AES128"
-	LABEL_ENCRYPTION_KEY_DES             = "KEY_ENCRYPTION_DES"
-	LABEL_ENCRYPTION_KEY_DES3            = "KEY_ENCRYPTION_DES3"
-	AuditKeyLabel                        = "AUDIT_SIGNING_KEY"
-	JWTKeyLabel                          = "JWT_SIGNING_KEY"
+	LABEL_ENCRYPTION_KEY        = "SSM_ENC_KEY"
+	LABEL_K4_KEY_AES            = "K4_AES"
+	LABEL_K4_KEY_DES            = "K4_DES"
+	LABEL_K4_KEY_DES3           = "K4_DES3"
+	LABEL_ENCRYPTION_KEY_AES256 = "KEY_ENCRYPTION_AES256"
+	LABEL_ENCRYPTION_KEY_AES128 = "KEY_ENCRYPTION_AES128"
+	LABEL_ENCRYPTION_KEY_DES    = "KEY_ENCRYPTION_DES"
+	LABEL_ENCRYPTION_KEY_DES3   = "KEY_ENCRYPTION_DES3"
+
+	// For SSM internal use
 	LABEL_ENCRYPTION_KEY_INTERNAL_AES256 = "ENCRYPTION_KEY_INTERNAL_AES256"
 	LABEL_ENCRYPTION_KEY_INTERNAL_AES128 = "ENCRYPTION_KEY_INTERNAL_AES128"
-	ALGORITHM_AES256                     = 1
-	ALGORITHM_AES128                     = 2
-	ALGORITHM_DES                        = 3
-	ALGORITHM_DES3                       = 4
-	ALGORITHM_AES256_OurUsers            = 5
-	ALGORITHM_AES128_OurUsers            = 6
-	ALGORITHM_DES_OurUsers               = 7
-	ALGORITHM_DES3_OurUsers              = 8
+	AuditKeyLabel                        = "AUDIT_SIGNING_KEY"
+	JWTKeyLabel                          = "JWT_SIGNING_KEY"
+
+	// Algorithm constants
+	ALGORITHM_AES256          = 1
+	ALGORITHM_AES128          = 2
+	ALGORITHM_DES             = 3
+	ALGORITHM_DES3            = 4
+	ALGORITHM_AES256_OurUsers = 5
+	ALGORITHM_AES128_OurUsers = 6
+	ALGORITHM_DES_OurUsers    = 7
+	ALGORITHM_DES3_OurUsers   = 8
 )
 
 var KeyLabelsExternalAllow [3]string = [3]string{

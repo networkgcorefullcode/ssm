@@ -116,6 +116,10 @@ func HandleEncrypt(c *gin.Context) {
 				return
 			}
 		}
+	default:
+		logger.AppLog.Errorf("Unsupported encryption algorithm: %s", req.EncryptionAlgorithm)
+		sendProblemDetails(c, "Bad Request", "The specified encryption algorithm is not supported", "UNSUPPORTED_ALGORITHM", http.StatusBadRequest, c.Request.URL.Path)
+		return
 	}
 
 	safe.Zero(pt) // Clear sensitive data from memory
