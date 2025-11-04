@@ -10,7 +10,7 @@ Method | HTTP request | Description
 [**GenerateDESKey**](KeyManagementAPI.md#GenerateDESKey) | **Post** /crypto/generate-des-key | Generate new DES key
 [**GetAllKeys**](KeyManagementAPI.md#GetAllKeys) | **Post** /crypto/get-all-keys | Get all keys from HSM
 [**GetDataKeys**](KeyManagementAPI.md#GetDataKeys) | **Post** /crypto/get-data-keys | Get multiple keys by label
-[**GetKey**](KeyManagementAPI.md#GetKey) | **Post** /crypto/get-data-key | Get single key information
+[**GetKey**](KeyManagementAPI.md#GetKey) | **Post** /crypto/get-key | Get single key information
 [**StoreKey**](KeyManagementAPI.md#StoreKey) | **Post** /crypto/store-key | Store existing key
 [**UpdateKey**](KeyManagementAPI.md#UpdateKey) | **Put** /crypto/store-key | Update key
 
@@ -33,7 +33,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	openapiclient "github.com/networkgcorefullcode/ssm/models"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
 )
 
 func main() {
@@ -99,7 +99,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	openapiclient "github.com/networkgcorefullcode/ssm/models"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
 )
 
 func main() {
@@ -165,7 +165,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	openapiclient "github.com/networkgcorefullcode/ssm/models"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
 )
 
 func main() {
@@ -231,7 +231,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	openapiclient "github.com/networkgcorefullcode/ssm/models"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
 )
 
 func main() {
@@ -297,7 +297,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	openapiclient "github.com/networkgcorefullcode/ssm/models"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
 )
 
 func main() {
@@ -358,7 +358,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	openapiclient "github.com/networkgcorefullcode/ssm/models"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
 )
 
 func main() {
@@ -424,7 +424,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	openapiclient "github.com/networkgcorefullcode/ssm/models"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
 )
 
 func main() {
@@ -490,7 +490,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	openapiclient "github.com/networkgcorefullcode/ssm/models"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
 )
 
 func main() {
@@ -556,7 +556,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	openapiclient "github.com/networkgcorefullcode/ssm/models"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
 )
 
 func main() {

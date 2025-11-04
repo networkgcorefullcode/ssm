@@ -36,6 +36,7 @@ servers:
 security:
 - bearerAuth: []
 - apiKeyAuth: []
+- mutualTLS: []
 tags:
 - description: Authentication operations
   name: Authentication
@@ -321,7 +322,7 @@ paths:
       summary: Update key
       tags:
       - Key Management
-  /crypto/get-data-key:
+  /crypto/get-key:
     post:
       description: |
         Retrieves information about a single key from the HSM by its label and ID.
@@ -400,11 +401,11 @@ paths:
       tags:
       - Key Management
   /crypto/health-check:
-    post:
+    get:
       description: |
         Health Check info to send periodical request to the SSM
         if don't get a response the SSM is down
-      operationId: healthCheckPost
+      operationId: healthCheckGet
       responses:
         "200":
           content:
@@ -701,7 +702,7 @@ components:
       - key_label
     LoginRequest:
       example:
-        username: admin
+        service_id: admin
         password: secret123
       properties:
         service_id:
@@ -988,3 +989,9 @@ components:
       in: header
       name: X-API-Key
       type: apiKey
+    mutualTLS:
+      description: |
+        Mutual TLS authentication using X.509 client certificates.
+        Client must present a valid certificate signed by a trusted CA.
+        The server verifies the client certificate during TLS handshake.
+      type: mutualTLS

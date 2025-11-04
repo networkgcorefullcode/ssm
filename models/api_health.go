@@ -22,26 +22,26 @@ import (
 // HealthAPIService HealthAPI service
 type HealthAPIService service
 
-type ApiHealthCheckPostRequest struct {
+type ApiHealthCheckGetRequest struct {
 	ctx        context.Context
 	ApiService *HealthAPIService
 }
 
-func (r ApiHealthCheckPostRequest) Execute() (*HealthCheckResponse, *http.Response, error) {
-	return r.ApiService.HealthCheckPostExecute(r)
+func (r ApiHealthCheckGetRequest) Execute() (*HealthCheckResponse, *http.Response, error) {
+	return r.ApiService.HealthCheckGetExecute(r)
 }
 
 /*
-HealthCheckPost Health check endpoint
+HealthCheckGet Health check endpoint
 
 Health Check info to send periodical request to the SSM
 if don't get a response the SSM is down
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiHealthCheckPostRequest
+	@return ApiHealthCheckGetRequest
 */
-func (a *HealthAPIService) HealthCheckPost(ctx context.Context) ApiHealthCheckPostRequest {
-	return ApiHealthCheckPostRequest{
+func (a *HealthAPIService) HealthCheckGet(ctx context.Context) ApiHealthCheckGetRequest {
+	return ApiHealthCheckGetRequest{
 		ApiService: a,
 		ctx:        ctx,
 	}
@@ -50,15 +50,15 @@ func (a *HealthAPIService) HealthCheckPost(ctx context.Context) ApiHealthCheckPo
 // Execute executes the request
 //
 //	@return HealthCheckResponse
-func (a *HealthAPIService) HealthCheckPostExecute(r ApiHealthCheckPostRequest) (*HealthCheckResponse, *http.Response, error) {
+func (a *HealthAPIService) HealthCheckGetExecute(r ApiHealthCheckGetRequest) (*HealthCheckResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
+		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
 		formFiles           []formFile
 		localVarReturnValue *HealthCheckResponse
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "HealthAPIService.HealthCheckPost")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "HealthAPIService.HealthCheckGet")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}

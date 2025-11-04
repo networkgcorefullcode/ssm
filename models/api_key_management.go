@@ -1017,7 +1017,7 @@ func (a *KeyManagementAPIService) GetKeyExecute(r ApiGetKeyRequest) (*GetKeyResp
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/crypto/get-data-key"
+	localVarPath := localBasePath + "/crypto/get-key"
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}

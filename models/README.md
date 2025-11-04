@@ -97,14 +97,14 @@ Class | Method | HTTP request | Description
 *AuthenticationAPI* | [**UserLogin**](docs/AuthenticationAPI.md#userlogin) | **Post** /login | User authentication
 *EncryptionAPI* | [**DecryptData**](docs/EncryptionAPI.md#decryptdata) | **Post** /crypto/decrypt | Decrypt data
 *EncryptionAPI* | [**EncryptData**](docs/EncryptionAPI.md#encryptdata) | **Post** /crypto/encrypt | Encrypt data
-*HealthAPI* | [**HealthCheckPost**](docs/HealthAPI.md#healthcheckpost) | **Post** /crypto/health-check | Health check endpoint
+*HealthAPI* | [**HealthCheckGet**](docs/HealthAPI.md#healthcheckget) | **Get** /crypto/health-check | Health check endpoint
 *KeyManagementAPI* | [**DeleteKey**](docs/KeyManagementAPI.md#deletekey) | **Delete** /crypto/store-key | Delete key
 *KeyManagementAPI* | [**GenerateAESKey**](docs/KeyManagementAPI.md#generateaeskey) | **Post** /crypto/generate-aes-key | Generate new AES key
 *KeyManagementAPI* | [**GenerateDES3Key**](docs/KeyManagementAPI.md#generatedes3key) | **Post** /crypto/generate-des3-key | Generate new DES3 key
 *KeyManagementAPI* | [**GenerateDESKey**](docs/KeyManagementAPI.md#generatedeskey) | **Post** /crypto/generate-des-key | Generate new DES key
 *KeyManagementAPI* | [**GetAllKeys**](docs/KeyManagementAPI.md#getallkeys) | **Post** /crypto/get-all-keys | Get all keys from HSM
 *KeyManagementAPI* | [**GetDataKeys**](docs/KeyManagementAPI.md#getdatakeys) | **Post** /crypto/get-data-keys | Get multiple keys by label
-*KeyManagementAPI* | [**GetKey**](docs/KeyManagementAPI.md#getkey) | **Post** /crypto/get-data-key | Get single key information
+*KeyManagementAPI* | [**GetKey**](docs/KeyManagementAPI.md#getkey) | **Post** /crypto/get-key | Get single key information
 *KeyManagementAPI* | [**StoreKey**](docs/KeyManagementAPI.md#storekey) | **Post** /crypto/store-key | Store existing key
 *KeyManagementAPI* | [**UpdateKey**](docs/KeyManagementAPI.md#updatekey) | **Put** /crypto/store-key | Update key
 

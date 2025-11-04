@@ -169,7 +169,11 @@ func (s *SSM) Start() error {
 		}()
 	}
 
-	startHTTPServer(router)
+	err = startHTTPServer(router)
+	if err != nil {
+		logger.AppLog.Errorf("Failed to start HTTP server: %v", err)
+		return err
+	}
 
 	pkcsManager.CloseAllSessions()
 	pkcsManager.Finalize()
