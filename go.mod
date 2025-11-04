@@ -3,6 +3,7 @@ module github.com/networkgcorefullcode/ssm
 go 1.24.4
 
 require (
+	github.com/awnumar/memguard v0.23.0
 	github.com/gin-contrib/cors v1.7.6
 	github.com/gin-gonic/gin v1.11.0
 	github.com/miekg/pkcs11 v1.1.1
@@ -17,6 +18,7 @@ require (
 
 require (
 	github.com/KyleBanks/depth v1.2.1 // indirect
+	github.com/awnumar/memcall v0.4.0 // indirect
 	github.com/bytedance/gopkg v0.1.3 // indirect
 	github.com/bytedance/sonic v1.14.1 // indirect
 	github.com/bytedance/sonic/loader v0.3.0 // indirect

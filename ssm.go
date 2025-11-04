@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/awnumar/memguard"
 	"github.com/networkgcorefullcode/ssm/logger"
 	"github.com/networkgcorefullcode/ssm/server"
 	"github.com/urfave/cli/v3"
@@ -20,6 +21,9 @@ import (
 var SSM = server.SsmServer
 
 func main() {
+	memguard.CatchInterrupt()
+	defer memguard.Purge()
+
 	logger.AppLog.Infoln("SSM is starting wait some seconds while the configs are loading")
 	app := &cli.Command{}
 	app.Name = "ssm"

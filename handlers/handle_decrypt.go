@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/awnumar/memguard"
 	"github.com/gin-gonic/gin"
 	"github.com/miekg/pkcs11"
 	constants "github.com/networkgcorefullcode/ssm/const"
@@ -87,43 +88,43 @@ func HandleDecrypt(c *gin.Context) {
 		return
 	}
 
-	var plaintext []byte
+	var rawPlaintext []byte
 	switch req.EncryptionAlgorithm {
 	case constants.ALGORITHM_AES128, constants.ALGORITHM_AES256, constants.ALGORITHM_AES128_OurUsers, constants.ALGORITHM_AES256_OurUsers:
 		if len(iv) == 16 {
-			plaintext, err = pkcs11mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_AES_CBC_PAD, *s)
+			rawPlaintext, err = pkcs11mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_AES_CBC_PAD, *s)
 			if err != nil {
-				plaintext, err = pkcs11mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_AES_CBC, *s)
+				rawPlaintext, err = pkcs11mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_AES_CBC, *s)
 			}
 		} else if iv == nil {
-			plaintext, err = pkcs11mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_AES_ECB, *s)
+			rawPlaintext, err = pkcs11mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_AES_ECB, *s)
 		}
 		// if err != nil {
-		// 	plaintext, err = pkcs11mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_AES_ECB_ENCRYPT_DATA)
+		// 	rawPlaintext, err = pkcs11mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_AES_ECB_ENCRYPT_DATA)
 		// }
 	case constants.ALGORITHM_DES, constants.ALGORITHM_DES_OurUsers:
 		if len(iv) == 8 {
-			plaintext, err = pkcs11mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES_CBC_PAD, *s)
+			rawPlaintext, err = pkcs11mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES_CBC_PAD, *s)
 			if err != nil {
-				plaintext, err = pkcs11mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES_CBC, *s)
+				rawPlaintext, err = pkcs11mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES_CBC, *s)
 			}
 		} else if iv == nil {
-			plaintext, err = pkcs11mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES_ECB, *s)
+			rawPlaintext, err = pkcs11mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES_ECB, *s)
 		}
 		// if err != nil {
-		// 	plaintext, err = pkcs11mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES_ECB_ENCRYPT_DATA)
+		// 	rawPlaintext, err = pkcs11mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES_ECB_ENCRYPT_DATA)
 		// }
 	case constants.ALGORITHM_DES3, constants.ALGORITHM_DES3_OurUsers:
 		if len(iv) == 8 {
-			plaintext, err = pkcs11mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES3_CBC_PAD, *s)
+			rawPlaintext, err = pkcs11mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES3_CBC_PAD, *s)
 			if err != nil {
-				plaintext, err = pkcs11mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES3_CBC, *s)
+				rawPlaintext, err = pkcs11mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES3_CBC, *s)
 			}
 		} else if iv == nil {
-			plaintext, err = pkcs11mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES3_ECB, *s)
+			rawPlaintext, err = pkcs11mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES3_ECB, *s)
 		}
 		// if err != nil {
-		// 	plaintext, err = pkcs11mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES3_ECB_ENCRYPT_DATA)
+		// 	rawPlaintext, err = pkcs11mgr.DecryptKey(keyHandle, iv, cipher, pkcs11.CKM_DES3_ECB_ENCRYPT_DATA)
 		// }
 	default:
 		logger.AppLog.Errorf("Unsupported decryption algorithm: %d", req.EncryptionAlgorithm)
@@ -136,23 +137,33 @@ func HandleDecrypt(c *gin.Context) {
 		sendProblemDetails(c, "Decryption Failed", "Failed to decrypt data: "+err.Error(), "decryption_failed", http.StatusInternalServerError, c.Request.URL.Path)
 		return
 	}
-	if len(plaintext) == 0 {
+	if len(rawPlaintext) == 0 {
 		logger.AppLog.Error("Decryption resulted in empty plaintext")
 		sendProblemDetails(c, "Decryption Failed", "Decryption resulted in empty plaintext", "empty_plaintext", http.StatusInternalServerError, c.Request.URL.Path)
 		return
 	}
 
-	logger.AppLog.Infof("Decryption successful for key '%s', plaintext length: %d bytes", req.KeyLabel, len(plaintext))
+	// Proteger el plaintext en memoria segura
+	secureBuf := memguard.NewBufferFromBytes(rawPlaintext)
+
+	// Zeroizar el slice normal y liberar
+	safe.Zero(rawPlaintext)
+	rawPlaintext = nil
+
+	logger.AppLog.Infof("Decryption successful for key '%s', plaintext length: %d bytes", req.KeyLabel, len(secureBuf.Bytes()))
+
+	hexPlain := make([]byte, hex.EncodedLen(len(secureBuf.Bytes())))
+	hex.Encode(hexPlain, secureBuf.Bytes())
 
 	// Prepare response
 	c.Header("Content-Type", "application/json")
 	resp := models.DecryptResponse{
-		Plain: hex.EncodeToString(plaintext),
+		Plain: string(hexPlain),
 	}
 
-	// Clear plaintext memory for security
-	safe.Zero(plaintext)
-	logger.AppLog.Debug("Plaintext memory zeroed for security")
+	// Destruir buffer protegido
+	secureBuf.Destroy()
+	safe.Zero(hexPlain)
 
 	c.JSON(http.StatusOK, resp)
 
