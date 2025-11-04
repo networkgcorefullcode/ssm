@@ -8,3 +8,4 @@ vendor
 .vscode
 pkcs11.conf
 server.csr
+ca.crt
