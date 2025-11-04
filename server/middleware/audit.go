@@ -11,6 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/miekg/pkcs11"
+	constants "github.com/networkgcorefullcode/ssm/const"
 	"github.com/networkgcorefullcode/ssm/database"
 	"github.com/networkgcorefullcode/ssm/factory"
 	"github.com/networkgcorefullcode/ssm/logger"
@@ -35,19 +36,19 @@ type AuditLog struct {
 
 // Map common patterns to actions
 var ActionMap map[string]string = map[string]string{
-	"POST /crypto/encrypt":           "ENCRYPT_DATA",
-	"POST /crypto/decrypt":           "DECRYPT_DATA",
-	"POST /crypto/generate-aes-key":  "GENERATE_AES_KEY",
-	"POST /crypto/generate-des-key":  "GENERATE_DES_KEY",
-	"POST /crypto/generate-des3-key": "GENERATE_DES3_KEY",
-	"POST /crypto/store-key":         "STORE_KEY",
-	"PUT /crypto/store-key":          "UPDATE_KEY",
-	"DELETE /crypto/store-key":       "DELETE_KEY",
-	"POST /crypto/get-data-key":      "GET_KEY",
-	"POST /crypto/get-data-keys":     "GET_KEYS",
-	"POST /crypto/get-all-keys":      "GET_ALL_KEYS",
-	"POST /crypto/health-check":      "HEALTH_CHECK",
-	"POST /login":                    "USER_LOGIN",
+	"POST /crypto/encrypt":           constants.ACTION_ENCRYPT_DATA,
+	"POST /crypto/decrypt":           constants.ACTION_DECRYPT_DATA,
+	"POST /crypto/generate-aes-key":  constants.ACTION_GENERATE_AES_KEY,
+	"POST /crypto/generate-des-key":  constants.ACTION_GENERATE_DES_KEY,
+	"POST /crypto/generate-des3-key": constants.ACTION_GENERATE_DES3_KEY,
+	"POST /crypto/store-key":         constants.ACTION_STORE_KEY,
+	"PUT /crypto/store-key":          constants.ACTION_UPDATE_KEY,
+	"DELETE /crypto/store-key":       constants.ACTION_DELETE_KEY,
+	"POST /crypto/get-data-key":      constants.ACTION_GET_KEY,
+	"POST /crypto/get-data-keys":     constants.ACTION_GET_KEYS,
+	"POST /crypto/get-all-keys":      constants.ACTION_GET_ALL_KEYS,
+	"POST /crypto/health-check":      constants.ACTION_HEALTH_CHECK,
+	"POST /login":                    constants.ACTION_USER_LOGIN,
 }
 
 func AuditRequest(c *gin.Context) {

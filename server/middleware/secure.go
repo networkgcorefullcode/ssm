@@ -11,6 +11,42 @@ import (
 	"github.com/networkgcorefullcode/ssm/logger"
 )
 
+// secureRequest adds security features to the request, for example DoS protection, rate limiting, etc.
+func SecureRequest(c *gin.Context) {
+	// Apply rate limiting if enabled
+	if rateLimiter != nil && rateLimiter.config.Enabled {
+		clientIP := c.ClientIP()
+
+		// Check rate limit
+		if !rateLimiter.isAllowed(clientIP) {
+			logger.AppLog.Warnf("Rate limit exceeded for IP: %s", clientIP)
+
+			// Add rate limit headers
+			remaining, resetTime := rateLimiter.getRateLimitHeaders(clientIP)
+			c.Header("X-RateLimit-Limit", fmt.Sprintf("%d", rateLimiter.config.RequestsPerMin))
+			c.Header("X-RateLimit-Remaining", fmt.Sprintf("%d", remaining))
+			c.Header("X-RateLimit-Reset", fmt.Sprintf("%d", resetTime))
+
+			c.JSON(http.StatusTooManyRequests, gin.H{
+				"error":       "Rate limit exceeded",
+				"message":     "Too many requests, please try again later",
+				"retry_after": 60,
+			})
+			c.Abort()
+			return
+		}
+
+		// Add rate limit headers for successful requests
+		remaining, resetTime := rateLimiter.getRateLimitHeaders(clientIP)
+		c.Header("X-RateLimit-Limit", fmt.Sprintf("%d", rateLimiter.config.RequestsPerMin))
+		c.Header("X-RateLimit-Remaining", fmt.Sprintf("%d", remaining))
+		c.Header("X-RateLimit-Reset", fmt.Sprintf("%d", resetTime))
+	}
+
+	// Call the next middleware or endpoint handler
+	c.Next()
+}
+
 // RateLimiter manages rate limiting for clients
 type RateLimiter struct {
 	mu      sync.RWMutex
@@ -124,40 +160,4 @@ func (rl *RateLimiter) getRateLimitHeaders(clientIP string) (remaining int, rese
 
 	resetTime = client.lastReset.Add(time.Minute).Unix()
 	return remaining, resetTime
-}
-
-// secureRequest adds security features to the request, for example DoS protection, rate limiting, etc.
-func SecureRequest(c *gin.Context) {
-	// Apply rate limiting if enabled
-	if rateLimiter != nil && rateLimiter.config.Enabled {
-		clientIP := c.ClientIP()
-
-		// Check rate limit
-		if !rateLimiter.isAllowed(clientIP) {
-			logger.AppLog.Warnf("Rate limit exceeded for IP: %s", clientIP)
-
-			// Add rate limit headers
-			remaining, resetTime := rateLimiter.getRateLimitHeaders(clientIP)
-			c.Header("X-RateLimit-Limit", fmt.Sprintf("%d", rateLimiter.config.RequestsPerMin))
-			c.Header("X-RateLimit-Remaining", fmt.Sprintf("%d", remaining))
-			c.Header("X-RateLimit-Reset", fmt.Sprintf("%d", resetTime))
-
-			c.JSON(http.StatusTooManyRequests, gin.H{
-				"error":       "Rate limit exceeded",
-				"message":     "Too many requests, please try again later",
-				"retry_after": 60,
-			})
-			c.Abort()
-			return
-		}
-
-		// Add rate limit headers for successful requests
-		remaining, resetTime := rateLimiter.getRateLimitHeaders(clientIP)
-		c.Header("X-RateLimit-Limit", fmt.Sprintf("%d", rateLimiter.config.RequestsPerMin))
-		c.Header("X-RateLimit-Remaining", fmt.Sprintf("%d", remaining))
-		c.Header("X-RateLimit-Reset", fmt.Sprintf("%d", resetTime))
-	}
-
-	// Call the next middleware or endpoint handler
-	c.Next()
 }
