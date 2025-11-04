@@ -2,7 +2,6 @@
 
 - [x] Task 1 Implement feature for simetrict description that uses IV vector
 - [x] Task 2 Implement rotation for simetric description
-- [ ] Task 3 Write go tests for simetric description with IV vector and rotation
 - [x] Task 4 Update documentation for new simetric description features
 - [x] Task 5 Update the open api generator to support new features
 - [x] Task 5.1 Update the open api generator to support new features

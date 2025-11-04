@@ -169,32 +169,7 @@ func (s *SSM) Start() error {
 		}()
 	}
 
-	// Start HTTPS or HTTP server based on configuration
-	if factory.SsmConfig.Configuration.IsHttps == nil || *factory.SsmConfig.Configuration.IsHttps {
-		// HTTPS server
-		certFile := factory.SsmConfig.Configuration.CertFile
-		keyFile := factory.SsmConfig.Configuration.KeyFile
-		if certFile == "" || keyFile == "" {
-			logger.AppLog.Error("HTTPS is enabled but certFile or keyFile is not set in the configuration")
-			return fmt.Errorf("certFile or keyFile not set")
-		}
-		logger.AppLog.Infof("SSM listening api https %s", factory.SsmConfig.Configuration.BindAddr)
-		// Use custom server with Gin router as handler
-		srv := &http.Server{Addr: factory.SsmConfig.Configuration.BindAddr, Handler: router}
-		if err := srv.ListenAndServeTLS(certFile, keyFile); err != nil {
-			logger.AppLog.Errorf("Server error: %v", err)
-			return err
-		}
-		return nil
-	} else {
-		logger.AppLog.Infof("SSM listening api http %s", factory.SsmConfig.Configuration.BindAddr)
-		// Use custom server with Gin router as handler for HTTP
-		srv := &http.Server{Addr: factory.SsmConfig.Configuration.BindAddr, Handler: router}
-		if err := srv.ListenAndServe(); err != nil {
-			logger.AppLog.Errorf("Server error: %v", err)
-			return err
-		}
-	}
+	startHTTPServer(router)
 
 	pkcsManager.CloseAllSessions()
 	pkcsManager.Finalize()

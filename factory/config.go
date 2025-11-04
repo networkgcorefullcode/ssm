@@ -43,6 +43,7 @@ type Configuration struct {
 	IsHttps         *bool      `yaml:"isHttps,omitempty"`
 	CertFile        string     `yaml:"certFile,omitempty"`
 	KeyFile         string     `yaml:"keyFile,omitempty"`
+	CAFile          string     `yaml:"caFile,omitempty"`
 	MaxSessions     int        `yaml:"maxSessions,omitempty"`
 	IsSecure        bool       `yaml:"isSecure,omitempty"`
 	CORS            *CORS      `yaml:"cors,omitempty"`
