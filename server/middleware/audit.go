@@ -60,7 +60,7 @@ func AuditRequest(c *gin.Context) {
 	duration := time.Since(start)
 	// Get or generate Request ID
 	requestID := c.GetString("request_id")
-	if requestID == "" {
+	if requestID == "" || len(requestID) == 0 {
 		requestID = generateContextualRequestID()
 		c.Set("request_id", requestID)
 	}
@@ -76,12 +76,6 @@ func AuditRequest(c *gin.Context) {
 		StatusCode: c.Writer.Status(),
 		RequestID:  c.GetString("request_id"),
 		Duration:   duration.Milliseconds(),
-		Error: func() string {
-			if len(c.Errors) > 0 {
-				return c.Errors.String()
-			}
-			return ""
-		}(),
 	}
 
 	// Capture errors if they exist
@@ -172,26 +166,24 @@ func determineAction(c *gin.Context) string {
 // logInLogger logs the audit entry to the application logger
 func logInLogger(entry AuditLog) {
 	if entry.StatusCode >= 400 {
-		logger.AppLog.Warnf("[AUDIT] %s | %s %s | IP: %s | Status: %d | Duration: %dms | User: %s | RequestID: %s | Error: %s",
+		logger.AppLog.Warnf("[AUDIT] %s | %s %s | IP: %s | Status: %d | Duration: %dms | RequestID: %s | Error: %s",
 			entry.Start.Format(time.RFC3339),
 			entry.Method,
 			entry.Path,
 			entry.IP,
 			entry.StatusCode,
 			entry.Duration,
-			// entry.UserID,
 			entry.RequestID,
 			entry.Error,
 		)
 	} else {
-		logger.AppLog.Infof("[AUDIT] %s | %s %s | IP: %s | Status: %d | Duration: %dms | User: %s | RequestID: %s",
+		logger.AppLog.Infof("[AUDIT] %s | %s %s | IP: %s | Status: %d | Duration: %dms | RequestID: %s",
 			entry.Start.Format(time.RFC3339),
 			entry.Method,
 			entry.Path,
 			entry.IP,
 			entry.StatusCode,
 			entry.Duration,
-			// entry.UserID,
 			entry.RequestID,
 		)
 	}

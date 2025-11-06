@@ -21,7 +21,7 @@ configuration:
   # MongoDB Database Configuration
   mongodb:
     name: "ssm_db"           # Database connection name identifier
-    url: "mongodb://localhost:27017"  # MongoDB connection string
+    url: "mongodb://172.28.31.5:27017/?replicaSet=rs0"  # MongoDB connection string
     dbName: "secure_storage"   # Name of the database to use
   
   # Rate Limiting Configuration - Controls API request throttling per client IP
