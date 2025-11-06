@@ -49,6 +49,8 @@ var ActionMap map[string]string = map[string]string{
 	"POST /crypto/get-all-keys":      constants.ACTION_GET_ALL_KEYS,
 	"GET /crypto/health-check":       constants.ACTION_HEALTH_CHECK,
 	"POST /login":                    constants.ACTION_USER_LOGIN,
+	"POST /crypto/encrypt-aes-gcm":   constants.ACTION_ENCRYPT_GCM,
+	"POST /crypto/decrypt-aes-gcm":   constants.ACTION_DECRYPT_GCM,
 }
 
 func AuditRequest(c *gin.Context) {

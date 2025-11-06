@@ -52,10 +52,22 @@ func CreateGinRouter() *gin.Engine {
 		handlers.HandleEncrypt(c)
 	})
 
+	// EncryptAES-GCM endpoints POST
+	rc.POST("/encrypt-aes-gcm", func(c *gin.Context) {
+		logger.AppLog.Debugf("Received /encrypt-aes-gcm request")
+		handlers.HandleEncryptAESGCM(c)
+	})
+
 	// Decrypt endpoints POST
 	rc.POST("/decrypt", func(c *gin.Context) {
 		logger.AppLog.Debugf("Received /decrypt request")
 		handlers.HandleDecrypt(c)
+	})
+
+	// DecryptAES-GCM endpoints POST
+	rc.POST("/decrypt-aes-gcm", func(c *gin.Context) {
+		logger.AppLog.Debugf("Received /decrypt-aes-gcm request")
+		handlers.HandleDecryptAESGCM(c)
 	})
 
 	// Store Key endpoints POST

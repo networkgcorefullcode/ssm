@@ -1,6 +1,8 @@
 example:
   key_label: MySecretKey
   plain: 48656c6c6f20576f726c6421
+  encryption_algorithm: 1
+description: Request schema for encrypting data using a specified key and algorithm
 properties:
   key_label:
     description: Label of the key to encrypt
@@ -20,6 +22,10 @@ properties:
     - 2
     - 3
     - 4
+    - 5
+    - 6
+    - 7
+    - 8
     example: 1
     type: integer
 required:

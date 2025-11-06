@@ -1,13 +1,14 @@
 # List for Things To Do
 
 - [x] Task 1 Implement feature for simetrict description that uses IV vector
-- [x] Task 2 Implement rotation for simetric description
+- [x] Task 2 Implement rotation for simetric description (see in the webconsole)
 - [x] Task 4 Update documentation for new simetric description features
 - [x] Task 5 Update the open api generator to support new features
 - [x] Task 5.1 Update the open api generator to support new features
 - [x] Task 6 Review and refactor code for performance improvements
 - [x] Task 7 Implement syncronization to aether core using the webconsole component
 - [x] Task 7.1 Implement new api for syncronization functions
+- [x] Task 7.2 Migrate to Gin framework for the HTTP API
 - [ ] Task 8 Add security modules for HTTP API using middlewares for security
   - [x] Add authentication and authorization mechanisms
   - [x] Implement CORS
@@ -15,14 +16,15 @@
   - [x] Add audit logging for security-related events
   - [x] Implement TLS for secure communication (mTLS1.3)
   - [x] Update OpenAPI documentation to reflect security features
-  - [ ] Write tests to verify the effectiveness of security measures
-  - [ ] Test all security features and fix any vulnerabilities found
+  - [0] Write tests to verify the effectiveness of security measures
+  - [0] Test all security features and fix any vulnerabilities found
 - [x] Task 9 Implement memory hardening techniques
-- [ ] Task 10 Implement SIEM integration for audit logs
-- [ ] Task 11 Performance testing and optimization, add benchmarks
+- [0] Task 10 Implement SIEM integration for audit logs
+- [0] Task 11 Performance testing and optimization, add benchmarks
 - [x] Task 12 Add function to save data in a secure way using AES256-GCM (encrypt and decrypt)
-- [ ] Task 12 Add a option to reset the user data for the login
+- [0] Task 12 Add a option to reset the user data for the login
 - [ ] Task 13 Add a new function to save the ssm data in other softHSMv2 instance securely
+- [ ] Task 13.1 Implement a frontend technology to see status information and logs
 - [ ] Task 14 Final review and documentation update
 
 ## Requirements
