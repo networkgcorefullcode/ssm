@@ -32,12 +32,12 @@ func HandleGenerateDESKey(c *gin.Context) {
 	var req models.GenDESKeyRequest
 	if err := json.NewDecoder(c.Request.Body).Decode(&req); err != nil {
 		logger.AppLog.Errorf("Failed to decode request body: %v", err)
-		sendProblemDetails(c, "Bad Request", "El cuerpo de la petición no es válido JSON", "INVALID_JSON", http.StatusBadRequest, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleBadRequest, ErrorDetailInvalidJSON, ErrorCodeInvalidJSON, http.StatusBadRequest, c.Request.URL.Path)
 		return
 	}
 	if req.Id < 0 {
 		logger.AppLog.Error("ID is required but was empty")
-		sendProblemDetails(c, "Bad Request", "El campo 'id' es requerido y no puede estar vacío", "MISSING_ID", http.StatusBadRequest, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleValidationError, "El campo 'id' es requerido y no puede estar vacío", ErrorCodeValidationFailed, http.StatusBadRequest, c.Request.URL.Path)
 		return
 	}
 
@@ -45,7 +45,7 @@ func HandleGenerateDESKey(c *gin.Context) {
 	handle, id, err := pkcs11mgr.GenerateDESKey(constants.LABEL_ENCRYPTION_KEY_DES, req.Id, *s)
 	if err != nil {
 		logger.AppLog.Errorf("DES key generation failed: %v", err)
-		sendProblemDetails(c, "Key Generation Failed", "Error al generar la clave DES en el HSM", "KEY_GENERATION_ERROR", http.StatusInternalServerError, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleKeyGenerationFailed, ErrorDetailKeyGenerationError, ErrorCodeKeyGenerationError, http.StatusInternalServerError, c.Request.URL.Path)
 		return
 	}
 

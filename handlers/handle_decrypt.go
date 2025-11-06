@@ -40,7 +40,7 @@ func HandleDecrypt(c *gin.Context) {
 	var req models.DecryptRequest
 	if err := json.NewDecoder(c.Request.Body).Decode(&req); err != nil {
 		logger.AppLog.Errorf("Failed to decode request body: %v", err)
-		sendProblemDetails(c, "Invalid JSON", "Failed to parse request body: "+err.Error(), "bad_json", http.StatusBadRequest, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleBadRequest, ErrorDetailInvalidJSON, ErrorCodeInvalidJSON, http.StatusBadRequest, c.Request.URL.Path)
 		return
 	}
 
@@ -49,13 +49,13 @@ func HandleDecrypt(c *gin.Context) {
 	// Validate required fields
 	if req.KeyLabel == "" {
 		logger.AppLog.Error("Key label is required but was empty")
-		sendProblemDetails(c, "Validation Error", "Key label is required", "validation_failed", http.StatusBadRequest, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleValidationError, ErrorDetailKeyLabelRequired, ErrorCodeValidationFailed, http.StatusBadRequest, c.Request.URL.Path)
 		return
 	}
 
 	if req.Cipher == "" {
 		logger.AppLog.Error("Ciphertext is required but was empty")
-		sendProblemDetails(c, "Validation Error", "Ciphertext is required", "validation_failed", http.StatusBadRequest, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleValidationError, "Ciphertext is required", ErrorCodeValidationFailed, http.StatusBadRequest, c.Request.URL.Path)
 		return
 	}
 
@@ -63,7 +63,7 @@ func HandleDecrypt(c *gin.Context) {
 	cipher, err := hex.DecodeString(req.Cipher)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to decode ciphertext hex: %v", err)
-		sendProblemDetails(c, "Invalid hex", "Failed to decode ciphertext: "+err.Error(), "bad_hex", http.StatusBadRequest, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleBadRequest, ErrorDetailInvalidHexCiphertext, ErrorCodeInvalidHex, http.StatusBadRequest, c.Request.URL.Path)
 		return
 	}
 
@@ -84,7 +84,7 @@ func HandleDecrypt(c *gin.Context) {
 	keyHandle, err := pkcs11mgr.FindKey(req.KeyLabel, req.Id, *s)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to find key by label '%s': %v", req.KeyLabel, err)
-		sendProblemDetails(c, "Key Search Failed", "Failed to search for key: "+err.Error(), "key_search_failed", http.StatusInternalServerError, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleKeyNotFound, ErrorDetailKeyNotExist, ErrorCodeKeyNotFound, http.StatusInternalServerError, c.Request.URL.Path)
 		return
 	}
 
@@ -128,18 +128,18 @@ func HandleDecrypt(c *gin.Context) {
 		// }
 	default:
 		logger.AppLog.Errorf("Unsupported decryption algorithm: %d", req.EncryptionAlgorithm)
-		sendProblemDetails(c, "Bad Request", "Unsupported decryption algorithm", "UNSUPPORTED_ALGORITHM", http.StatusBadRequest, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleBadRequest, "Unsupported decryption algorithm", "UNSUPPORTED_ALGORITHM", http.StatusBadRequest, c.Request.URL.Path)
 		return
 	}
 
 	if err != nil {
 		logger.AppLog.Errorf("Decryption failed: %v", err)
-		sendProblemDetails(c, "Decryption Failed", "Failed to decrypt data: "+err.Error(), "decryption_failed", http.StatusInternalServerError, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleDecryptionFailed, ErrorDetailDecryptionError, ErrorCodeDecryptionError, http.StatusInternalServerError, c.Request.URL.Path)
 		return
 	}
 	if len(rawPlaintext) == 0 {
 		logger.AppLog.Error("Decryption resulted in empty plaintext")
-		sendProblemDetails(c, "Decryption Failed", "Decryption resulted in empty plaintext", "empty_plaintext", http.StatusInternalServerError, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleDecryptionFailed, "Decryption resulted in empty plaintext", ErrorCodeDecryptionError, http.StatusInternalServerError, c.Request.URL.Path)
 		return
 	}
 

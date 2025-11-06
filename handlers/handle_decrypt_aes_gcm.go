@@ -36,7 +36,7 @@ func HandleDecryptAESGCM(c *gin.Context) {
 	var req models.DecryptAESGCMRequest
 	if err := json.NewDecoder(c.Request.Body).Decode(&req); err != nil {
 		logger.AppLog.Errorf("Failed to decode request body: %v", err)
-		sendProblemDetails(c, "Invalid JSON", "Failed to parse request body: "+err.Error(), "INVALID_JSON", http.StatusBadRequest, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleBadRequest, ErrorDetailInvalidJSON, ErrorCodeInvalidJSON, http.StatusBadRequest, c.Request.URL.Path)
 		return
 	}
 
@@ -45,25 +45,25 @@ func HandleDecryptAESGCM(c *gin.Context) {
 	// Validate required fields
 	if req.KeyLabel == "" {
 		logger.AppLog.Error("Key label is required but was empty")
-		sendProblemDetails(c, "Validation Error", "Key label is required", "VALIDATION_FAILED", http.StatusBadRequest, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleValidationError, ErrorDetailKeyLabelRequired, ErrorCodeValidationFailed, http.StatusBadRequest, c.Request.URL.Path)
 		return
 	}
 
 	if req.Cipher == "" {
 		logger.AppLog.Error("Ciphertext is required but was empty")
-		sendProblemDetails(c, "Validation Error", "Ciphertext is required", "VALIDATION_FAILED", http.StatusBadRequest, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleValidationError, "Ciphertext is required", ErrorCodeValidationFailed, http.StatusBadRequest, c.Request.URL.Path)
 		return
 	}
 
 	if req.Iv == "" {
 		logger.AppLog.Error("IV is required but was empty")
-		sendProblemDetails(c, "Validation Error", "IV is required for AES-GCM", "VALIDATION_FAILED", http.StatusBadRequest, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleValidationError, "IV is required for AES-GCM", ErrorCodeValidationFailed, http.StatusBadRequest, c.Request.URL.Path)
 		return
 	}
 
 	if req.Tag == "" {
 		logger.AppLog.Error("Authentication tag is required but was empty")
-		sendProblemDetails(c, "Validation Error", "Authentication tag is required for AES-GCM", "VALIDATION_FAILED", http.StatusBadRequest, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleValidationError, "Authentication tag is required for AES-GCM", ErrorCodeValidationFailed, http.StatusBadRequest, c.Request.URL.Path)
 		return
 	}
 
@@ -71,28 +71,28 @@ func HandleDecryptAESGCM(c *gin.Context) {
 	cipher, err := hex.DecodeString(req.Cipher)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to decode ciphertext hex: %v", err)
-		sendProblemDetails(c, "Invalid hex", "Failed to decode ciphertext: "+err.Error(), "INVALID_HEX", http.StatusBadRequest, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleBadRequest, ErrorDetailInvalidHexCiphertext, ErrorCodeInvalidHex, http.StatusBadRequest, c.Request.URL.Path)
 		return
 	}
 
 	iv, err := hex.DecodeString(req.Iv)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to decode IV hex: %v", err)
-		sendProblemDetails(c, "Invalid hex", "Failed to decode IV: "+err.Error(), "INVALID_HEX", http.StatusBadRequest, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleBadRequest, ErrorDetailInvalidHexIV, ErrorCodeInvalidHex, http.StatusBadRequest, c.Request.URL.Path)
 		return
 	}
 
 	tag, err := hex.DecodeString(req.Tag)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to decode tag hex: %v", err)
-		sendProblemDetails(c, "Invalid hex", "Failed to decode authentication tag: "+err.Error(), "INVALID_HEX", http.StatusBadRequest, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleBadRequest, ErrorDetailInvalidHexTag, ErrorCodeInvalidHex, http.StatusBadRequest, c.Request.URL.Path)
 		return
 	}
 
 	// Validate tag length (should be 16 bytes for 128-bit tag)
 	if len(tag) != 16 {
 		logger.AppLog.Errorf("Invalid tag length: %d bytes (expected 16)", len(tag))
-		sendProblemDetails(c, "Validation Error", "Authentication tag must be 16 bytes (128 bits)", "INVALID_TAG_LENGTH", http.StatusBadRequest, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleValidationError, "Authentication tag must be 16 bytes (128 bits)", ErrorCodeValidationFailed, http.StatusBadRequest, c.Request.URL.Path)
 		return
 	}
 
@@ -102,7 +102,7 @@ func HandleDecryptAESGCM(c *gin.Context) {
 		aad, err = hex.DecodeString(req.Aad)
 		if err != nil {
 			logger.AppLog.Errorf("Failed to decode hex AAD: %v", err)
-			sendProblemDetails(c, "Bad Request", "The AAD hex data is not valid", "INVALID_HEX", http.StatusBadRequest, c.Request.URL.Path)
+			sendProblemDetails(c, ErrorTitleBadRequest, ErrorDetailInvalidHexAAD, ErrorCodeInvalidHex, http.StatusBadRequest, c.Request.URL.Path)
 			return
 		}
 		logger.AppLog.Infof("AAD provided: %d bytes", len(aad))
@@ -114,7 +114,7 @@ func HandleDecryptAESGCM(c *gin.Context) {
 	keyHandle, err := pkcs11mgr.FindKeyLabelReturnRandom(req.KeyLabel, *s)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to find key by label '%s': %v", req.KeyLabel, err)
-		sendProblemDetails(c, "Key Not Found", "The specified key does not exist in the HSM", "KEY_NOT_FOUND", http.StatusNotFound, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleKeyNotFound, ErrorDetailKeyNotExist, ErrorCodeKeyNotFound, http.StatusNotFound, c.Request.URL.Path)
 		return
 	}
 
@@ -122,7 +122,7 @@ func HandleDecryptAESGCM(c *gin.Context) {
 	attr, err := pkcs11mgr.GetObjectAttributes(keyHandle, *s)
 	if err != nil {
 		logger.AppLog.Errorf("Attributes not found: %s, error: %v", req.KeyLabel, err)
-		sendProblemDetails(c, "Attributes Not Found", "Failed to retrieve key attributes", "ATTRIBUTES_NOT_FOUND", http.StatusNotFound, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleAttributesNotFound, ErrorDetailAttributesNotFound, ErrorCodeAttributesNotFound, http.StatusNotFound, c.Request.URL.Path)
 		return
 	}
 
@@ -135,7 +135,7 @@ func HandleDecryptAESGCM(c *gin.Context) {
 	rawPlaintext, err := pkcs11mgr.DecryptKeyAesGCM(keyHandle, iv, ciphertextWithTag, aad, *s)
 	if err != nil {
 		logger.AppLog.Errorf("AES-GCM decryption failed (authentication may have failed): %v", err)
-		sendProblemDetails(c, "Decryption Failed", "AES-GCM decryption failed. The authentication tag may be invalid or the data may have been tampered with.", "DECRYPTION_ERROR", http.StatusUnauthorized, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleDecryptionFailed, "AES-GCM decryption failed. The authentication tag may be invalid or the data may have been tampered with.", ErrorCodeDecryptionError, http.StatusUnauthorized, c.Request.URL.Path)
 		return
 	}
 

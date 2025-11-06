@@ -76,6 +76,12 @@ func AuditRequest(c *gin.Context) {
 		StatusCode: c.Writer.Status(),
 		RequestID:  c.GetString("request_id"),
 		Duration:   duration.Milliseconds(),
+		Error: func() string {
+			if len(c.Errors) > 0 {
+				return c.Errors.String()
+			}
+			return ""
+		}(),
 	}
 
 	// Capture errors if they exist

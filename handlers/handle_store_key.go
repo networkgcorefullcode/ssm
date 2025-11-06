@@ -33,7 +33,7 @@ func HandleStoreKey(c *gin.Context) {
 	case http.MethodPut:
 		updateStoreKey(c)
 	default:
-		sendProblemDetails(c, "Method Not Allowed", "The HTTP method is not allowed for this endpoint", "METHOD_NOT_ALLOWED", http.StatusMethodNotAllowed, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleBadRequest, "The HTTP method is not allowed for this endpoint", "METHOD_NOT_ALLOWED", http.StatusMethodNotAllowed, c.Request.URL.Path)
 	}
 }
 
@@ -49,7 +49,7 @@ func postStoreKey(c *gin.Context) {
 
 	if err := json.NewDecoder(c.Request.Body).Decode(&req); err != nil {
 		logger.AppLog.Errorf("Failed to decode request body: %v", err)
-		sendProblemDetails(c, "Bad Request", "The request body is not valid JSON", "INVALID_JSON", http.StatusBadRequest, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleBadRequest, ErrorDetailInvalidJSON, ErrorCodeInvalidJSON, http.StatusBadRequest, c.Request.URL.Path)
 		return
 	}
 
@@ -60,7 +60,7 @@ func postStoreKey(c *gin.Context) {
 	key_value, err := hex.DecodeString(req.KeyValue)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to decode HEX key value: %v", err)
-		sendProblemDetails(c, "Bad Request", "The key value in HEX is not valid", "INVALID_HEX", http.StatusBadRequest, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleBadRequest, "The key value in HEX is not valid", ErrorCodeInvalidHex, http.StatusBadRequest, c.Request.URL.Path)
 		return
 	}
 
@@ -68,7 +68,7 @@ func postStoreKey(c *gin.Context) {
 		req.KeyLabel != constants.LABEL_K4_KEY_DES &&
 		req.KeyLabel != constants.LABEL_K4_KEY_DES3 {
 		logger.AppLog.Errorf("Unsupported key type: %s", req.KeyLabel)
-		sendProblemDetails(c, "Bad Request", "The specified key type is not supported", "UNSUPPORTED_KEY_TYPE", http.StatusBadRequest, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleBadRequest, "The specified key type is not supported", "UNSUPPORTED_KEY_TYPE", http.StatusBadRequest, c.Request.URL.Path)
 		return
 	}
 
@@ -122,7 +122,7 @@ func deleteStoreKey(c *gin.Context) {
 
 	if err := json.NewDecoder(c.Request.Body).Decode(&req); err != nil {
 		logger.AppLog.Errorf("Failed to decode request body: %v", err)
-		sendProblemDetails(c, "Bad Request", "The request body is not valid JSON", "INVALID_JSON", http.StatusBadRequest, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleBadRequest, ErrorDetailInvalidJSON, ErrorCodeInvalidJSON, http.StatusBadRequest, c.Request.URL.Path)
 		return
 	}
 
@@ -159,7 +159,7 @@ func updateStoreKey(c *gin.Context) {
 
 	if err := json.NewDecoder(c.Request.Body).Decode(&req); err != nil {
 		logger.AppLog.Errorf("Failed to decode request body: %v", err)
-		sendProblemDetails(c, "Bad Request", "The request body is not valid JSON", "INVALID_JSON", http.StatusBadRequest, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleBadRequest, ErrorDetailInvalidJSON, ErrorCodeInvalidJSON, http.StatusBadRequest, c.Request.URL.Path)
 		return
 	}
 
@@ -172,7 +172,7 @@ func updateStoreKey(c *gin.Context) {
 	keyValue, err := hex.DecodeString(req.KeyValue)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to decode hex key value: %v", err)
-		sendProblemDetails(c, "Bad Request", "The key value in hexadecimal is not valid", "INVALID_HEX", http.StatusBadRequest, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleBadRequest, "The key value in hexadecimal is not valid", ErrorCodeInvalidHex, http.StatusBadRequest, c.Request.URL.Path)
 		return
 	}
 

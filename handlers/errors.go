@@ -1,0 +1,71 @@
+package handlers
+
+// Error titles
+const (
+	ErrorTitleBadRequest          = "Bad Request"
+	ErrorTitleValidationError     = "Validation Error"
+	ErrorTitleKeyNotFound         = "Key Not Found"
+	ErrorTitleAttributesNotFound  = "Attributes Not Found"
+	ErrorTitleInternalServerError = "Internal Server Error"
+	ErrorTitleEncryptionFailed    = "Encryption Failed"
+	ErrorTitleDecryptionFailed    = "Decryption Failed"
+	ErrorTitleSigningFailed       = "Signing Failed"
+	ErrorTitleVerificationFailed  = "Verification Failed"
+	ErrorTitleKeyGenerationFailed = "Key Generation Failed"
+	ErrorTitleNotFound            = "Not Found"
+	ErrorTitleUnauthorized        = "Unauthorized"
+	ErrorTitleForbidden           = "Forbidden"
+)
+
+// Error details
+const (
+	ErrorDetailInvalidJSON          = "The request body is not valid JSON"
+	ErrorDetailKeyLabelRequired     = "Key label is required"
+	ErrorDetailPlaintextRequired    = "Plaintext is required"
+	ErrorDetailInvalidHexPlaintext  = "The plaintext hex data is not valid"
+	ErrorDetailInvalidHexAAD        = "The AAD hex data is not valid"
+	ErrorDetailKeyNotExist          = "The specified key does not exist in the HSM"
+	ErrorDetailAttributesNotFound   = "Failed to retrieve key attributes"
+	ErrorDetailIVGenerationFailed   = "Error generating initialization vector"
+	ErrorDetailEncryptionError      = "Error during AES-GCM encryption process"
+	ErrorDetailInvalidEncryptionOut = "Invalid encryption output"
+	ErrorDetailInvalidHexCiphertext = "The ciphertext hex data is not valid"
+	ErrorDetailInvalidHexIV         = "The IV hex data is not valid"
+	ErrorDetailInvalidHexTag        = "The tag hex data is not valid"
+	ErrorDetailDecryptionError      = "Error during AES-GCM decryption process"
+	ErrorDetailAuthenticationFailed = "Authentication tag verification failed"
+	ErrorDetailInvalidHexData       = "The data hex is not valid"
+	ErrorDetailInvalidHexSignature  = "The signature hex data is not valid"
+	ErrorDetailSigningError         = "Error during signing process"
+	ErrorDetailVerificationError    = "Error during signature verification process"
+	ErrorDetailInvalidSignature     = "The signature is not valid"
+	ErrorDetailKeyGenerationError   = "Error during key generation process"
+	ErrorDetailInvalidKeyType       = "Invalid key type specified"
+	ErrorDetailInvalidKeySize       = "Invalid key size specified"
+	ErrorDetailCiphertextRequired   = "Ciphertext is required"
+	ErrorDetailIVRequired           = "IV is required"
+	ErrorDetailTagRequired          = "Authentication tag is required"
+)
+
+// Error types/codes
+const (
+	ErrorCodeInvalidJSON          = "INVALID_JSON"
+	ErrorCodeValidationFailed     = "VALIDATION_FAILED"
+	ErrorCodeInvalidHex           = "INVALID_HEX"
+	ErrorCodeKeyNotFound          = "KEY_NOT_FOUND"
+	ErrorCodeAttributesNotFound   = "ATTRIBUTES_NOT_FOUND"
+	ErrorCodeIVGenerationFailed   = "IV_GENERATION_FAILED"
+	ErrorCodeEncryptionError      = "ENCRYPTION_ERROR"
+	ErrorCodeDecryptionError      = "DECRYPTION_ERROR"
+	ErrorCodeAuthenticationFailed = "AUTHENTICATION_FAILED"
+	ErrorCodeSigningError         = "SIGNING_ERROR"
+	ErrorCodeVerificationError    = "VERIFICATION_ERROR"
+	ErrorCodeInvalidSignature     = "INVALID_SIGNATURE"
+	ErrorCodeKeyGenerationError   = "KEY_GENERATION_ERROR"
+	ErrorCodeInvalidKeyType       = "INVALID_KEY_TYPE"
+	ErrorCodeInvalidKeySize       = "INVALID_KEY_SIZE"
+	ErrorCodeNotFound             = "NOT_FOUND"
+	ErrorCodeUnauthorized         = "UNAUTHORIZED"
+	ErrorCodeForbidden            = "FORBIDDEN"
+	ErrorCodeInternalError        = "INTERNAL_ERROR"
+)

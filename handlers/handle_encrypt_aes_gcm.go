@@ -35,20 +35,20 @@ func HandleEncryptAESGCM(c *gin.Context) {
 	var req models.EncryptAESGCMRequest
 	if err := json.NewDecoder(c.Request.Body).Decode(&req); err != nil {
 		logger.AppLog.Errorf("Failed to decode request body: %v", err)
-		sendProblemDetails(c, "Bad Request", "The request body is not valid JSON", "INVALID_JSON", http.StatusBadRequest, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleBadRequest, ErrorDetailInvalidJSON, ErrorCodeInvalidJSON, http.StatusBadRequest, c.Request.URL.Path)
 		return
 	}
 
 	// Validate required fields
 	if req.KeyLabel == "" {
 		logger.AppLog.Error("Key label is required but was empty")
-		sendProblemDetails(c, "Validation Error", "Key label is required", "VALIDATION_FAILED", http.StatusBadRequest, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleValidationError, ErrorDetailKeyLabelRequired, ErrorCodeValidationFailed, http.StatusBadRequest, c.Request.URL.Path)
 		return
 	}
 
 	if req.Plain == "" {
 		logger.AppLog.Error("Plaintext is required but was empty")
-		sendProblemDetails(c, "Validation Error", "Plaintext is required", "VALIDATION_FAILED", http.StatusBadRequest, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleValidationError, ErrorDetailPlaintextRequired, ErrorCodeValidationFailed, http.StatusBadRequest, c.Request.URL.Path)
 		return
 	}
 
@@ -56,7 +56,7 @@ func HandleEncryptAESGCM(c *gin.Context) {
 	pt, err := hex.DecodeString(req.Plain)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to decode hex plaintext: %v", err)
-		sendProblemDetails(c, "Bad Request", "The plaintext hex data is not valid", "INVALID_HEX", http.StatusBadRequest, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleBadRequest, ErrorDetailInvalidHexPlaintext, ErrorCodeInvalidHex, http.StatusBadRequest, c.Request.URL.Path)
 		return
 	}
 
@@ -66,7 +66,7 @@ func HandleEncryptAESGCM(c *gin.Context) {
 		aad, err = hex.DecodeString(req.Aad)
 		if err != nil {
 			logger.AppLog.Errorf("Failed to decode hex AAD: %v", err)
-			sendProblemDetails(c, "Bad Request", "The AAD hex data is not valid", "INVALID_HEX", http.StatusBadRequest, c.Request.URL.Path)
+			sendProblemDetails(c, ErrorTitleBadRequest, ErrorDetailInvalidHexAAD, ErrorCodeInvalidHex, http.StatusBadRequest, c.Request.URL.Path)
 			return
 		}
 		logger.AppLog.Infof("AAD provided: %d bytes", len(aad))
@@ -76,7 +76,7 @@ func HandleEncryptAESGCM(c *gin.Context) {
 	keyHandle, err := pkcs11mgr.FindKeyLabelReturnRandom(req.KeyLabel, *s)
 	if err != nil {
 		logger.AppLog.Errorf("Key not found: %s, error: %v", req.KeyLabel, err)
-		sendProblemDetails(c, "Key Not Found", "The specified key does not exist in the HSM", "KEY_NOT_FOUND", http.StatusNotFound, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleKeyNotFound, ErrorDetailKeyNotExist, ErrorCodeKeyNotFound, http.StatusNotFound, c.Request.URL.Path)
 		return
 	}
 
@@ -84,7 +84,7 @@ func HandleEncryptAESGCM(c *gin.Context) {
 	attr, err := pkcs11mgr.GetObjectAttributes(keyHandle, *s)
 	if err != nil {
 		logger.AppLog.Errorf("Attributes not found: %s, error: %v", req.KeyLabel, err)
-		sendProblemDetails(c, "Attributes Not Found", "Failed to retrieve key attributes", "ATTRIBUTES_NOT_FOUND", http.StatusNotFound, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleAttributesNotFound, ErrorDetailAttributesNotFound, ErrorCodeAttributesNotFound, http.StatusNotFound, c.Request.URL.Path)
 		return
 	}
 
@@ -92,7 +92,7 @@ func HandleEncryptAESGCM(c *gin.Context) {
 	iv := make([]byte, 12) // 12 bytes (96 bits) is recommended for GCM
 	if err := safe.RandRead(iv); err != nil {
 		logger.AppLog.Errorf("Failed to generate IV: %v", err)
-		sendProblemDetails(c, "Internal Server Error", "Error generating initialization vector", "IV_GENERATION_FAILED", http.StatusInternalServerError, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleInternalServerError, ErrorDetailIVGenerationFailed, ErrorCodeIVGenerationFailed, http.StatusInternalServerError, c.Request.URL.Path)
 		return
 	}
 
@@ -102,7 +102,7 @@ func HandleEncryptAESGCM(c *gin.Context) {
 	ciphertextWithTag, err := pkcs11mgr.EncryptKeyAesGCM(keyHandle, iv, pt, aad, *s)
 	if err != nil {
 		logger.AppLog.Errorf("AES-GCM encryption failed: %v", err)
-		sendProblemDetails(c, "Encryption Failed", "Error during AES-GCM encryption process", "ENCRYPTION_ERROR", http.StatusInternalServerError, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleEncryptionFailed, ErrorDetailEncryptionError, ErrorCodeEncryptionError, http.StatusInternalServerError, c.Request.URL.Path)
 		return
 	}
 
@@ -114,7 +114,7 @@ func HandleEncryptAESGCM(c *gin.Context) {
 	// Separate them for the response
 	if len(ciphertextWithTag) < 16 {
 		logger.AppLog.Errorf("Invalid ciphertext length: %d (expected at least 16 bytes for tag)", len(ciphertextWithTag))
-		sendProblemDetails(c, "Encryption Failed", "Invalid encryption output", "ENCRYPTION_ERROR", http.StatusInternalServerError, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleEncryptionFailed, ErrorDetailInvalidEncryptionOut, ErrorCodeEncryptionError, http.StatusInternalServerError, c.Request.URL.Path)
 		return
 	}
 

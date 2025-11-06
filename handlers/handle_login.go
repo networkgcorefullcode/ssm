@@ -20,7 +20,7 @@ func HandleLogin(c *gin.Context) {
 	// Parse JSON request
 	if err := c.ShouldBindJSON(&loginReq); err != nil {
 		logger.AppLog.Errorf("Invalid JSON payload: %v", err)
-		sendProblemDetails(c, "Bad Request", "Invalid JSON payload", "invalid_request", http.StatusBadRequest, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleBadRequest, ErrorDetailInvalidJSON, ErrorCodeInvalidJSON, http.StatusBadRequest, c.Request.URL.Path)
 		return
 	}
 
@@ -32,7 +32,7 @@ func HandleLogin(c *gin.Context) {
 	userData, err := database.FindOneData(client, factory.SsmConfig.Configuration.Mongodb.DBName, database.CollSecret, filter)
 	if err != nil {
 		logger.AppLog.Errorf("User not found: %v", err)
-		sendProblemDetails(c, "Unauthorized", "Invalid service ID or password", "invalid_credentials", http.StatusUnauthorized, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleUnauthorized, "Invalid service ID or password", ErrorCodeUnauthorized, http.StatusUnauthorized, c.Request.URL.Path)
 		return
 	}
 
@@ -41,14 +41,14 @@ func HandleLogin(c *gin.Context) {
 	bsonBytes, _ := bson.Marshal(userData)
 	if err := bson.Unmarshal(bsonBytes, &user); err != nil {
 		logger.AppLog.Errorf("Failed to unmarshal user data: %v", err)
-		sendProblemDetails(c, "Internal Server Error", "User data processing error", "internal_error", http.StatusInternalServerError, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleInternalServerError, "User data processing error", ErrorCodeInternalError, http.StatusInternalServerError, c.Request.URL.Path)
 		return
 	}
 
 	var iv []byte
 	if iv, err = hex.DecodeString(user.PasswordSecret.IV); err != nil {
 		logger.AppLog.Errorf("Failed to decode IV: %v", err)
-		sendProblemDetails(c, "Internal Server Error", "Invalid IV format", "internal_error", http.StatusInternalServerError, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleInternalServerError, ErrorDetailInvalidHexIV, ErrorCodeInternalError, http.StatusInternalServerError, c.Request.URL.Path)
 		return
 	}
 
@@ -60,7 +60,7 @@ func HandleLogin(c *gin.Context) {
 	keyHandle, err := pkcs11mgr.FindKey(user.PasswordSecret.KeyLabel, user.PasswordSecret.Id, *session)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to find key: %v", err)
-		sendProblemDetails(c, "Internal Server Error", "Key retrieval error", "internal_error", http.StatusInternalServerError, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleInternalServerError, "Key retrieval error", ErrorCodeInternalError, http.StatusInternalServerError, c.Request.URL.Path)
 		return
 	}
 
@@ -68,21 +68,21 @@ func HandleLogin(c *gin.Context) {
 	encryptedPassword, err := hex.DecodeString(user.PasswordSecret.EncryptedData)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to decode encrypted password: %v", err)
-		sendProblemDetails(c, "Internal Server Error", "Password decryption error", "internal_error", http.StatusInternalServerError, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleInternalServerError, "Password decryption error", ErrorCodeInternalError, http.StatusInternalServerError, c.Request.URL.Path)
 		return
 	}
 
 	decryptedPassword, err := pkcs11mgr.DecryptKey(keyHandle, iv, encryptedPassword, pkcs11.CKM_AES_CBC_PAD, *session)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to decrypt password: %v", err)
-		sendProblemDetails(c, "Internal Server Error", "Password decryption failed", "internal_error", http.StatusInternalServerError, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleInternalServerError, "Password decryption failed", ErrorCodeInternalError, http.StatusInternalServerError, c.Request.URL.Path)
 		return
 	}
 
 	// Compare passwords
 	if hex.EncodeToString(decryptedPassword) != loginReq.Password {
 		logger.AppLog.Warnf("Password mismatch for user: %s", loginReq.ServiceId)
-		sendProblemDetails(c, "Unauthorized", "Invalid service ID or password", "invalid_credentials", http.StatusUnauthorized, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleUnauthorized, "Invalid service ID or password", ErrorCodeUnauthorized, http.StatusUnauthorized, c.Request.URL.Path)
 		return
 	}
 
@@ -90,7 +90,7 @@ func HandleLogin(c *gin.Context) {
 	token, err := generateJWTToken(user.ServiceID, session)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to generate JWT token: %v", err)
-		sendProblemDetails(c, "Internal Server Error", "Token generation failed", "internal_error", http.StatusInternalServerError, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleInternalServerError, "Token generation failed", ErrorCodeInternalError, http.StatusInternalServerError, c.Request.URL.Path)
 		return
 	}
 

@@ -33,7 +33,7 @@ func HandleHealthCheck(c *gin.Context) {
 	// Encode and send response
 	if err := json.NewEncoder(c.Writer).Encode(response); err != nil {
 		logger.AppLog.Errorf("Failed to encode health check response: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		sendProblemDetails(c, ErrorTitleInternalServerError, "Failed to encode response", ErrorCodeInternalError, http.StatusInternalServerError, c.Request.URL.Path)
 		return
 	}
 

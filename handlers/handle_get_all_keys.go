@@ -37,7 +37,7 @@ func HandleGetAllKeys(c *gin.Context) {
 	}
 	if err != nil {
 		logger.AppLog.Errorf("Failed to search all keys: %v", err)
-		sendProblemDetails(c, "Key Search Failed", "Error searching all keys in HSM", "KEY_GET_ERROR", http.StatusInternalServerError, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleInternalServerError, "Error searching all keys in HSM", "KEY_GET_ERROR", http.StatusInternalServerError, c.Request.URL.Path)
 		return
 	}
 
@@ -57,7 +57,7 @@ func HandleGetAllKeys(c *gin.Context) {
 		objAttrs, err := pkcs11mgr.GetValuesForObjects(handles, *s)
 		if err != nil {
 			logger.AppLog.Errorf("Failed to get object attributes for label %s: %v", label, err)
-			sendProblemDetails(c, "Key Attributes Failed", "Error getting key attributes", "KEY_GET_ERROR", http.StatusInternalServerError, c.Request.URL.Path)
+			sendProblemDetails(c, ErrorTitleAttributesNotFound, "Error getting key attributes", "KEY_GET_ERROR", http.StatusInternalServerError, c.Request.URL.Path)
 			return
 		}
 

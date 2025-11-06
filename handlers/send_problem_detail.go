@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"errors"
+
 	"github.com/gin-gonic/gin"
 	"github.com/networkgcorefullcode/ssm/models"
 )
@@ -32,5 +34,6 @@ func sendProblemDetails(c *gin.Context, title, detail, errorCode string, status 
 		Status:   int32(status),
 		Instance: instance,
 	}
+	c.Error(errors.New(errorCode))
 	c.JSON(status, problem)
 }

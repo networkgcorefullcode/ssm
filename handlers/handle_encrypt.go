@@ -39,7 +39,7 @@ func HandleEncrypt(c *gin.Context) {
 	var req models.EncryptRequest
 	if err := json.NewDecoder(c.Request.Body).Decode(&req); err != nil {
 		logger.AppLog.Errorf("Failed to decode request body: %v", err)
-		sendProblemDetails(c, "Bad Request", "The request body is not valid JSON", "INVALID_JSON", http.StatusBadRequest, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleBadRequest, ErrorDetailInvalidJSON, ErrorCodeInvalidJSON, http.StatusBadRequest, c.Request.URL.Path)
 		return
 	}
 
@@ -47,7 +47,7 @@ func HandleEncrypt(c *gin.Context) {
 	pt, err := hex.DecodeString(req.Plain)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to decode hex plaintext: %v", err)
-		sendProblemDetails(c, "Bad Request", "The hex data is not valid", "INVALID_HEX", http.StatusBadRequest, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleBadRequest, ErrorDetailInvalidHexData, ErrorCodeInvalidHex, http.StatusBadRequest, c.Request.URL.Path)
 		return
 	}
 
@@ -55,13 +55,13 @@ func HandleEncrypt(c *gin.Context) {
 	keyHandle, err := pkcs11mgr.FindKeyLabelReturnRandom(req.KeyLabel, *s)
 	if err != nil {
 		logger.AppLog.Errorf("Key not found: %s, error: %v", req.KeyLabel, err)
-		sendProblemDetails(c, "Key Not Found", "The specified key does not exist in the HSM", "KEY_NOT_FOUND", http.StatusNotFound, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleKeyNotFound, ErrorDetailKeyNotExist, ErrorCodeKeyNotFound, http.StatusNotFound, c.Request.URL.Path)
 		return
 	}
 	atrr, err := pkcs11mgr.GetObjectAttributes(keyHandle, *s)
 	if err != nil {
 		logger.AppLog.Errorf("Atributes not found: %s, error: %v", req.KeyLabel, err)
-		sendProblemDetails(c, "Atributes Not Found", "The specified key does not exist in the HSM", "KEY_NOT_FOUND", http.StatusNotFound, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleAttributesNotFound, ErrorDetailAttributesNotFound, ErrorCodeAttributesNotFound, http.StatusNotFound, c.Request.URL.Path)
 		return
 	}
 
@@ -75,7 +75,7 @@ func HandleEncrypt(c *gin.Context) {
 	iv := make([]byte, size)
 	if err := safe.RandRead(iv); err != nil {
 		logger.AppLog.Errorf("Failed to generate IV: %v", err)
-		sendProblemDetails(c, "Internal Server Error", "Error generating initialization vector", "IV_GENERATION_FAILED", http.StatusInternalServerError, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleInternalServerError, ErrorDetailIVGenerationFailed, ErrorCodeIVGenerationFailed, http.StatusInternalServerError, c.Request.URL.Path)
 		return
 	}
 
@@ -90,7 +90,7 @@ func HandleEncrypt(c *gin.Context) {
 			ciphertext, err = pkcs11mgr.EncryptKey(keyHandle, iv, pt, pkcs11.CKM_AES_CBC, *s)
 			if err != nil {
 				logger.AppLog.Errorf("Encryption failed: %v", err)
-				sendProblemDetails(c, "Encryption Failed", "Error during encryption process", "ENCRYPTION_ERROR", http.StatusInternalServerError, c.Request.URL.Path)
+				sendProblemDetails(c, ErrorTitleEncryptionFailed, ErrorDetailEncryptionError, ErrorCodeEncryptionError, http.StatusInternalServerError, c.Request.URL.Path)
 				return
 			}
 		}
@@ -101,7 +101,7 @@ func HandleEncrypt(c *gin.Context) {
 			ciphertext, err = pkcs11mgr.EncryptKey(keyHandle, iv, pt, pkcs11.CKM_DES3_CBC, *s)
 			if err != nil {
 				logger.AppLog.Errorf("Encryption failed: %v", err)
-				sendProblemDetails(c, "Encryption Failed", "Error during encryption process", "ENCRYPTION_ERROR", http.StatusInternalServerError, c.Request.URL.Path)
+				sendProblemDetails(c, ErrorTitleEncryptionFailed, ErrorDetailEncryptionError, ErrorCodeEncryptionError, http.StatusInternalServerError, c.Request.URL.Path)
 				return
 			}
 		}
@@ -112,13 +112,13 @@ func HandleEncrypt(c *gin.Context) {
 			ciphertext, err = pkcs11mgr.EncryptKey(keyHandle, iv, pt, pkcs11.CKM_DES_CBC, *s)
 			if err != nil {
 				logger.AppLog.Errorf("Encryption failed: %v", err)
-				sendProblemDetails(c, "Encryption Failed", "Error during encryption process", "ENCRYPTION_ERROR", http.StatusInternalServerError, c.Request.URL.Path)
+				sendProblemDetails(c, ErrorTitleEncryptionFailed, ErrorDetailEncryptionError, ErrorCodeEncryptionError, http.StatusInternalServerError, c.Request.URL.Path)
 				return
 			}
 		}
 	default:
 		logger.AppLog.Errorf("Unsupported encryption algorithm: %s", req.EncryptionAlgorithm)
-		sendProblemDetails(c, "Bad Request", "The specified encryption algorithm is not supported", "UNSUPPORTED_ALGORITHM", http.StatusBadRequest, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleBadRequest, "The specified encryption algorithm is not supported", "UNSUPPORTED_ALGORITHM", http.StatusBadRequest, c.Request.URL.Path)
 		return
 	}
 
