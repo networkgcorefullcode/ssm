@@ -530,8 +530,8 @@ components:
       $ref: 'components/security/auth.yml#/bearerAuth'
     apiKeyAuth:
       $ref: 'components/security/auth.yml#/apiKeyAuth'
-    mutualTLS:
-      $ref: 'components/security/auth.yml#/mutualTLS'
+    # mutualTLS:
+    #   $ref: 'components/security/auth.yml#/mutualTLS'
   
   schemas:
     # Common schemas

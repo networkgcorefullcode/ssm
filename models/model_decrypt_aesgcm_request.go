@@ -11,7 +11,7 @@ Contact: support@yourorganization.com
 
 package models
 
-// DecryptAESGCMRequest - Request for AES-GCM decryption
+// DecryptAESGCMRequest
 type DecryptAESGCMRequest struct {
 	// Label of the AES key to use for GCM decryption
 	KeyLabel string `json:"key_label"`
@@ -22,5 +22,5 @@ type DecryptAESGCMRequest struct {
 	// Authentication tag in hexadecimal (16 bytes for 128-bit tag)
 	Tag string `json:"tag"`
 	// Additional Authenticated Data (AAD) in hexadecimal (must match the AAD used during encryption)
-	Aad string `json:"aad,omitempty"`
+	Aad string `json:"aad"`
 }

@@ -11,18 +11,20 @@ Contact: support@yourorganization.com
 
 package models
 
-import "time"
+import (
+	"time"
+)
 
-// DecryptAESGCMResponse - Response for AES-GCM decryption
+// DecryptAESGCMResponse
 type DecryptAESGCMResponse struct {
 	// Decrypted plaintext data in hexadecimal
 	Plain string `json:"plain"`
 	// ID of the key that was used to decrypt the data
-	Id int32 `json:"id,omitempty"`
+	Id int32 `json:"id"`
 	// Indicates if the operation was successful
 	Ok bool `json:"ok"`
 	// Creation timestamp in RFC3339 format
-	TimeCreated time.Time `json:"time_created,omitempty"`
+	TimeCreated time.Time `json:"time_created"`
 	// Update timestamp in RFC3339 format
-	TimeUpdated time.Time `json:"time_updated,omitempty"`
+	TimeUpdated time.Time `json:"time_updated"`
 }

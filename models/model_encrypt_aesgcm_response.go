@@ -11,9 +11,11 @@ Contact: support@yourorganization.com
 
 package models
 
-import "time"
+import (
+	"time"
+)
 
-// EncryptAESGCMResponse - Response for AES-GCM encryption
+// EncryptAESGCMResponse
 type EncryptAESGCMResponse struct {
 	// Encrypted data (ciphertext) in hexadecimal
 	Cipher string `json:"cipher"`
@@ -22,11 +24,11 @@ type EncryptAESGCMResponse struct {
 	// Authentication tag in hexadecimal (16 bytes for 128-bit tag)
 	Tag string `json:"tag"`
 	// ID of the key that was used to encrypt the data
-	Id int32 `json:"id,omitempty"`
+	Id int32 `json:"id"`
 	// Indicates if the operation was successful
 	Ok bool `json:"ok"`
 	// Creation timestamp in RFC3339 format
-	TimeCreated time.Time `json:"time_created,omitempty"`
+	TimeCreated time.Time `json:"time_created"`
 	// Update timestamp in RFC3339 format
-	TimeUpdated time.Time `json:"time_updated,omitempty"`
+	TimeUpdated time.Time `json:"time_updated"`
 }

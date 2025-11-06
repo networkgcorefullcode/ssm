@@ -236,6 +236,98 @@ paths:
       summary: Decrypt data
       tags:
       - Encryption
+  /crypto/encrypt-aes-gcm:
+    post:
+      description: |
+        Encrypts data using an AES key stored in the HSM with GCM (Galois/Counter Mode).
+        GCM provides authenticated encryption with associated data (AEAD).
+        Generates a unique random IV (nonce) for each encryption operation.
+        Returns ciphertext, IV, and authentication tag separately.
+      operationId: encryptDataAESGCM
+      requestBody:
+        content:
+          application/json:
+            examples:
+              basic:
+                summary: Basic AES-GCM encryption
+                value:
+                  key_label: MyAESKey
+                  plain: 48656c6c6f20576f726c6421
+              withAAD:
+                summary: AES-GCM with Additional Authenticated Data
+                value:
+                  key_label: MyAESKey
+                  plain: 48656c6c6f20576f726c6421
+                  aad: 4d7941646469746f6e616c44617461
+            schema:
+              $ref: '#/components/schemas/EncryptAESGCMRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EncryptAESGCMResponse'
+          description: Data encrypted successfully with AES-GCM
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "404":
+          $ref: '#/components/responses/KeyNotFound'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+      summary: Encrypt data with AES-GCM
+      tags:
+      - Encryption
+  /crypto/decrypt-aes-gcm:
+    post:
+      description: |
+        Decrypts data using an AES key stored in the HSM with GCM (Galois/Counter Mode).
+        GCM provides authenticated decryption - the operation will fail if the data
+        has been tampered with or if the authentication tag is invalid.
+        Requires the same IV and AAD (if any) used during encryption.
+      operationId: decryptDataAESGCM
+      requestBody:
+        content:
+          application/json:
+            examples:
+              basic:
+                summary: Basic AES-GCM decryption
+                value:
+                  key_label: MyAESKey
+                  cipher: 3a5f8c9d2e1b4a7c8f6e5d4c3b2a1f0e
+                  iv: 000102030405060708090a0b
+                  tag: 1f0e2d3c4b5a69788796a5b4c3d2e1f0
+              withAAD:
+                summary: AES-GCM decryption with AAD
+                value:
+                  key_label: MyAESKey
+                  cipher: 3a5f8c9d2e1b4a7c8f6e5d4c3b2a1f0e
+                  iv: 000102030405060708090a0b
+                  tag: 1f0e2d3c4b5a69788796a5b4c3d2e1f0
+                  aad: 4d7941646469746f6e616c44617461
+            schema:
+              $ref: '#/components/schemas/DecryptAESGCMRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DecryptAESGCMResponse'
+          description: Data decrypted successfully with AES-GCM
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "404":
+          $ref: '#/components/responses/KeyNotFound'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+      summary: Decrypt data with AES-GCM
+      tags:
+      - Encryption
   /crypto/store-key:
     delete:
       description: |
@@ -586,6 +678,65 @@ components:
       - id
       - iv
       - key_label
+    EncryptAESGCMRequest:
+      example:
+        key_label: MyAESKey
+        plain: 48656c6c6f20576f726c6421
+        aad: 4d7941646469746f6e616c44617461
+      properties:
+        key_label:
+          description: Label of the AES key to use for GCM encryption
+          example: MyAESKey
+          minLength: 1
+          type: string
+        plain:
+          description: Plaintext data to encrypt encoded in hexadecimal
+          format: byte
+          type: string
+        aad:
+          description: Additional Authenticated Data (AAD) in hexadecimal (optional).
+            This data is authenticated but not encrypted.
+          format: byte
+          type: string
+      required:
+      - key_label
+      - plain
+    DecryptAESGCMRequest:
+      example:
+        key_label: MyAESKey
+        cipher: 3a5f8c9d2e1b4a7c8f6e5d4c3b2a1f0e
+        iv: 000102030405060708090a0b
+        tag: 1f0e2d3c4b5a69788796a5b4c3d2e1f0
+        aad: 4d7941646469746f6e616c44617461
+      properties:
+        key_label:
+          description: Label of the AES key to use for GCM decryption
+          example: MyAESKey
+          minLength: 1
+          type: string
+        cipher:
+          description: Ciphertext data to decrypt encoded in hexadecimal
+          format: byte
+          type: string
+        iv:
+          description: Initialization vector (nonce) in hexadecimal used during encryption
+            (12 bytes recommended)
+          format: byte
+          type: string
+        tag:
+          description: Authentication tag in hexadecimal (16 bytes for 128-bit tag)
+          format: byte
+          type: string
+        aad:
+          description: Additional Authenticated Data (AAD) in hexadecimal (must match
+            the AAD used during encryption)
+          format: byte
+          type: string
+      required:
+      - cipher
+      - iv
+      - key_label
+      - tag
     StoreKeyRequest:
       example:
         key_label: ImportedKey
@@ -804,6 +955,75 @@ components:
           description: Decrypted data in Base64
           format: byte
           type: string
+    EncryptAESGCMResponse:
+      example:
+        cipher: 3a5f8c9d2e1b4a7c8f6e5d4c3b2a1f0e
+        iv: 000102030405060708090a0b
+        tag: 1f0e2d3c4b5a69788796a5b4c3d2e1f0
+        ok: true
+        time_created: 2024-10-03T10:15:30Z
+        time_updated: 2024-10-03T10:15:30Z
+      properties:
+        cipher:
+          description: Encrypted data (ciphertext) in hexadecimal
+          format: byte
+          type: string
+        iv:
+          description: Initialization vector (nonce) in hexadecimal used for GCM encryption
+            (12 bytes recommended)
+          format: byte
+          type: string
+        tag:
+          description: Authentication tag in hexadecimal (16 bytes for 128-bit tag)
+          format: byte
+          type: string
+        id:
+          description: ID of the key that was used to encrypt the data
+          example: 1
+          type: integer
+        ok:
+          description: Indicates if the operation was successful
+          example: true
+          type: boolean
+        time_created:
+          description: Creation timestamp in RFC3339 format
+          example: 2024-10-03T10:15:30Z
+          format: date-time
+          type: string
+        time_updated:
+          description: Update timestamp in RFC3339 format
+          example: 2024-10-03T10:15:30Z
+          format: date-time
+          type: string
+    DecryptAESGCMResponse:
+      example:
+        plain: 48656c6c6f20576f726c6421
+        ok: true
+        time_created: 2024-10-03T10:15:30Z
+        time_updated: 2024-10-03T10:15:30Z
+      properties:
+        plain:
+          description: Decrypted plaintext data in hexadecimal
+          format: byte
+          type: string
+        id:
+          description: ID of the key that was used to decrypt the data
+          example: 1
+          type: integer
+        ok:
+          description: Indicates if the operation was successful
+          example: true
+          type: boolean
+        time_created:
+          description: Creation timestamp in RFC3339 format
+          example: 2024-10-03T10:15:30Z
+          format: date-time
+          type: string
+        time_updated:
+          description: Update timestamp in RFC3339 format
+          example: 2024-10-03T10:15:30Z
+          format: date-time
+          type: string
     StoreKeyResponse:
       example:
         handle: 987654321
@@ -989,9 +1209,3 @@ components:
       in: header
       name: X-API-Key
       type: apiKey
-    mutualTLS:
-      description: |
-        Mutual TLS authentication using X.509 client certificates.
-        Client must present a valid certificate signed by a trusted CA.
-        The server verifies the client certificate during TLS handshake.
-      type: mutualTLS

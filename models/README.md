@@ -96,7 +96,9 @@ Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
 *AuthenticationAPI* | [**UserLogin**](docs/AuthenticationAPI.md#userlogin) | **Post** /login | User authentication
 *EncryptionAPI* | [**DecryptData**](docs/EncryptionAPI.md#decryptdata) | **Post** /crypto/decrypt | Decrypt data
+*EncryptionAPI* | [**DecryptDataAESGCM**](docs/EncryptionAPI.md#decryptdataaesgcm) | **Post** /crypto/decrypt-aes-gcm | Decrypt data with AES-GCM
 *EncryptionAPI* | [**EncryptData**](docs/EncryptionAPI.md#encryptdata) | **Post** /crypto/encrypt | Encrypt data
+*EncryptionAPI* | [**EncryptDataAESGCM**](docs/EncryptionAPI.md#encryptdataaesgcm) | **Post** /crypto/encrypt-aes-gcm | Encrypt data with AES-GCM
 *HealthAPI* | [**HealthCheckGet**](docs/HealthAPI.md#healthcheckget) | **Get** /crypto/health-check | Health check endpoint
 *KeyManagementAPI* | [**DeleteKey**](docs/KeyManagementAPI.md#deletekey) | **Delete** /crypto/store-key | Delete key
 *KeyManagementAPI* | [**GenerateAESKey**](docs/KeyManagementAPI.md#generateaeskey) | **Post** /crypto/generate-aes-key | Generate new AES key
@@ -112,10 +114,14 @@ Class | Method | HTTP request | Description
 ## Documentation For Models
 
  - [DataKeyInfo](docs/DataKeyInfo.md)
+ - [DecryptAESGCMRequest](docs/DecryptAESGCMRequest.md)
+ - [DecryptAESGCMResponse](docs/DecryptAESGCMResponse.md)
  - [DecryptRequest](docs/DecryptRequest.md)
  - [DecryptResponse](docs/DecryptResponse.md)
  - [DeleteKeyRequest](docs/DeleteKeyRequest.md)
  - [DeleteKeyResponse](docs/DeleteKeyResponse.md)
+ - [EncryptAESGCMRequest](docs/EncryptAESGCMRequest.md)
+ - [EncryptAESGCMResponse](docs/EncryptAESGCMResponse.md)
  - [EncryptRequest](docs/EncryptRequest.md)
  - [EncryptResponse](docs/EncryptResponse.md)
  - [GenAESKeyRequest](docs/GenAESKeyRequest.md)

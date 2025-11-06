@@ -11,12 +11,12 @@ Contact: support@yourorganization.com
 
 package models
 
-// EncryptAESGCMRequest - Request for AES-GCM encryption
+// EncryptAESGCMRequest
 type EncryptAESGCMRequest struct {
 	// Label of the AES key to use for GCM encryption
 	KeyLabel string `json:"key_label"`
 	// Plaintext data to encrypt encoded in hexadecimal
 	Plain string `json:"plain"`
 	// Additional Authenticated Data (AAD) in hexadecimal (optional). This data is authenticated but not encrypted.
-	Aad string `json:"aad,omitempty"`
+	Aad string `json:"aad"`
 }
