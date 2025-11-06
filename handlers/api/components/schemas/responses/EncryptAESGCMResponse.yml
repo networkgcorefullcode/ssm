@@ -1,0 +1,45 @@
+example:
+  cipher: 3a5f8c9d2e1b4a7c8f6e5d4c3b2a1f0e
+  iv: 000102030405060708090a0b
+  tag: 1f0e2d3c4b5a69788796a5b4c3d2e1f0
+  ok: true
+  time_created: 2024-10-03T10:15:30Z
+  time_updated: 2024-10-03T10:15:30Z
+properties:
+  cipher:
+    description: Encrypted data (ciphertext) in hexadecimal
+    example: !!binary |-
+      M2E1ZjhjOWQyZTFiNGE3YzhmNmU1ZDRjM2IyYTFmMGU=
+    format: byte
+    type: string
+  iv:
+    description: Initialization vector (nonce) in hexadecimal used for GCM encryption (12 bytes recommended)
+    example: !!binary |-
+      MDAwMTAyMDMwNDA1MDYwNzA4MDkwYTBi
+    format: byte
+    type: string
+  tag:
+    description: Authentication tag in hexadecimal (16 bytes for 128-bit tag)
+    example: !!binary |-
+      MWYwZTJkM2M0YjVhNjk3ODg3OTZhNWI0YzNkMmUxZjA=
+    format: byte
+    type: string
+  id:
+    description: ID of the key that was used to encrypt the data
+    example: 1
+    type: integer
+  ok:
+    description: Indicates if the operation was successful
+    example: true
+    type: boolean
+  time_created:
+    description: Creation timestamp in RFC3339 format
+    example: 2024-10-03T10:15:30Z
+    format: date-time
+    type: string
+  time_updated:
+    description: Update timestamp in RFC3339 format
+    example: 2024-10-03T10:15:30Z
+    format: date-time
+    type: string
+type: object

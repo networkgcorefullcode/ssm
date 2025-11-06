@@ -17,10 +17,10 @@
   - [x] Update OpenAPI documentation to reflect security features
   - [ ] Write tests to verify the effectiveness of security measures
   - [ ] Test all security features and fix any vulnerabilities found
-- [ ] Task 9 Implement memory hardening techniques
+- [x] Task 9 Implement memory hardening techniques
 - [ ] Task 10 Implement SIEM integration for audit logs
 - [ ] Task 11 Performance testing and optimization, add benchmarks
-- [ ] Task 12 Add function to save data in a secure way using AES256-GCM
+- [x] Task 12 Add function to save data in a secure way using AES256-GCM (encrypt and decrypt)
 - [ ] Task 12 Add a option to reset the user data for the login
 - [ ] Task 13 Add a new function to save the ssm data in other softHSMv2 instance securely
 - [ ] Task 14 Final review and documentation update

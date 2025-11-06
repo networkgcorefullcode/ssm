@@ -1,0 +1,42 @@
+example:
+  key_label: MyAESKey
+  cipher: 3a5f8c9d2e1b4a7c8f6e5d4c3b2a1f0e
+  iv: 000102030405060708090a0b
+  tag: 1f0e2d3c4b5a69788796a5b4c3d2e1f0
+  aad: 4d7941646469746f6e616c44617461
+properties:
+  key_label:
+    description: Label of the AES key to use for GCM decryption
+    example: MyAESKey
+    minLength: 1
+    type: string
+  cipher:
+    description: Ciphertext data to decrypt encoded in hexadecimal
+    example: !!binary |-
+      M2E1ZjhjOWQyZTFiNGE3YzhmNmU1ZDRjM2IyYTFmMGU=
+    format: byte
+    type: string
+  iv:
+    description: Initialization vector (nonce) in hexadecimal used during encryption (12 bytes recommended)
+    example: !!binary |-
+      MDAwMTAyMDMwNDA1MDYwNzA4MDkwYTBi
+    format: byte
+    type: string
+  tag:
+    description: Authentication tag in hexadecimal (16 bytes for 128-bit tag)
+    example: !!binary |-
+      MWYwZTJkM2M0YjVhNjk3ODg3OTZhNWI0YzNkMmUxZjA=
+    format: byte
+    type: string
+  aad:
+    description: Additional Authenticated Data (AAD) in hexadecimal (must match the AAD used during encryption)
+    example: !!binary |-
+      NGQ3OTQxNjQ2NDY5NzQ2ZjZlNjE2YzQ0NjE3NDYx
+    format: byte
+    type: string
+required:
+- key_label
+- cipher
+- iv
+- tag
+type: object

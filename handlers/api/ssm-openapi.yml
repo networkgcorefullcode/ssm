@@ -244,6 +244,100 @@ paths:
       tags:
       - Encryption
 
+  /crypto/encrypt-aes-gcm:
+    post:
+      description: |
+        Encrypts data using an AES key stored in the HSM with GCM (Galois/Counter Mode).
+        GCM provides authenticated encryption with associated data (AEAD).
+        Generates a unique random IV (nonce) for each encryption operation.
+        Returns ciphertext, IV, and authentication tag separately.
+      operationId: encryptDataAESGCM
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EncryptAESGCMRequest'
+            examples:
+              basic:
+                summary: Basic AES-GCM encryption
+                value:
+                  key_label: MyAESKey
+                  plain: 48656c6c6f20576f726c6421
+              withAAD:
+                summary: AES-GCM with Additional Authenticated Data
+                value:
+                  key_label: MyAESKey
+                  plain: 48656c6c6f20576f726c6421
+                  aad: 4d7941646469746f6e616c44617461
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EncryptAESGCMResponse'
+          description: Data encrypted successfully with AES-GCM
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "404":
+          $ref: '#/components/responses/KeyNotFound'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+      summary: Encrypt data with AES-GCM
+      tags:
+      - Encryption
+
+  /crypto/decrypt-aes-gcm:
+    post:
+      description: |
+        Decrypts data using an AES key stored in the HSM with GCM (Galois/Counter Mode).
+        GCM provides authenticated decryption - the operation will fail if the data
+        has been tampered with or if the authentication tag is invalid.
+        Requires the same IV and AAD (if any) used during encryption.
+      operationId: decryptDataAESGCM
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DecryptAESGCMRequest'
+            examples:
+              basic:
+                summary: Basic AES-GCM decryption
+                value:
+                  key_label: MyAESKey
+                  cipher: 3a5f8c9d2e1b4a7c8f6e5d4c3b2a1f0e
+                  iv: 000102030405060708090a0b
+                  tag: 1f0e2d3c4b5a69788796a5b4c3d2e1f0
+              withAAD:
+                summary: AES-GCM decryption with AAD
+                value:
+                  key_label: MyAESKey
+                  cipher: 3a5f8c9d2e1b4a7c8f6e5d4c3b2a1f0e
+                  iv: 000102030405060708090a0b
+                  tag: 1f0e2d3c4b5a69788796a5b4c3d2e1f0
+                  aad: 4d7941646469746f6e616c44617461
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DecryptAESGCMResponse'
+          description: Data decrypted successfully with AES-GCM
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "404":
+          $ref: '#/components/responses/KeyNotFound'
+        "500":
+          $ref: '#/components/responses/InternalServerError'
+      summary: Decrypt data with AES-GCM
+      tags:
+      - Encryption
+
   /crypto/store-key:
     post:
       description: |
@@ -456,6 +550,10 @@ components:
       $ref: 'components/schemas/requests/EncryptRequest.yml'
     DecryptRequest:
       $ref: 'components/schemas/requests/DecryptRequest.yml'
+    EncryptAESGCMRequest:
+      $ref: 'components/schemas/requests/EncryptAESGCMRequest.yml'
+    DecryptAESGCMRequest:
+      $ref: 'components/schemas/requests/DecryptAESGCMRequest.yml'
     StoreKeyRequest:
       $ref: 'components/schemas/requests/StoreKeyRequest.yml'
     UpdateKeyRequest:
@@ -480,6 +578,10 @@ components:
       $ref: 'components/schemas/responses/EncryptResponse.yml'
     DecryptResponse:
       $ref: 'components/schemas/responses/DecryptResponse.yml'
+    EncryptAESGCMResponse:
+      $ref: 'components/schemas/responses/EncryptAESGCMResponse.yml'
+    DecryptAESGCMResponse:
+      $ref: 'components/schemas/responses/DecryptAESGCMResponse.yml'
     StoreKeyResponse:
       $ref: 'components/schemas/responses/StoreKeyResponse.yml'
     UpdateKeyResponse:

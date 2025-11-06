@@ -1,0 +1,26 @@
+example:
+  key_label: MyAESKey
+  plain: 48656c6c6f20576f726c6421
+  aad: 4d7941646469746f6e616c44617461
+properties:
+  key_label:
+    description: Label of the AES key to use for GCM encryption
+    example: MyAESKey
+    minLength: 1
+    type: string
+  plain:
+    description: Plaintext data to encrypt encoded in hexadecimal
+    example: !!binary |-
+      NDg2NTZjNmM2ZjIwNTc2ZjcyNmM2NDIx
+    format: byte
+    type: string
+  aad:
+    description: Additional Authenticated Data (AAD) in hexadecimal (optional). This data is authenticated but not encrypted.
+    example: !!binary |-
+      NGQ3OTQxNjQ2NDY5NzQ2ZjZlNjE2YzQ0NjE3NDYx
+    format: byte
+    type: string
+required:
+- key_label
+- plain
+type: object
