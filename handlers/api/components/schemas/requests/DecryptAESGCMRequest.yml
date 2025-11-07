@@ -4,6 +4,7 @@ example:
   iv: 000102030405060708090a0b
   tag: 1f0e2d3c4b5a69788796a5b4c3d2e1f0
   aad: 4d7941646469746f6e616c44617461
+  id: 2
 properties:
   key_label:
     description: Label of the AES key to use for GCM decryption
@@ -34,9 +35,14 @@ properties:
       NGQ3OTQxNjQ2NDY5NzQ2ZjZlNjE2YzQ0NjE3NDYx
     format: byte
     type: string
+  id:
+    description: Optional ID for tracking
+    example: 2
+    type: integer
 required:
 - key_label
 - cipher
 - iv
 - tag
+- id
 type: object

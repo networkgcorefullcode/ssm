@@ -14,7 +14,7 @@ services:
     image: docker.elastic.co/kibana/kibana:8.15.1
     container_name: kibana
     ports:
-      - "5601:5601"
+      - "5801:5601"
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
     depends_on:
@@ -25,8 +25,10 @@ services:
     container_name: logstash
     ports:
       - "5044:5044"
+    command: ["bash", "bin/logstash-plugin", "install", "logstash-input-mongodb"]
     volumes:
       - ./logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+      - ./logstash/mongodb-logstash-7.13.0.jar:/usr/share/logstash/logstash-core/lib/jars/mongodb-logstash-7.13.0.jar
     depends_on:
       - elasticsearch
     environment:

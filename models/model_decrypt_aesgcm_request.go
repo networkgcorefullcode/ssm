@@ -23,4 +23,5 @@ type DecryptAESGCMRequest struct {
 	Tag string `json:"tag"`
 	// Additional Authenticated Data (AAD) in hexadecimal (must match the AAD used during encryption)
 	Aad string `json:"aad"`
+	Id  int32  `json:"id,omitempty"`
 }

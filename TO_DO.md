@@ -16,13 +16,13 @@
   - [x] Add audit logging for security-related events
   - [x] Implement TLS for secure communication (mTLS1.3)
   - [x] Update OpenAPI documentation to reflect security features
-  - [0] Write tests to verify the effectiveness of security measures
-  - [0] Test all security features and fix any vulnerabilities found
+  - [ ] Write tests to verify the effectiveness of security measures
+  - [ ] Test all security features and fix any vulnerabilities found
 - [x] Task 9 Implement memory hardening techniques
-- [0] Task 10 Implement SIEM integration for audit logs
-- [0] Task 11 Performance testing and optimization, add benchmarks
+- [ ] Task 10 Implement SIEM integration for audit logs
+- [ ] Task 11 Performance testing and optimization, add benchmarks
 - [x] Task 12 Add function to save data in a secure way using AES256-GCM (encrypt and decrypt)
-- [0] Task 12 Add a option to reset the user data for the login
+- [ ] Task 12 Add a option to reset the user data for the login
 - [ ] Task 13 Add a new function to save the ssm data in other softHSMv2 instance securely
 - [ ] Task 13.1 Implement a frontend technology to see status information and logs
 - [ ] Task 14 Final review and documentation update

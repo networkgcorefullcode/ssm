@@ -67,9 +67,10 @@ func HandleEncrypt(c *gin.Context) {
 
 	logger.AppLog.Info("Generating initialization vector (IV)")
 	var size int
-	if req.EncryptionAlgorithm == constants.ALGORITHM_DES3_OurUsers || req.EncryptionAlgorithm == constants.ALGORITHM_DES_OurUsers {
+	switch req.EncryptionAlgorithm {
+	case constants.ALGORITHM_DES3_OurUsers, constants.ALGORITHM_DES_OurUsers:
 		size = 8
-	} else if req.EncryptionAlgorithm == constants.ALGORITHM_AES128_OurUsers || req.EncryptionAlgorithm == constants.ALGORITHM_AES256_OurUsers {
+	case constants.ALGORITHM_AES128_OurUsers, constants.ALGORITHM_AES256_OurUsers:
 		size = 16
 	}
 	iv := make([]byte, size)

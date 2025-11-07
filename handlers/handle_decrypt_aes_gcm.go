@@ -111,18 +111,10 @@ func HandleDecryptAESGCM(c *gin.Context) {
 	logger.AppLog.Debugf("Decoded ciphertext length: %d bytes, IV length: %d bytes, Tag length: %d bytes", len(cipher), len(iv), len(tag))
 
 	// Find key by label
-	keyHandle, err := pkcs11mgr.FindKeyLabelReturnRandom(req.KeyLabel, *s)
+	keyHandle, err := pkcs11mgr.FindKey(req.KeyLabel, req.Id, *s)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to find key by label '%s': %v", req.KeyLabel, err)
-		sendProblemDetails(c, ErrorTitleKeyNotFound, ErrorDetailKeyNotExist, ErrorCodeKeyNotFound, http.StatusNotFound, c.Request.URL.Path)
-		return
-	}
-
-	// Get key attributes
-	attr, err := pkcs11mgr.GetObjectAttributes(keyHandle, *s)
-	if err != nil {
-		logger.AppLog.Errorf("Attributes not found: %s, error: %v", req.KeyLabel, err)
-		sendProblemDetails(c, ErrorTitleAttributesNotFound, ErrorDetailAttributesNotFound, ErrorCodeAttributesNotFound, http.StatusNotFound, c.Request.URL.Path)
+		sendProblemDetails(c, ErrorTitleKeyNotFound, ErrorDetailKeyNotExist, ErrorCodeKeyNotFound, http.StatusInternalServerError, c.Request.URL.Path)
 		return
 	}
 
@@ -153,7 +145,7 @@ func HandleDecryptAESGCM(c *gin.Context) {
 		Ok:          true,
 		TimeCreated: timeCreated,
 		TimeUpdated: timeUpdated,
-		Id:          attr.Id,
+		Id:          req.Id,
 	}
 
 	// Clear sensitive data
