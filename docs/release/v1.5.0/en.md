@@ -22,3 +22,4 @@
 - SIEM implemented according to security requirements
 - Endpoint to reset access passwords, without having to do it manually
 - Implementation of a technology to visualize audit logs in a centralized way
+- Apply these changes to the other NFs (webconsole and udm)

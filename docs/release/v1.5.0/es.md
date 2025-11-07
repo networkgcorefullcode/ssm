@@ -22,3 +22,4 @@
 - SIEM implementado según requerimientos de seguridad
 - Endpoint para reiniciar los password de acceso, sin necesidad de hacerlo manualmente
 - Implementación de una tecnología para visualizar los logs de auditoría de forma centralizada
+- Aplicar estos cambios en las demás NFs (webconsole y udm)
