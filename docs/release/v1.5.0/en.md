@@ -7,6 +7,7 @@
 - We can store keys that can be used by other services, for example to decrypt/encrypt data
 - Support for decryption operation using keys stored in HSM. Supports symmetric keys such as AES128, AES192, AES256, DES, 3DES
 - Support for encryption operation using keys stored in HSM. Supports symmetric keys such as AES128, AES192, AES256, DES, 3DES
+- Memory hardening for greater security (using mlockall)
 - Model and HTTP client generation using OpenAPI Generator
 - Support for secure communication using mTLS 1.3
 - Support for AES256-GCM encryption and decryption with IV and AAD

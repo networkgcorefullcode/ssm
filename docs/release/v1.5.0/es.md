@@ -7,6 +7,7 @@
 - Podemos almacenar claves que pueden ser utilizadas por otros servicios, por ejemplo para descifrar/cifrar datos
 - Soporte para operación de descifrado usando claves almacenadas en HSM. Soporta claves simétricas como AES128, AES192, AES256, DES, 3DES
 - Soporte para operación de cifrado usando claves almacenadas en HSM. Soporta claves simétricas como AES128, AES192, AES256, DES, 3DES
+- Endurecimiento de memoria para mayor seguridad (usando mlockall)
 - Generación de modelos y cliente http usando OpenAPI Generator
 - Soporte para comunicación segura usando mTLS 1.3
 - Soporte para cifrado y descifrado AES256-GCM con IV y AAD
