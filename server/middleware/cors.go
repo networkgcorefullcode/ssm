@@ -4,11 +4,14 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/networkgcorefullcode/ssm/factory"
+	"github.com/networkgcorefullcode/ssm/logger"
 )
 
 // configureCORS sets up CORS middleware based on configuration settings yaml file
 func ConfigureCORS(r *gin.Engine) {
 	corsConfig := factory.SsmConfig.Configuration.CORS
+
+	logger.AppLog.Infof("Configuring CORS middleware, CORS: %+v", corsConfig)
 
 	config := cors.Config{
 		AllowAllOrigins:           getBoolValue(corsConfig.AllowAllOrigins),
