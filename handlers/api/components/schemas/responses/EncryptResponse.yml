@@ -1,0 +1,40 @@
+example:
+  cipher: 48656c6c6f20576f726c6421
+  iv: c6f205
+  ok: true
+  time_created: 2024-10-03T10:15:30Z
+  time_updated: 2024-10-03T10:15:30Z
+properties:
+  cipher:
+    description: Encrypted data in hexadecimal
+    example: !!binary |-
+      NDg2NTZjNmM2ZjIwNTc2ZjcyNmM2NDIx
+    format: byte
+    type: string
+  iv:
+    description: Initialization vector in hexadecimal
+    example: !!binary |-
+      NTZjNmM2ZjI=
+    format: byte
+    type: string
+  id: 
+    description: Id key that used to encrypt plan data
+    example: !!binary |-
+      NTZjNmM2ZjI=
+    format: byte
+    type: integer
+  ok:
+    description: Indicates if the operation was successful
+    example: true
+    type: boolean
+  time_created:
+    description: Creation timestamp in RFC3339
+    example: 2024-10-03T10:15:30Z
+    format: date-time
+    type: string
+  time_updated:
+    description: Update timestamp in RFC3339
+    example: 2024-10-03T10:15:30Z
+    format: date-time
+    type: string
+type: object

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/gin-gonic/gin"
 	constants "github.com/networkgcorefullcode/ssm/const"
 	"github.com/networkgcorefullcode/ssm/logger"
 	"github.com/networkgcorefullcode/ssm/models"
@@ -21,40 +22,30 @@ import (
 // @Failure 400 {object} models.ProblemDetails "Petición inválida"
 // @Failure 500 {object} models.ProblemDetails "Error interno del servidor"
 // @Router /generate-des-key [post]
-func HandleGenerateDESKey(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
-	case http.MethodPost:
-		postGenerateDESKey(w, r)
-	default:
-		sendProblemDetails(w, "Method Not Allowed", "El método HTTP no está permitido para este endpoint", "METHOD_NOT_ALLOWED", http.StatusMethodNotAllowed, r.URL.Path)
-	}
-}
-
-func postGenerateDESKey(w http.ResponseWriter, r *http.Request) {
+func HandleGenerateDESKey(c *gin.Context) {
 	logger.AppLog.Info("Processing DES key generation request")
-	//// init the session
-	s := mgr.GetSession()
-	//
 
+	// init the session
+	s := mgr.GetSession()
 	defer mgr.LogoutSession(s)
 
 	var req models.GenDESKeyRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := json.NewDecoder(c.Request.Body).Decode(&req); err != nil {
 		logger.AppLog.Errorf("Failed to decode request body: %v", err)
-		sendProblemDetails(w, "Bad Request", "El cuerpo de la petición no es válido JSON", "INVALID_JSON", http.StatusBadRequest, r.URL.Path)
+		sendProblemDetails(c, ErrorTitleBadRequest, ErrorDetailInvalidJSON, ErrorCodeInvalidJSON, http.StatusBadRequest, c.Request.URL.Path)
 		return
 	}
-	if req.Id <= 0 {
+	if req.Id < 0 {
 		logger.AppLog.Error("ID is required but was empty")
-		sendProblemDetails(w, "Bad Request", "El campo 'id' es requerido y no puede estar vacío", "MISSING_ID", http.StatusBadRequest, r.URL.Path)
+		sendProblemDetails(c, ErrorTitleValidationError, "El campo 'id' es requerido y no puede estar vacío", ErrorCodeValidationFailed, http.StatusBadRequest, c.Request.URL.Path)
 		return
 	}
 
 	logger.AppLog.Infof("Generating DES key - ID: %d", req.Id)
-	handle, err := pkcs11mgr.GenerateDESKey(constants.LABEL_ENCRYPTION_KEY_DES, req.Id, *s)
+	handle, id, err := pkcs11mgr.GenerateDESKey(constants.LABEL_ENCRYPTION_KEY_DES, req.Id, *s)
 	if err != nil {
 		logger.AppLog.Errorf("DES key generation failed: %v", err)
-		sendProblemDetails(w, "Key Generation Failed", "Error al generar la clave DES en el HSM", "KEY_GENERATION_ERROR", http.StatusInternalServerError, r.URL.Path)
+		sendProblemDetails(c, ErrorTitleKeyGenerationFailed, ErrorDetailKeyGenerationError, ErrorCodeKeyGenerationError, http.StatusInternalServerError, c.Request.URL.Path)
 		return
 	}
 
@@ -62,13 +53,8 @@ func postGenerateDESKey(w http.ResponseWriter, r *http.Request) {
 
 	resp := models.GenDESKeyResponse{
 		Handle: int32(handle),
-		Id:     req.Id,
+		Id:     id,
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-
-	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		logger.AppLog.Errorf("Failed to encode response: %v", err)
-	}
+	c.JSON(http.StatusCreated, resp)
 }

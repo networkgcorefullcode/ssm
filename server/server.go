@@ -7,10 +7,13 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/gin-gonic/gin"
+	"github.com/networkgcorefullcode/ssm/database"
 	"github.com/networkgcorefullcode/ssm/factory"
 	"github.com/networkgcorefullcode/ssm/handlers"
 	"github.com/networkgcorefullcode/ssm/logger"
 	"github.com/networkgcorefullcode/ssm/pkcs11mgr"
+	"github.com/networkgcorefullcode/ssm/server/middleware"
 	"github.com/urfave/cli/v3"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -19,9 +22,6 @@ import (
 type SSM struct{}
 
 var SsmServer = &SSM{}
-
-// TODO: create a proper server struct to hold server config if needed
-var main_server http.Server
 
 type (
 	// Config information.
@@ -75,9 +75,6 @@ func (ssm *SSM) Initialize(c *cli.Command) error {
 
 	factory.SsmConfig.CfgLocation = absPath
 
-	main_server = http.Server{
-		Addr: factory.SsmConfig.Configuration.BindAddr,
-	}
 	return nil
 }
 
@@ -118,6 +115,10 @@ func (ausf *SSM) FilterCli(c *cli.Command) (args []string) {
 }
 
 func (s *SSM) Start() error {
+	if factory.SsmConfig.Configuration.IsSecure {
+		logger.AppLog.Info("Running in Gin Release Mode")
+		gin.SetMode(gin.ReleaseMode)
+	}
 	// remove old socket
 	socketPath := factory.SsmConfig.Configuration.SocketPath
 
@@ -131,21 +132,6 @@ func (s *SSM) Start() error {
 		return err
 	}
 
-	// // Initialize PKCS11 connection pool
-	// poolConfig := pkcs11mgr.DefaultPoolConfig()
-	// poolConfig.PkcsPath = factory.SsmConfig.Configuration.PkcsPath
-	// poolConfig.SlotNumber = uint(factory.SsmConfig.Configuration.LotsNumber)
-	// poolConfig.Pin = factory.SsmConfig.Configuration.Pin
-	// poolConfig.MaxSize = factory.SsmConfig.Configuration.PoolConfig.MaxSize // Configure based on expected load
-	// poolConfig.MinSize = factory.SsmConfig.Configuration.PoolConfig.MinSize // Minimum connections to maintain
-
-	// logger.AppLog.Info("Initializing PKCS11 connection pool...")
-	// if err := pkcs11mgr.InitializeGlobalPool(poolConfig); err != nil {
-	// 	logger.AppLog.Errorf("Failed to initialize PKCS11 connection pool: %v", err)
-	// 	return err
-	// }
-	// logger.AppLog.Info("PKCS11 connection pool initialized successfully")
-
 	// init the pkcs manager
 	pkcsManager, err := pkcs11mgr.New(factory.SsmConfig.Configuration.PkcsPath,
 		uint(factory.SsmConfig.Configuration.LotsNumber),
@@ -157,39 +143,24 @@ func (s *SSM) Start() error {
 
 	pkcsManager.CloseAllSessions()
 	pkcs11mgr.SetChanMaxSessions(factory.SsmConfig.Configuration.MaxSessions)
+
 	handlers.SetPKCS11Manager(pkcsManager)
+	middleware.SetPKCS11Manager(pkcsManager)
+	pkcs11mgr.SetPKCS11Manager(pkcsManager)
+	database.SetPKCS11Manager(pkcsManager)
 
-	// SsmServer.mgr = PkcsManager
+	// Initialize PKCS11 functions and constants
+	pkcs11mgr.InitPKCS11()
+	// Initialize the database functions
+	database.InitDB()
 
-	// err = PkcsManager.OpenSession()
-
-	// if err != nil {
-	// 	logger.AppLog.Errorf("Failed to OpenSession PKCS11 manager: %v", err)
-	// 	return err
-	// }
-
-	// Pool monitoring endpoint
-	// http.HandleFunc("/pool/stats", func(w http.ResponseWriter, r *http.Request) {
-	// 	logger.AppLog.Debugf("Received /pool/stats request")
-	// 	handlers.HandlePoolStats(w, r)
-	// })
-
-	// HealthCheck endpoint
-	http.HandleFunc("/health-check", func(w http.ResponseWriter, r *http.Request) {
-		logger.AppLog.Debugf("Received /health-check request")
-		handlers.HandleHealthCheck(w, r)
-	})
-
-	// if factory.SsmConfig.Configuration.HandlersPoolConect {
-	// 	CreateEndpointHandlersPool()
-	// } else {
-	CreateEndpointHandlers()
-	// }
+	// Build Gin router with all endpoints
+	router := CreateGinRouter()
 
 	// Serve HTTP requests in a separate goroutine
 	logger.AppLog.Infof("SSM listening on unix socket %s", socketPath)
 	go func() error {
-		if err := http.Serve(l, nil); err != nil {
+		if err := http.Serve(l, router); err != nil {
 			logger.AppLog.Errorf("Server error: %v", err)
 			return err
 		}
@@ -203,38 +174,12 @@ func (s *SSM) Start() error {
 		}()
 	}
 
-	// Start HTTPS or HTTP server based on configuration
-	if factory.SsmConfig.Configuration.IsHttps == nil || *factory.SsmConfig.Configuration.IsHttps {
-		// HTTPS server
-		certFile := factory.SsmConfig.Configuration.CertFile
-		keyFile := factory.SsmConfig.Configuration.KeyFile
-		if certFile == "" || keyFile == "" {
-			logger.AppLog.Error("HTTPS is enabled but certFile or keyFile is not set in the configuration")
-			return fmt.Errorf("certFile or keyFile not set")
-		}
-		logger.AppLog.Infof("SSM listening api https %s", factory.SsmConfig.Configuration.BindAddr)
-		// Use ListenAndServeTLS to handle HTTPS connections
-		if err := http.ListenAndServeTLS(factory.SsmConfig.Configuration.BindAddr, certFile, keyFile, nil); err != nil {
-			logger.AppLog.Errorf("Server error: %v", err)
-			return err
-		}
-		return nil
-	} else {
-		logger.AppLog.Infof("SSM listening api http %s", factory.SsmConfig.Configuration.BindAddr)
-		// Use ListenAndServe to handle HTTP connections
-		if err := http.ListenAndServe(factory.SsmConfig.Configuration.BindAddr, nil); err != nil {
-			logger.AppLog.Errorf("Server error: %v", err)
-			return err
-		}
+	err = startHTTPServer(router)
+	if err != nil {
+		logger.AppLog.Errorf("Failed to start HTTP server: %v", err)
+		return err
 	}
 
-	// // Close PKCS11 connection pool
-	// if pool := pkcs11mgr.GetGlobalPool(); pool != nil {
-	// 	logger.AppLog.Info("Closing PKCS11 connection pool...")
-	// 	pool.Close()
-	// }
-
-	// PkcsManager.CloseSession()
 	pkcsManager.CloseAllSessions()
 	pkcsManager.Finalize()
 

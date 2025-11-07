@@ -1,0 +1,39 @@
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.1
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false  # desactiva auth para pruebas
+    ports:
+      - "9200:9200"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.15.1
+    container_name: kibana
+    ports:
+      - "5801:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.15.1
+    container_name: logstash
+    ports:
+      - "5044:5044"
+    command: ["bash", "bin/logstash-plugin", "install", "logstash-input-mongodb"]
+    volumes:
+      - ./logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+      - ./logstash/mongodb-logstash-7.13.0.jar:/usr/share/logstash/logstash-core/lib/jars/mongodb-logstash-7.13.0.jar
+    depends_on:
+      - elasticsearch
+    environment:
+      - LS_JAVA_OPTS=-Xms512m -Xmx512m
+      - MONGODB_URI=mongodb://172.28.31.5:27017/secure_storage/?replicaSet=rs0
+
+volumes:
+  es_data:

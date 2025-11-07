@@ -9,8 +9,8 @@ SSM provides secure operations for:
 - HSM/SoftHSM integration
 
 ## Authentication
-The API works through Unix Domain Sockets for enhanced security.
-Also supports HTTPS with TLS certificates.
+The API supports JWT Bearer tokens and API keys for authentication.
+Obtain a JWT token using the `/login` endpoint.
 
 ## Data Formats
 - All binary data (plaintext, ciphertext, IV) should be in Base64/Hex
@@ -94,28 +94,34 @@ All URIs are relative to *http://localhost*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
-*EncryptionAPI* | [**DecryptData**](docs/EncryptionAPI.md#decryptdata) | **Post** /decrypt | Decrypt data
-*EncryptionAPI* | [**EncryptData**](docs/EncryptionAPI.md#encryptdata) | **Post** /encrypt | Encrypt data
-*HealthAPI* | [**HealthCheckGet**](docs/HealthAPI.md#healthcheckget) | **Get** /health-check | Health check endpoint
-*HealthAPI* | [**HealthCheckPost**](docs/HealthAPI.md#healthcheckpost) | **Post** /health-check | Health check endpoint
-*KeyManagementAPI* | [**DeleteKey**](docs/KeyManagementAPI.md#deletekey) | **Delete** /store-key | Delete key
-*KeyManagementAPI* | [**GenerateAESKey**](docs/KeyManagementAPI.md#generateaeskey) | **Post** /generate-aes-key | Generate new AES key
-*KeyManagementAPI* | [**GenerateDES3Key**](docs/KeyManagementAPI.md#generatedes3key) | **Post** /generate-des3-key | Generate new DES3 key
-*KeyManagementAPI* | [**GenerateDESKey**](docs/KeyManagementAPI.md#generatedeskey) | **Post** /generate-des-key | Generate new DES key
-*KeyManagementAPI* | [**GetAllKeys**](docs/KeyManagementAPI.md#getallkeys) | **Post** /get-all-keys | Get all keys from HSM
-*KeyManagementAPI* | [**GetDataKeys**](docs/KeyManagementAPI.md#getdatakeys) | **Post** /get-data-keys | Get multiple keys by label
-*KeyManagementAPI* | [**GetKey**](docs/KeyManagementAPI.md#getkey) | **Post** /get-key | Get single key information
-*KeyManagementAPI* | [**StoreKey**](docs/KeyManagementAPI.md#storekey) | **Post** /store-key | Store existing key
-*KeyManagementAPI* | [**UpdateKey**](docs/KeyManagementAPI.md#updatekey) | **Put** /store-key | Update key
+*AuthenticationAPI* | [**UserLogin**](docs/AuthenticationAPI.md#userlogin) | **Post** /login | User authentication
+*EncryptionAPI* | [**DecryptData**](docs/EncryptionAPI.md#decryptdata) | **Post** /crypto/decrypt | Decrypt data
+*EncryptionAPI* | [**DecryptDataAESGCM**](docs/EncryptionAPI.md#decryptdataaesgcm) | **Post** /crypto/decrypt-aes-gcm | Decrypt data with AES-GCM
+*EncryptionAPI* | [**EncryptData**](docs/EncryptionAPI.md#encryptdata) | **Post** /crypto/encrypt | Encrypt data
+*EncryptionAPI* | [**EncryptDataAESGCM**](docs/EncryptionAPI.md#encryptdataaesgcm) | **Post** /crypto/encrypt-aes-gcm | Encrypt data with AES-GCM
+*HealthAPI* | [**HealthCheckGet**](docs/HealthAPI.md#healthcheckget) | **Get** /crypto/health-check | Health check endpoint
+*KeyManagementAPI* | [**DeleteKey**](docs/KeyManagementAPI.md#deletekey) | **Delete** /crypto/store-key | Delete key
+*KeyManagementAPI* | [**GenerateAESKey**](docs/KeyManagementAPI.md#generateaeskey) | **Post** /crypto/generate-aes-key | Generate new AES key
+*KeyManagementAPI* | [**GenerateDES3Key**](docs/KeyManagementAPI.md#generatedes3key) | **Post** /crypto/generate-des3-key | Generate new DES3 key
+*KeyManagementAPI* | [**GenerateDESKey**](docs/KeyManagementAPI.md#generatedeskey) | **Post** /crypto/generate-des-key | Generate new DES key
+*KeyManagementAPI* | [**GetAllKeys**](docs/KeyManagementAPI.md#getallkeys) | **Post** /crypto/get-all-keys | Get all keys from HSM
+*KeyManagementAPI* | [**GetDataKeys**](docs/KeyManagementAPI.md#getdatakeys) | **Post** /crypto/get-data-keys | Get multiple keys by label
+*KeyManagementAPI* | [**GetKey**](docs/KeyManagementAPI.md#getkey) | **Post** /crypto/get-key | Get single key information
+*KeyManagementAPI* | [**StoreKey**](docs/KeyManagementAPI.md#storekey) | **Post** /crypto/store-key | Store existing key
+*KeyManagementAPI* | [**UpdateKey**](docs/KeyManagementAPI.md#updatekey) | **Put** /crypto/store-key | Update key
 
 
 ## Documentation For Models
 
  - [DataKeyInfo](docs/DataKeyInfo.md)
+ - [DecryptAESGCMRequest](docs/DecryptAESGCMRequest.md)
+ - [DecryptAESGCMResponse](docs/DecryptAESGCMResponse.md)
  - [DecryptRequest](docs/DecryptRequest.md)
  - [DecryptResponse](docs/DecryptResponse.md)
  - [DeleteKeyRequest](docs/DeleteKeyRequest.md)
  - [DeleteKeyResponse](docs/DeleteKeyResponse.md)
+ - [EncryptAESGCMRequest](docs/EncryptAESGCMRequest.md)
+ - [EncryptAESGCMResponse](docs/EncryptAESGCMResponse.md)
  - [EncryptRequest](docs/EncryptRequest.md)
  - [EncryptResponse](docs/EncryptResponse.md)
  - [GenAESKeyRequest](docs/GenAESKeyRequest.md)
@@ -130,6 +136,8 @@ Class | Method | HTTP request | Description
  - [GetKeyRequest](docs/GetKeyRequest.md)
  - [GetKeyResponse](docs/GetKeyResponse.md)
  - [HealthCheckResponse](docs/HealthCheckResponse.md)
+ - [LoginRequest](docs/LoginRequest.md)
+ - [LoginResponse](docs/LoginResponse.md)
  - [ProblemDetails](docs/ProblemDetails.md)
  - [StoreKeyRequest](docs/StoreKeyRequest.md)
  - [StoreKeyResponse](docs/StoreKeyResponse.md)
@@ -139,7 +147,39 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Authorization
 
-Endpoints do not require authorization.
+
+Authentication schemes defined for the API:
+### bearerAuth
+
+- **Type**: HTTP Bearer token authentication
+
+Example
+
+```go
+auth := context.WithValue(context.Background(), models.ContextAccessToken, "BEARER_TOKEN_STRING")
+r, err := client.Service.Operation(auth, args)
+```
+
+### apiKeyAuth
+
+- **Type**: API key
+- **API key parameter name**: X-API-Key
+- **Location**: HTTP header
+
+Note, each API key must be added to a map of `map[string]APIKey` where the key is: X-API-Key and passed in as the auth context for each request.
+
+Example
+
+```go
+auth := context.WithValue(
+		context.Background(),
+		models.ContextAPIKeys,
+		map[string]models.APIKey{
+			"X-API-Key": {Key: "API_KEY_STRING"},
+		},
+	)
+r, err := client.Service.Operation(auth, args)
+```
 
 
 ## Documentation for Utility Methods

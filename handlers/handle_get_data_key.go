@@ -4,12 +4,14 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/gin-gonic/gin"
+	constants "github.com/networkgcorefullcode/ssm/const"
 	"github.com/networkgcorefullcode/ssm/logger"
 	"github.com/networkgcorefullcode/ssm/models"
 	"github.com/networkgcorefullcode/ssm/pkcs11mgr"
 )
 
-// HandleStoreKey handles key storage requests
+// HandleGetDataKey
 // @Summary Store key
 // @Description Stores a key in the HSM and optionally encrypts it
 // @Tags Key Management
@@ -20,28 +22,16 @@ import (
 // @Failure 400 {object} models.ProblemDetails "Invalid request"
 // @Failure 500 {object} models.ProblemDetails "Internal server error"
 // @Router /store-key [post]
-func HandleGetDataKey(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
-	case http.MethodPost:
-		postGetDataKey(w, r)
-	default:
-		sendProblemDetails(w, "Method Not Allowed", "The HTTP method is not allowed for this endpoint", "METHOD_NOT_ALLOWED", http.StatusMethodNotAllowed, r.URL.Path)
-	}
-}
-
-func postGetDataKey(w http.ResponseWriter, r *http.Request) {
+func HandleGetDataKey(c *gin.Context) {
 	logger.AppLog.Info("Processing get data key request")
-	//// init the session
+	// init the session
 	s := mgr.GetSession()
-	//
-
 	defer mgr.LogoutSession(s)
 
 	var req models.GetKeyRequest
-
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := json.NewDecoder(c.Request.Body).Decode(&req); err != nil {
 		logger.AppLog.Errorf("Failed to decode request body: %v", err)
-		sendProblemDetails(w, "Bad Request", "The request body is not valid JSON", "INVALID_JSON", http.StatusBadRequest, r.URL.Path)
+		sendProblemDetails(c, ErrorTitleBadRequest, ErrorDetailInvalidJSON, ErrorCodeInvalidJSON, http.StatusBadRequest, c.Request.URL.Path)
 		return
 	}
 
@@ -49,22 +39,15 @@ func postGetDataKey(w http.ResponseWriter, r *http.Request) {
 
 	logger.AppLog.Infof("Searching key in HSM - using the Label: %s", label)
 	handle, err := pkcs11mgr.FindKey(label, req.Id, *s)
-	if err != nil && err.Error() == "error Key With The Label Not Found" {
-		// Prepare the response
-		// Prepare the response
+	if err != nil && err.Error() == constants.ERROR_STRING_KEY_NOT_FOUND {
 		resp := models.GetKeyResponse{}
 		logger.AppLog.Info("Not key found")
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(resp); err != nil {
-			logger.AppLog.Errorf("Failed to encode response: %v", err)
-			sendProblemDetails(w, "Internal Server Error", "Failed to encode response", "INTERNAL_SERVER_ERROR", http.StatusInternalServerError, r.URL.Path)
-		}
+		c.JSON(http.StatusOK, resp)
 		return
 	}
 	if err != nil {
 		logger.AppLog.Errorf("Failed to search keys: %v", err)
-		sendProblemDetails(w, "Key find Failed", "Error searching key in HSM", "KEY_GET_ERROR", http.StatusInternalServerError, r.URL.Path)
+		sendProblemDetails(c, "Key find Failed", "Error searching key in HSM", "KEY_GET_ERROR", http.StatusInternalServerError, c.Request.URL.Path)
 		return
 	}
 
@@ -73,11 +56,10 @@ func postGetDataKey(w http.ResponseWriter, r *http.Request) {
 	objAtr, err := pkcs11mgr.GetObjectAttributes(handle, *s)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to get object attribute: %v", err)
-		sendProblemDetails(w, "Key get Failed", "Error getting key attribute", "KEY_GET_ERROR", http.StatusInternalServerError, r.URL.Path)
+		sendProblemDetails(c, "Key get Failed", "Error getting key attribute", "KEY_GET_ERROR", http.StatusInternalServerError, c.Request.URL.Path)
 		return
 	}
 
-	// Prepare the response
 	resp := models.GetKeyResponse{
 		KeyInfo: models.DataKeyInfo{
 			Handle: objAtr.Handle,
@@ -85,10 +67,5 @@ func postGetDataKey(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		logger.AppLog.Errorf("Failed to encode response: %v", err)
-		sendProblemDetails(w, "Internal Server Error", "Failed to encode response", "INTERNAL_SERVER_ERROR", http.StatusInternalServerError, r.URL.Path)
-	}
+	c.JSON(http.StatusOK, resp)
 }

@@ -1,0 +1,16 @@
+example:
+  status: OK
+  message: Status is ok
+properties:
+  status:
+    description: Health status
+    example: OK
+    type: string
+  message:
+    description: Additional information
+    example: Status is ok
+    type: string
+required:
+- status
+- message
+type: object

@@ -1,0 +1,18 @@
+example:
+  service_id: admin
+  password: secret123
+properties:
+  service_id:
+    description: service_id for authentication
+    example: admin
+    minLength: 1
+    type: string
+  password:
+    description: Password for authentication
+    example: secret123
+    minLength: 1
+    type: string
+required:
+- username
+- password
+type: object

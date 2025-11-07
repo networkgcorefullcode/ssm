@@ -1,0 +1,11 @@
+example:
+  key_info:
+    handle: 1001
+    id: 1
+    size_bits: 256
+properties:
+  key_info:
+    $ref: '../common/DataKeyInfo.yml'
+required:
+- key_info
+type: object

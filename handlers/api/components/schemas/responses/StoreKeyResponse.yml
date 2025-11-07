@@ -1,0 +1,14 @@
+example:
+  handle: 987654321
+  cipher_key: encrypted_key_value
+properties:
+  handle:
+    description: Handle of the stored key
+    example: 987654321
+    format: uint
+    type: integer
+  cipher_key:
+    description: Stored encrypted key
+    example: encrypted_key_value
+    type: string
+type: object

@@ -1,7 +1,7 @@
 /*
 SSM (Secure Storage Manager) API
 
-API for secure cryptographic key management using PKCS#11 and HSM.  SSM provides secure operations for: - AES, DES, DES3 key generation - Data encryption and decryption - Key storage and management - HSM/SoftHSM integration  ## Authentication The API works through Unix Domain Sockets for enhanced security. Also supports HTTPS with TLS certificates.  ## Data Formats - All binary data (plaintext, ciphertext, IV) should be in Base64/Hex - Responses include timestamps in RFC3339 format - Errors follow RFC 7807 standard (Problem Details)
+API for secure cryptographic key management using PKCS#11 and HSM.  SSM provides secure operations for: - AES, DES, DES3 key generation - Data encryption and decryption - Key storage and management - HSM/SoftHSM integration  ## Authentication The API supports JWT Bearer tokens and API keys for authentication. Obtain a JWT token using the `/login` endpoint.  ## Data Formats - All binary data (plaintext, ciphertext, IV) should be in Base64/Hex - Responses include timestamps in RFC3339 format - Errors follow RFC 7807 standard (Problem Details)
 
 API version: 1.0.0
 Contact: support@yourorganization.com
@@ -49,6 +49,8 @@ type APIClient struct {
 
 	// API Services
 
+	AuthenticationAPI *AuthenticationAPIService
+
 	EncryptionAPI *EncryptionAPIService
 
 	HealthAPI *HealthAPIService
@@ -72,6 +74,7 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.common.client = c
 
 	// API Services
+	c.AuthenticationAPI = (*AuthenticationAPIService)(&c.common)
 	c.EncryptionAPI = (*EncryptionAPIService)(&c.common)
 	c.HealthAPI = (*HealthAPIService)(&c.common)
 	c.KeyManagementAPI = (*KeyManagementAPIService)(&c.common)
@@ -415,6 +418,11 @@ func (c *APIClient) prepareRequest(
 		localVarRequest = localVarRequest.WithContext(ctx)
 
 		// Walk through any authentication.
+
+		// AccessToken Authentication
+		if auth, ok := ctx.Value(ContextAccessToken).(string); ok {
+			localVarRequest.Header.Add("Authorization", "Bearer "+auth)
+		}
 
 	}
 

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/gin-gonic/gin"
 	"github.com/networkgcorefullcode/ssm/logger"
 	"github.com/networkgcorefullcode/ssm/models"
 )
@@ -16,7 +17,7 @@ import (
 // @Produce json
 // @Success 200 {object} HealthCheckResponse
 // @Router /health-check [get]
-func HandleHealthCheck(w http.ResponseWriter, r *http.Request) {
+func HandleHealthCheck(c *gin.Context) {
 	logger.AppLog.Info("Health check endpoint called")
 
 	// Create response
@@ -26,13 +27,13 @@ func HandleHealthCheck(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Set response headers
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
+	c.Header("Content-Type", "application/json")
+	c.Status(http.StatusOK)
 
 	// Encode and send response
-	if err := json.NewEncoder(w).Encode(response); err != nil {
+	if err := json.NewEncoder(c.Writer).Encode(response); err != nil {
 		logger.AppLog.Errorf("Failed to encode health check response: %v", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		sendProblemDetails(c, ErrorTitleInternalServerError, "Failed to encode response", ErrorCodeInternalError, http.StatusInternalServerError, c.Request.URL.Path)
 		return
 	}
 
