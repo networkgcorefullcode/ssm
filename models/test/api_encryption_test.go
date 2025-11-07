@@ -35,11 +35,35 @@ func Test_models_EncryptionAPIService(t *testing.T) {
 
 	})
 
+	t.Run("Test EncryptionAPIService DecryptDataAESGCM", func(t *testing.T) {
+
+		t.Skip("skip test") // remove to run test
+
+		resp, httpRes, err := apiClient.EncryptionAPI.DecryptDataAESGCM(context.Background()).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
 	t.Run("Test EncryptionAPIService EncryptData", func(t *testing.T) {
 
 		t.Skip("skip test") // remove to run test
 
 		resp, httpRes, err := apiClient.EncryptionAPI.EncryptData(context.Background()).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test EncryptionAPIService EncryptDataAESGCM", func(t *testing.T) {
+
+		t.Skip("skip test") // remove to run test
+
+		resp, httpRes, err := apiClient.EncryptionAPI.EncryptDataAESGCM(context.Background()).Execute()
 
 		require.Nil(t, err)
 		require.NotNil(t, resp)

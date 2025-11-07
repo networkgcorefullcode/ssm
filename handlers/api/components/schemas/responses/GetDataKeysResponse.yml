@@ -1,0 +1,17 @@
+example:
+  keys:
+    - handle: 1001
+      id: 1
+      size_bits: 256
+    - handle: 1002
+      id: 2
+      size_bits: 256
+properties:
+  keys:
+    description: Array of key information
+    items:
+      $ref: '../common/DataKeyInfo.yml'
+    type: array
+required:
+- keys
+type: object

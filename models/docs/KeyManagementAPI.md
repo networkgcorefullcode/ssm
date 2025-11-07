@@ -4,15 +4,15 @@ All URIs are relative to *http://localhost*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**DeleteKey**](KeyManagementAPI.md#DeleteKey) | **Delete** /store-key | Delete key
-[**GenerateAESKey**](KeyManagementAPI.md#GenerateAESKey) | **Post** /generate-aes-key | Generate new AES key
-[**GenerateDES3Key**](KeyManagementAPI.md#GenerateDES3Key) | **Post** /generate-des3-key | Generate new DES3 key
-[**GenerateDESKey**](KeyManagementAPI.md#GenerateDESKey) | **Post** /generate-des-key | Generate new DES key
-[**GetAllKeys**](KeyManagementAPI.md#GetAllKeys) | **Post** /get-all-keys | Get all keys from HSM
-[**GetDataKeys**](KeyManagementAPI.md#GetDataKeys) | **Post** /get-data-keys | Get multiple keys by label
-[**GetKey**](KeyManagementAPI.md#GetKey) | **Post** /get-key | Get single key information
-[**StoreKey**](KeyManagementAPI.md#StoreKey) | **Post** /store-key | Store existing key
-[**UpdateKey**](KeyManagementAPI.md#UpdateKey) | **Put** /store-key | Update key
+[**DeleteKey**](KeyManagementAPI.md#DeleteKey) | **Delete** /crypto/store-key | Delete key
+[**GenerateAESKey**](KeyManagementAPI.md#GenerateAESKey) | **Post** /crypto/generate-aes-key | Generate new AES key
+[**GenerateDES3Key**](KeyManagementAPI.md#GenerateDES3Key) | **Post** /crypto/generate-des3-key | Generate new DES3 key
+[**GenerateDESKey**](KeyManagementAPI.md#GenerateDESKey) | **Post** /crypto/generate-des-key | Generate new DES key
+[**GetAllKeys**](KeyManagementAPI.md#GetAllKeys) | **Post** /crypto/get-all-keys | Get all keys from HSM
+[**GetDataKeys**](KeyManagementAPI.md#GetDataKeys) | **Post** /crypto/get-data-keys | Get multiple keys by label
+[**GetKey**](KeyManagementAPI.md#GetKey) | **Post** /crypto/get-key | Get single key information
+[**StoreKey**](KeyManagementAPI.md#StoreKey) | **Post** /crypto/store-key | Store existing key
+[**UpdateKey**](KeyManagementAPI.md#UpdateKey) | **Put** /crypto/store-key | Update key
 
 
 
@@ -70,7 +70,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[apiKeyAuth](../README.md#apiKeyAuth), [bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
@@ -136,7 +136,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[apiKeyAuth](../README.md#apiKeyAuth), [bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
@@ -202,7 +202,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[apiKeyAuth](../README.md#apiKeyAuth), [bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
@@ -268,7 +268,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[apiKeyAuth](../README.md#apiKeyAuth), [bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
@@ -329,7 +329,7 @@ Other parameters are passed through a pointer to a apiGetAllKeysRequest struct v
 
 ### Authorization
 
-No authorization required
+[apiKeyAuth](../README.md#apiKeyAuth), [bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
@@ -395,7 +395,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[apiKeyAuth](../README.md#apiKeyAuth), [bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
@@ -461,7 +461,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[apiKeyAuth](../README.md#apiKeyAuth), [bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
@@ -494,7 +494,7 @@ import (
 )
 
 func main() {
-	storeKeyRequest := *openapiclient.NewStoreKeyRequest("ImportedKey", int32(2), string([B@2324bfe7), "AES") // StoreKeyRequest | 
+	storeKeyRequest := *openapiclient.NewStoreKeyRequest("ImportedKey", int32(2), string(123), "AES") // StoreKeyRequest | 
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -527,7 +527,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[apiKeyAuth](../README.md#apiKeyAuth), [bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
@@ -593,7 +593,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[apiKeyAuth](../README.md#apiKeyAuth), [bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 

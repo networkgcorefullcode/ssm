@@ -1,0 +1,19 @@
+example:
+  id: key001
+  bits: 256
+properties:
+  id:
+    description: Unique key identifier
+    type: integer
+  bits:
+    description: Key size in bits
+    enum:
+    - 128
+    - 192
+    - 256
+    example: 256
+    type: integer
+required:
+- bits
+- id
+type: object

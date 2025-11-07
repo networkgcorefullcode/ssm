@@ -1,0 +1,27 @@
+example:
+  message: Key updated successfully
+  handle: 987654321
+  key_label: ImportedKey
+  cipher_key: encrypted_key_value
+properties:
+  message:
+    description: Confirmation message
+    example: Key updated successfully
+    type: string
+  handle:
+    description: New HSM key handle
+    example: 987654321
+    type: integer
+  key_label:
+    description: Label of the updated key
+    example: ImportedKey
+    type: string
+  cipher_key:
+    description: Encrypted key value (optional)
+    example: encrypted_key_value
+    type: string
+required:
+- handle
+- key_label
+- message
+type: object

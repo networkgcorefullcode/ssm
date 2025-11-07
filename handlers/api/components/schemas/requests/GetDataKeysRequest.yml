@@ -1,0 +1,11 @@
+example:
+  key_label: my-aes-key
+properties:
+  key_label:
+    description: Label of the keys to retrieve
+    example: my-aes-key
+    minLength: 1
+    type: string
+required:
+- key_label
+type: object

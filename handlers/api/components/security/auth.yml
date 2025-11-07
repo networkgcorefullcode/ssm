@@ -1,0 +1,18 @@
+bearerAuth:
+  type: http
+  scheme: bearer
+  bearerFormat: JWT
+  description: JWT token obtained from /login endpoint
+
+apiKeyAuth:
+  type: apiKey
+  in: header
+  name: X-API-Key
+  description: API key for service-to-service authentication
+
+# mutualTLS:
+#   type: mutualTLS
+#   description: |
+#     Mutual TLS authentication using X.509 client certificates.
+#     Client must present a valid certificate signed by a trusted CA.
+#     The server verifies the client certificate during TLS handshake.

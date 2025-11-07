@@ -1,0 +1,44 @@
+example:
+  key_label: MySecretKey
+  cipher: YWJjZGVmZ2hpams...
+  iv: MTIzNDU2Nzg5MEFCQ0RFRg==
+  encryption_algorithm: 1
+  id: 2345
+properties:
+  key_label:
+    description: Label of the key to decrypt
+    example: MySecretKey
+    minLength: 1
+    type: string
+  cipher:
+    description: Encrypted data in Base64
+    example: !!binary |-
+      NjU2YzZjNmYyMDU3NmY3MjZjNjQyMQ==
+    format: byte
+    type: string
+  iv:
+    description: Initialization vector in Base64 (same used for encryption)
+    example: !!binary |-
+      NmYyMDU3NmY=
+    format: byte
+    type: string
+  id:
+    description: Optional ID for tracking
+    example: 12345
+    type: integer
+  encryption_algorithm:
+    description: "Encryption algorithm to use (1: AES, 2: AES, 3: DES, 4: DES3)"
+    enum:
+    - 1
+    - 2
+    - 3
+    - 4
+    example: 1
+    type: integer
+required:
+- cipher
+- encryption_algorithm
+- id
+- iv
+- key_label
+type: object

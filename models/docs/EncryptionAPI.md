@@ -4,8 +4,10 @@ All URIs are relative to *http://localhost*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**DecryptData**](EncryptionAPI.md#DecryptData) | **Post** /decrypt | Decrypt data
-[**EncryptData**](EncryptionAPI.md#EncryptData) | **Post** /encrypt | Encrypt data
+[**DecryptData**](EncryptionAPI.md#DecryptData) | **Post** /crypto/decrypt | Decrypt data
+[**DecryptDataAESGCM**](EncryptionAPI.md#DecryptDataAESGCM) | **Post** /crypto/decrypt-aes-gcm | Decrypt data with AES-GCM
+[**EncryptData**](EncryptionAPI.md#EncryptData) | **Post** /crypto/encrypt | Encrypt data
+[**EncryptDataAESGCM**](EncryptionAPI.md#EncryptDataAESGCM) | **Post** /crypto/encrypt-aes-gcm | Encrypt data with AES-GCM
 
 
 
@@ -30,7 +32,7 @@ import (
 )
 
 func main() {
-	decryptRequest := *openapiclient.NewDecryptRequest("MySecretKey", string([B@6e1b9411), string([B@21d1b321), int32(12345), int32(1)) // DecryptRequest | 
+	decryptRequest := *openapiclient.NewDecryptRequest("MySecretKey", string(123), string(123), int32(12345), int32(1)) // DecryptRequest | 
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -63,7 +65,73 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[apiKeyAuth](../README.md#apiKeyAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## DecryptDataAESGCM
+
+> DecryptAESGCMResponse DecryptDataAESGCM(ctx).DecryptAESGCMRequest(decryptAESGCMRequest).Execute()
+
+Decrypt data with AES-GCM
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	decryptAESGCMRequest := *openapiclient.NewDecryptAESGCMRequest("MyAESKey", string(123), string(123), string(123)) // DecryptAESGCMRequest | 
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.EncryptionAPI.DecryptDataAESGCM(context.Background()).DecryptAESGCMRequest(decryptAESGCMRequest).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `EncryptionAPI.DecryptDataAESGCM``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `DecryptDataAESGCM`: DecryptAESGCMResponse
+	fmt.Fprintf(os.Stdout, "Response from `EncryptionAPI.DecryptDataAESGCM`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiDecryptDataAESGCMRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **decryptAESGCMRequest** | [**DecryptAESGCMRequest**](DecryptAESGCMRequest.md) |  | 
+
+### Return type
+
+[**DecryptAESGCMResponse**](DecryptAESGCMResponse.md)
+
+### Authorization
+
+[apiKeyAuth](../README.md#apiKeyAuth), [bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 
@@ -96,7 +164,7 @@ import (
 )
 
 func main() {
-	encryptRequest := *openapiclient.NewEncryptRequest("MySecretKey", string([B@117bcfdc), int32(1)) // EncryptRequest | 
+	encryptRequest := *openapiclient.NewEncryptRequest("MySecretKey", string(123), int32(1)) // EncryptRequest | 
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -129,7 +197,73 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[apiKeyAuth](../README.md#apiKeyAuth), [bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## EncryptDataAESGCM
+
+> EncryptAESGCMResponse EncryptDataAESGCM(ctx).EncryptAESGCMRequest(encryptAESGCMRequest).Execute()
+
+Encrypt data with AES-GCM
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	encryptAESGCMRequest := *openapiclient.NewEncryptAESGCMRequest("MyAESKey", string(123)) // EncryptAESGCMRequest | 
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.EncryptionAPI.EncryptDataAESGCM(context.Background()).EncryptAESGCMRequest(encryptAESGCMRequest).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `EncryptionAPI.EncryptDataAESGCM``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `EncryptDataAESGCM`: EncryptAESGCMResponse
+	fmt.Fprintf(os.Stdout, "Response from `EncryptionAPI.EncryptDataAESGCM`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiEncryptDataAESGCMRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **encryptAESGCMRequest** | [**EncryptAESGCMRequest**](EncryptAESGCMRequest.md) |  | 
+
+### Return type
+
+[**EncryptAESGCMResponse**](EncryptAESGCMResponse.md)
+
+### Authorization
+
+[apiKeyAuth](../README.md#apiKeyAuth), [bearerAuth](../README.md#bearerAuth)
 
 ### HTTP request headers
 

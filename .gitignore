@@ -5,3 +5,7 @@ go-structs-only
 ssm.exe 
 ssm
 vendor
+.vscode
+pkcs11.conf
+server.csr
+ca.crt
