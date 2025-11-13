@@ -20,6 +20,7 @@ var AlgorithmLabelMap = map[int]string{
 	ALGORITHM_AES128_OurUsers: LABEL_ENCRYPTION_KEY_AES128,
 	ALGORITHM_DES_OurUsers:    LABEL_ENCRYPTION_KEY_DES,
 	ALGORITHM_DES3_OurUsers:   LABEL_ENCRYPTION_KEY_DES3,
+	ALGORITHM_AES256_GCM:      LABEL_ENCRYPTION_KEY_AES256,
 }
 
 var LabelAlgorithmMap = map[string]int{
@@ -57,6 +58,7 @@ const (
 	ALGORITHM_AES128_OurUsers = 6
 	ALGORITHM_DES_OurUsers    = 7
 	ALGORITHM_DES3_OurUsers   = 8
+	ALGORITHM_AES256_GCM      = 9
 )
 
 var KeyLabelsExternalAllow [3]string = [3]string{
