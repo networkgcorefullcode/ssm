@@ -7,11 +7,13 @@ import (
 
 	"github.com/gin-gonic/gin"
 	constants "github.com/networkgcorefullcode/ssm/const"
+	"github.com/networkgcorefullcode/ssm/logger"
 	"github.com/networkgcorefullcode/ssm/pkcs11mgr"
 )
 
 func AuthenticateRequest() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		logger.AppLog.Debugf("Authenticating request for %s %s", c.Request.Method, c.Request.URL.Path)
 		jwtToken := c.GetHeader("Authorization")
 
 		if jwtToken == "" {
@@ -22,10 +24,10 @@ func AuthenticateRequest() gin.HandlerFunc {
 		tokenString := strings.Replace(jwtToken, "Bearer ", "", 1)
 
 		session := mgr.GetSession()
-		defer mgr.LogoutSession(session)
 
 		// verify JWT token here
 		jwtPayload, err := pkcs11mgr.VerifyJWT(session, tokenString)
+		mgr.LogoutSession(session)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid or expired token"})
 			return
