@@ -16,7 +16,7 @@ configuration:
   certFile: server.crt 
   keyFile: server.key
   caFile: ca.crt
-  maxSessions: 5
+  maxSessions: 100
   isSecure: true             # Enable security middlewares (CORS, rate limiting, authentication)
   # MongoDB Database Configuration
   mongodb:
