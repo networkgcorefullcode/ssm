@@ -55,6 +55,7 @@ var ActionMap map[string]string = map[string]string{
 
 func AuditRequest(c *gin.Context) {
 	// Capture data before processing the request
+	logger.AppLog.Debugf("Starting audit log for %s %s", c.Request.Method, c.Request.URL.Path)
 	start := time.Now()
 	c.Next() // Process the request
 
@@ -117,11 +118,11 @@ func logAuditEntry(entry AuditLog) {
 
 	// getting pkcs11 manager and session from SsmServer
 	session := mgr.GetSession()
-	defer mgr.LogoutSession(session)
 	auditPrivateKey := pkcs11mgr.GetAuditPrivateKey()
 
 	var err error
 	entry.Signature, err = signAuditLog(entry, &session.Handle, session.Ctx, auditPrivateKey)
+	mgr.LogoutSession(session)
 	if err != nil {
 		logger.AppLog.Errorf("Failed to sign audit log: %v", err)
 		return

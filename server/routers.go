@@ -16,15 +16,16 @@ func CreateGinRouter() *gin.Engine {
 	r.Use(gin.Recovery())
 	r.Use(gin.Logger())
 
+	// TODO: fix the ratelimite present errors in operations
 	// Initialize rate limiter
-	middleware.InitRateLimiter(factory.SsmConfig.GetRateLimit())
+	// middleware.InitRateLimiter(factory.SsmConfig.GetRateLimit())
 
 	// Aplicar TODOS los middlewares globales PRIMERO
 	if factory.SsmConfig.Configuration.IsSecure {
 		logger.AppLog.Info("Configuring secure middlewares")
 		r.Use(middleware.AuditRequest) // Ahora aplica a TODAS las rutas
 		middleware.ConfigureCORS(r)
-		r.Use(middleware.SecureRequest)
+		// r.Use(middleware.SecureRequest)
 	}
 
 	// CREAR grupos DESPUÉS de aplicar middlewares globales

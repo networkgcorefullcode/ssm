@@ -39,6 +39,9 @@ func HandleDecryptAESGCM(c *gin.Context) {
 		sendProblemDetails(c, ErrorTitleBadRequest, ErrorDetailInvalidJSON, ErrorCodeInvalidJSON, http.StatusBadRequest, c.Request.URL.Path)
 		return
 	}
+	// Log all request fields for debugging
+	logger.AppLog.Debugf("Request fields - KeyLabel: %s, Id: %s, Cipher: %s, IV: %s, Tag: %s, AAD: %s",
+		req.KeyLabel, req.Id, req.Cipher, req.Iv, req.Tag, req.Aad)
 
 	logger.AppLog.Debugf("Decryption request for key label: %s", req.KeyLabel)
 

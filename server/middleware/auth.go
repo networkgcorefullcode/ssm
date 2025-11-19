@@ -7,11 +7,13 @@ import (
 
 	"github.com/gin-gonic/gin"
 	constants "github.com/networkgcorefullcode/ssm/const"
+	"github.com/networkgcorefullcode/ssm/logger"
 	"github.com/networkgcorefullcode/ssm/pkcs11mgr"
 )
 
 func AuthenticateRequest() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		logger.AppLog.Debugf("Authenticating request for %s %s", c.Request.Method, c.Request.URL.Path)
 		jwtToken := c.GetHeader("Authorization")
 
 		if jwtToken == "" {
@@ -22,10 +24,10 @@ func AuthenticateRequest() gin.HandlerFunc {
 		tokenString := strings.Replace(jwtToken, "Bearer ", "", 1)
 
 		session := mgr.GetSession()
-		defer mgr.LogoutSession(session)
 
 		// verify JWT token here
 		jwtPayload, err := pkcs11mgr.VerifyJWT(session, tokenString)
+		mgr.LogoutSession(session)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid or expired token"})
 			return
@@ -33,6 +35,7 @@ func AuthenticateRequest() gin.HandlerFunc {
 
 		// check if the user is valid
 		if jwtPayload.Sub != constants.USER_UDM && jwtPayload.Sub != constants.USER_WEBCONSOLE {
+			logger.AppLog.Debugf("User: %s is invalid", jwtPayload.Sub)
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid user"})
 			return
 		}
@@ -40,11 +43,13 @@ func AuthenticateRequest() gin.HandlerFunc {
 		// check if the operation is allow for the role (udm only decrypt, webconsole all actions in the list)
 		action := determineAction(c)
 		if !slices.Contains(constants.ActionList, action) && jwtPayload.Sub == constants.USER_WEBCONSOLE {
+			logger.AppLog.Debugf("Action is: %s", action)
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid operation for the user"})
 			return
 		}
 
-		if action != constants.ACTION_DECRYPT_DATA && action != constants.ACTION_HEALTH_CHECK && jwtPayload.Sub == constants.USER_UDM {
+		if (action != constants.ACTION_DECRYPT_DATA && action != constants.ACTION_DECRYPT_GCM && action != constants.ACTION_HEALTH_CHECK) &&
+			jwtPayload.Sub == constants.USER_UDM {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid operation for the user"})
 			return
 		}
