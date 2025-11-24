@@ -41,7 +41,7 @@ sudo pkcs11-tool --module /usr/lib/softhsm/libsofthsm2.so --slot 1121449042 --lo
 
 ```bash
 # Generate a self-signed Root CA certificate
-sudo openssl req -engine pkcs11 -new -x509 -days 3650 -sha256 \
+sudo openssl req -engine pkcs11 -new -x509 -days 365 -sha256 \
   -keyform engine -key "pkcs11:object=RootCAKey;type=private" \
   -subj "/C=CU/ST=Havana/L=Marianao/O=MyOrg/OU=Security/CN=MyRootCA/emailAddress=admin@myorg.cu" \
   -addext "basicConstraints=critical,CA:TRUE,pathlen:1" \
